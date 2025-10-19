@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pupil Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Basic Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            height: 100%;
+        }
+
+        /* Full-page background image */
+        .landing-page {
+            background: url('{% static 'images/background.png' %}') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Animation effect on the heading */
+        .landing-page h1 {
+            font-size: 3.5rem;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+        }
+
+        /* Animation for button */
+        .landing-page .btn {
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            background-color: #FF5733;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            opacity: 0;
+            animation: fadeInButton 2s 1s forwards;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        /* Login Button Animation */
+        .landing-page .btn-login {
+            background-color: #007bff;
+            animation: fadeInButton 2s 2s forwards;
+        }
+
+        /* Keyframes for fading in heading */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Keyframes for fading in button */
+        @keyframes fadeInButton {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Overlay for dark background on top of the image */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* For smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Landing Page Section -->
+<div class="landing-page">
+    <div class="overlay"></div>  <!-- Dark overlay for background image -->
+    <div>
+        <h1>Welcome to Pupil Management System</h1>
+        <p>Your go-to platform for managing students, results, fees, and more!</p>
+        <a href="#features" class="btn">Explore Features</a>
+        <a href="/login" class="btn btn-login">Login</a>  <!-- Login Button -->
+    </div>
+</div>
+
+<!-- Features Section -->
+<section id="features" class="container py-5">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <h3>Fee Management</h3>
+            <p>Efficient tracking and payment options for school fees.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <h3>Student Records</h3>
+            <p>Keep track of all student details, including results and attendance.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <h3>Reports</h3>
+            <p>Generate detailed reports to analyze student progress.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <h3>Communications</h3>
+            <p>Communicate with parents through sms.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer Section -->
+<footer class="text-center py-4" style="background-color: #333; color: white;">
+    <p>&copy; 2025 Pupil Management System | All Rights Reserved</p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

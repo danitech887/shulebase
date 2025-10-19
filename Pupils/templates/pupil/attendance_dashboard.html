@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<link href="{% static 'css/students/attendance_dashboard.css' %}" rel="stylesheet">
+<div class="dashboard-wrapper">
+    <!-- Enhanced Header -->
+    <div class="dashboard-header fade-in">
+        <h3>
+            <i class="bi bi-calendar-check"></i>
+            Attendance Dashboard
+        </h3>
+    </div>
+
+    <!-- Enhanced Navigation -->
+    <div class="nav-section fade-in">
+        <nav>
+            <ul class="nav nav-pills mb-0">
+                <li class="nav-item">
+                    <a class="nav-link{% if request.resolver_match.url_name == 'pupil_attendance' %} active{% endif %}" href="{% url 'pupil_attendance' %}">
+                        <i class="bi bi-plus-circle me-2"></i>More Options
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Enhanced Filter Section -->
+    <div class="filter-section fade-in">
+        <div class="filter-title">
+            <div class="filter-icon">🔍</div>
+            Filter Attendance Data
+        </div>
+        <form method="get" class="form-block">
+            <label for="year">Year:</label>
+            <select name="year" id="year" class="form-control mx-2">
+                <option value="">All</option>
+                {% for y in years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+            <label for="term">Term:</label>
+            <select name="term" id="term" class="form-control mx-2">
+                <option value="">All</option>
+                <option value="Term 1" {% if term == "Term 1" %}selected{% endif %}>Term 1</option>
+                <option value="Term 2" {% if term == "Term 2" %}selected{% endif %}>Term 2</option>
+                <option value="Term 3" {% if term == "Term 3" %}selected{% endif %}>Term 3</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+
+    <!-- Enhanced Charts -->
+    <div class="charts-grid fade-in">
+        <div class="chart-container">
+            <div class="chart-title">
+                <div class="chart-icon">📊</div>
+                Attendance by Grade-Stream
+            </div>
+            <div class="chart-canvas">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">
+                <div class="chart-icon">🥧</div>
+                Overall Attendance %
+            </div>
+            <div class="chart-canvas">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-grid-2 fade-in">
+        <div class="chart-container">
+            <div class="chart-title">
+                <div class="chart-icon">📈</div>
+                Attendance per Month
+            </div>
+            <div class="chart-canvas">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">
+                <div class="chart-icon">📋</div>
+                Attendance by Grade
+            </div>
+            <div class="chart-canvas">
+                <canvas id="stackedBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced chart configuration
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { 
+                            size: 13, 
+                            weight: 'bold',
+                            family: 'Inter, sans-serif'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#2d3748',
+                    bodyColor: '#4a5568',
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    cornerRadius: 12,
+                    padding: 15,
+                    titleFont: { weight: 'bold', size: 14 },
+                    bodyFont: { size: 13 }
+                }
+            },
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            }
+        };
+
+        // Chart 1: Enhanced Bar Chart (Attendance by Grade-Stream)
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ labels_json|safe }},
+                datasets: [
+                    {
+                        label: 'Present',
+                        backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                        borderColor: '#4caf50',
+                        borderWidth: 2,
+                        data: {{ present_json|safe }},
+                        borderRadius: 8,
+                    },
+                    {
+                        label: 'Absent',
+                        backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                        borderColor: '#f44336',
+                        borderWidth: 2,
+                        data: {{ absent_json|safe }},
+                        borderRadius: 8,
+                    }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                scales: { 
+                    x: { 
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { font: { weight: 'bold' } }
+                    }, 
+                    y: { 
+                        beginAtZero: true, 
+                        stacked: true,
+                        grid: { color: 'rgba(0,0,0,0.1)' },
+                        ticks: { font: { weight: 'bold' } }
+                    } 
+                }
+            }
+        });
+
+        // Chart 2: Enhanced Pie Chart (Overall Attendance %)
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [{{ total_present_json }}, {{ total_absent_json }}],
+                    backgroundColor: [
+                        'rgba(76, 175, 80, 0.8)',
+                        'rgba(244, 67, 54, 0.8)'
+                    ],
+                    borderColor: ['#4caf50', '#f44336'],
+                    borderWidth: 3,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                ...chartOptions,
+                cutout: '60%'
+            }
+        });
+
+        // Chart 3: Enhanced Line Chart (Attendance per Month)
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: {{ month_labels_json|safe }},
+                datasets: [{
+                    label: 'Present',
+                    data: {{ month_present_json|safe }},
+                    borderColor: '#4caf50',
+                    backgroundColor: 'rgba(76,175,80,0.1)',
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#4caf50',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 10
+                },{
+                    label: 'Absent',
+                    data: {{ month_absent_json|safe }},
+                    borderColor: '#f44336',
+                    backgroundColor: 'rgba(244,67,54,0.1)',
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#f44336',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 10
+                }]
+            },
+            options: {
+                ...chartOptions,
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.1)' },
+                        ticks: { font: { weight: 'bold' } }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+
+        // Chart 4: Enhanced Stacked Bar Chart (Attendance by Grade)
+        const stackedBarCtx = document.getElementById('stackedBarChart').getContext('2d');
+        new Chart(stackedBarCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ grade_labels_json|safe }},
+                datasets: [
+                    {
+                        label: 'Present',
+                        backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                        borderColor: '#4caf50',
+                        borderWidth: 2,
+                        data: {{ grade_present_json|safe }},
+                        borderRadius: 8,
+                    },
+                    {
+                        label: 'Absent',
+                        backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                        borderColor: '#f44336',
+                        borderWidth: 2,
+                        data: {{ grade_absent_json|safe }},
+                        borderRadius: 8,
+                    }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                scales: { 
+                    x: { 
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { font: { weight: 'bold' } }
+                    }, 
+                    y: { 
+                        beginAtZero: true, 
+                        stacked: true,
+                        grid: { color: 'rgba(0,0,0,0.1)' },
+                        ticks: { font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+
+        // Enhanced interactions
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Form interactions
+        const formControls = document.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+            control.addEventListener('focus', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+            });
+            
+            control.addEventListener('blur', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '';
+            });
+        });
+
+        // Card hover effects
+        const cards = document.querySelectorAll('.chart-container, .filter-section');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.willChange = 'transform, box-shadow';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.willChange = 'auto';
+            });
+        });
+
+        // Chart refresh on resize
+        window.addEventListener('resize', function() {
+            setTimeout(() => {
+                Chart.helpers.each(Chart.instances, function(instance) {
+                    instance.resize();
+                });
+            }, 100);
+        });
+
+        console.log('Enhanced Attendance Dashboard loaded successfully');
+    });
+</script>
+
+{% endblock %}

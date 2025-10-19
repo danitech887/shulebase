@@ -1,0 +1,8 @@
+<form method="post" action="{% url 'strand_edit' strand.pk %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="d-flex gap-2 mt-2">
+        <button type="submit" class="btn btn-success w-100">Update</button>
+        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+    </div>
+</form>

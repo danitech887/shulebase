@@ -1,0 +1,12 @@
+Django>=4.2
+gunicorn
+pymysql
+whitenoise
+dj-database-url 
+cryptography
+django-extensions
+mysqlclient
+fpdf
+reportlab
+whitenoise
+psycopg2-binary>=2.9

@@ -1,0 +1,570 @@
+{% extends 'teacher_base.html' %}
+{% block title %}Teacher Portal{% endblock %}
+{% block content %}
+
+<style>
+/* Enhanced UI styling while preserving all functionality */
+.dashboard-container {
+    background: linear-gradient(135deg, #f8faff 0%, #e6f0ff 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+    position: relative;
+}
+
+.dashboard-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="teacher-pattern" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="8" r="2" fill="none" stroke="rgba(102, 126, 234, 0.04)" stroke-width="1"/><rect x="12" y="12" width="6" height="8" fill="none" stroke="rgba(102, 126, 234, 0.04)" stroke-width="1" rx="1"/><line x1="9" y1="22" x2="21" y2="22" stroke="rgba(102, 126, 234, 0.04)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23teacher-pattern)"/></svg>');
+    pointer-events: none;
+}
+
+/* Enhanced fade-in animation */
+.fade-in {
+    animation: fadeInUp 0.8s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInUp {
+    0% { 
+        transform: translateY(30px); 
+        opacity: 0; 
+    }
+    100% { 
+        transform: translateY(0); 
+        opacity: 1; 
+    }
+}
+
+/* Staggered animation delays */
+.fade-in:nth-child(1) { animation-delay: 0.1s; }
+.fade-in:nth-child(2) { animation-delay: 0.2s; }
+.fade-in:nth-child(3) { animation-delay: 0.3s; }
+.fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+/* Enhanced welcome header */
+.welcome-header {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #10b981, #f59e0b);
+    background-size: 400% 100%;
+    animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-subtitle {
+    color: #6b7280;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+}
+
+.welcome-divider {
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 2px;
+    margin: 0 auto;
+}
+
+/* Enhanced card styling */
+.enhanced-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+}
+
+.enhanced-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+.enhanced-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    font-weight: 700;
+    font-size: 1.1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-card-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { transform: translateX(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) rotate(45deg); }
+}
+
+.header-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.header-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+}
+
+.header-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.header-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+}
+
+.enhanced-card-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    margin: 0 -0.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-value {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.icon-wrapper {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+}
+
+/* Enhanced list styling */
+.enhanced-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.enhanced-list-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-list-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+    transform-origin: bottom;
+}
+
+.enhanced-list-item:hover::before {
+    transform: scaleY(1);
+}
+
+.enhanced-list-item:hover {
+    background: #f8faff;
+    border-color: #667eea;
+    transform: translateX(8px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.role-title {
+    font-weight: 700;
+    color: #374151;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.role-details {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.subjects-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.subject-badge {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.subject-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.subjects-label {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.no-roles-message {
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+    padding: 2rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+}
+
+/* Enhanced statistics cards */
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item:hover {
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 8px;
+    margin: 0 -1rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+.stat-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.stat-value {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 50px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.stat-value.warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.stat-value.info {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem 0;
+    }
+    
+    .welcome-header {
+        padding: 2rem 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .welcome-title {
+        font-size: 2rem;
+    }
+    
+    .enhanced-card-body {
+        padding: 1.5rem;
+    }
+    
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        text-align: left;
+    }
+    
+    .subjects-container {
+        justify-content: center;
+    }
+}
+
+/* Enhanced container */
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Loading animation */
+.card-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+</style>
+
+<div class="dashboard-container">
+    <div class="container mt-5">
+        <!-- Enhanced Welcome Header -->
+        <div class="welcome-header fade-in">
+            <h2 class="welcome-title">👋 Welcome, {{ teacher.first_name }} {{ teacher.surname }}</h2>
+            <p class="welcome-subtitle">Your personalized teacher dashboard</p>
+            <hr class="welcome-divider">
+        </div>
+
+        <!-- Enhanced Teacher Details & Roles -->
+        <div class="row mb-4">
+            <div class="col-md-6 fade-in">
+                <div class="enhanced-card">
+                    <div class="enhanced-card-header header-primary">
+                        <i class="bi bi-person-badge me-2"></i> Your Details
+                    </div>
+                    <div class="enhanced-card-body">
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <div class="icon-wrapper">
+                                    <i class="bi bi-hash"></i>
+                                </div>
+                                Registration No:
+                            </span>
+                            <span class="detail-value">{{ teacher.registration_no }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <div class="icon-wrapper">
+                                    <i class="bi bi-envelope"></i>
+                                </div>
+                                Email:
+                            </span>
+                            <span class="detail-value">{{ teacher.email }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <div class="icon-wrapper">
+                                    <i class="bi bi-phone"></i>
+                                </div>
+                                Phone:
+                            </span>
+                            <span class="detail-value">{{ teacher.phone }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 fade-in">
+                <div class="enhanced-card">
+                    <div class="enhanced-card-header header-info">
+                        <i class="bi bi-briefcase me-2"></i> Your Roles
+                    </div>
+                    <div class="enhanced-card-body">
+                        {% if roles %}
+                            <ul class="enhanced-list">
+                                {% for role in roles %}
+                                <li class="enhanced-list-item">
+                                    <div class="role-title">{{ role.type_of_teacher }}</div>
+                                    {% if role.grade or role.stream %}
+                                        <div class="role-details">
+                                            {% if role.grade %}{{ role.grade }}{% endif %}
+                                            {% if role.stream %} {{ role.stream }}{% endif %}
+                                        </div>
+                                    {% endif %}
+                                    {% if subjects %}
+                                        <span class="subjects-label">Teaching Subjects:</span>
+                                        <div class="subjects-container">
+                                            {% for sub in subjects %}
+                                                <span class="subject-badge">{{ sub }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="no-roles-message">
+                                <i class="bi bi-info-circle mb-2" style="font-size: 2rem; opacity: 0.5;"></i>
+                                <div>No roles assigned yet.</div>
+                                <small>Contact your administrator for role assignment.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Teaching & Attendance -->
+        <div class="row">
+            {% if is_class_teacher %}
+            <div class="col-md-4 mb-3 fade-in">
+                <div class="enhanced-card">
+                    <div class="enhanced-card-header header-success">
+                        <i class="bi bi-people-fill me-2"></i> Class Attendance
+                    </div>
+                    <div class="enhanced-card-body">
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                <span>✅</span>
+                                Present Today
+                            </span>
+                            <span class="stat-value">{{ present_today }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                <span>❌</span>
+                                Absent Today
+                            </span>
+                            <span class="stat-value info">{{ absent_today }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col-md-4 mb-3 fade-in">
+                <div class="enhanced-card">
+                    <div class="enhanced-card-header header-secondary">
+                        <i class="bi bi-journal-text me-2"></i> Teaching Progress
+                    </div>
+                    <div class="enhanced-card-body">
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                <span>📘</span>
+                                Completed Topics
+                            </span>
+                            <span class="stat-value">{{ completed }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                <span>📖</span>
+                                Ongoing Topics
+                            </span>
+                            <span class="stat-value warning">{{ ongoing }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

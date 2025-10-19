@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Details{% endblock %}
+
+{% block content %}
+<style>
+    .overlay2 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+    }
+    .card2 {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        width: 80%;
+        max-width: 600px;
+        text-align: left;
+        animation: fadeIn 0.3s ease-in-out;
+        z-index: 1100;
+        position: relative;
+        overflow: auto;
+        max-height: 80vh;
+    }
+    .close-btn {
+        color: black;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        float: right;
+        border-radius: 5px;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        background-color: transparent;
+        font-size: 1.2rem;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .close-btn:hover {
+        background: aqua;
+    }
+    .overlay2.show {
+        display: flex;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .search-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        align-items: flex-end;
+    }
+    .search-filter-bar .form-group {
+        flex: 1 1 180px;
+        min-width: 180px;
+    }
+    .search-filter-bar .btn {
+        min-width: 120px;
+    }
+</style>
+
+<!-- Registration Form overlay2 -->
+<div class="overlay2" id="overlay2">
+    <div class="card2 p-4 shadow-lg">
+        <button class="close-btn" onclick="closeDialog2();" id="close-btn" title="Close">&times;</button>
+        <h2 class="my-4">Grade Streams Configs</h2>
+        <form method="post"">
+            {% csrf_token %}
+            <div id="grade-streams">
+                <div class="grade-stream-row">
+                    <input type="text" name="grade[]" placeholder="Grade">
+                    <input type="text" name="stream[]" placeholder="Stream">
+                    <button type="button" onclick="addRow()">+</button>
+                </div>
+            </div>
+            <div class='register'>
+                <button type="submit" class="btn btn-primary mt-4">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function showDialog() {
+        document.getElementById("overlay2").classList.add("show");
+    }
+    function closeDialog() {
+        document.getElementById("overlay2").classList.remove("show");
+    }
+    function showSuccessModal() {
+        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    }
+    function addRow() {
+            var container = document.getElementById('grade-streams');
+            var row = document.createElement('div');
+            row.className = 'grade-stream-row';
+            row.innerHTML = '<input type="text" name="grade[]" placeholder="Grade">' +
+                            '<input type="text" name="stream[]" placeholder="Stream">' +
+                            '<button type="button" onclick="this.parentNode.remove()">-</button>';
+            container.appendChild(row);
+        }
+</script>
+{% endblock %}
+

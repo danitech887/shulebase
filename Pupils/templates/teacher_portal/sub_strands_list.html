@@ -1,0 +1,132 @@
+{% load dict_extras %}
+
+<form id="addSubStrandForm" method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Sub-Strand Name</label>
+        <input type="text" name="name" class="form-control" placeholder="Enter sub-strand name" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Description</label>
+        <textarea name="description" class="form-control" rows="2" placeholder="Optional description..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-success w-100">
+        <i class="bi bi-plus-circle"></i> Add Sub-Strand
+    </button>
+</form>
+
+<hr>
+
+<h6 class="fw-bold mb-3">Existing Sub-Strands</h6>
+
+<ul class="list-group" id="subStrandList">
+    {% for ss in sub_strands %}
+    <li class="list-group-item">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div class="flex-grow-1">
+                <span class="fw-semibold"><i class="bi bi-diagram-3 me-1"></i> {{ ss.name }}</span>
+                <small class="text-muted d-block">{{ ss.created_at|date:"M d, Y" }}</small>
+                {% if ss.description %}
+                <p class="text-secondary small mb-1">{{ ss.description }}</p>
+                {% endif %}
+            </div>
+
+            <div class="text-end">
+                <button class="btn btn-sm btn-outline-primary record-substrand-btn mt-2 mt-sm-0"
+                    data-substrand="{{ ss.id }}" data-name="{{ ss.name }}" data-bs-toggle="modal"
+                    data-bs-target="#recordSubStrandModal">
+                    <i class="bi bi-pencil-square"></i> Record Marks
+                </button>
+            </div>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted text-center">No sub-strands yet.</li>
+    {% endfor %}
+</ul>
+
+{% if messages %}
+<div class="modal fade show" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true"
+    style="display:block;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                {% comment %}
+                Detect if there's any error message.
+                We'll set a flag by looping once and storing it in a variable.
+                {% endcomment %}
+                {% with has_error=False %}
+                {% for message in messages %}
+                {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
+                {% with True as has_error %}
+                {% endwith %}
+                {% endif %}
+                {% endfor %}
+
+                <h5 class="modal-title" id="messageModalLabel">
+                    {% if has_error %}
+                    <i class="bi bi-exclamation-triangle me-2"></i>Error!
+                    {% else %}
+                    <i class="bi bi-check-circle me-2"></i>info!
+                    {% endif %}
+                </h5>
+                {% endwith %}
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                {% for message in messages %}
+                {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
+                <div style="font-size: 3rem; color: #dc3545;">✗</div>
+                {% else %}
+                <div style="font-size: 3rem; color: #4facfe;">✓</div>
+                {% endif %}
+                <p class="mt-3">{{ message }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+<script>
+    /**
+     * Delegated event listener for the Sub-Strand form submission.
+     * Works even after re-rendering the modal body dynamically.
+     */
+    document.addEventListener('click', async function (e) {
+        if (e.target.classList.contains('record-substrand-btn')) {
+            const id = e.target.getAttribute('data-substrand');
+            const modalBody = document.querySelector('#recordSubStrandModal .modal-body');
+
+            // show loading
+            modalBody.innerHTML = '<p class="text-center py-3">Loading...</p>';
+
+            try {
+                const res = await fetch(`/record_substrand_scores/${id}/`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin'
+                });
+                const html = await res.text();
+                modalBody.innerHTML = html;
+            } catch (err) {
+                console.error('Error loading modal content:', err);
+                modalBody.innerHTML = '<p class="text-danger text-center">Failed to load data.</p>';
+            }
+        }
+    });
+
+</script>

@@ -1,0 +1,995 @@
+{% extends 'teacher_base.html' %}
+{% block title %}Record Marks{% endblock %}
+{% load dict_extras %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+        --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        --secondary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.15);
+        --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Enhanced Page Header */
+    .page-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        padding: 2rem;
+        border-radius: 24px;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.8s ease;
+    }
+
+    .page-header:hover::before {
+        left: 100%;
+    }
+
+    .page-header h2 {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+        font-size: 2.2rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .page-header i {
+        color: #667eea;
+    }
+
+    /* Enhanced Filter Section */
+    .filter-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+        position: relative;
+    }
+
+    .filter-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.8s ease;
+        pointer-events: none;
+    }
+
+    .filter-section:hover::before {
+        left: 100%;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 3px solid transparent;
+        border-image: var(--primary-gradient) 1;
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .section-title i {
+        color: #667eea;
+        margin-right: 0.5rem;
+    }
+
+    /* Enhanced Form Controls */
+    .form-control,
+    .form-select {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25), 0 4px 20px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.6rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+        border-radius: 12px;
+        padding: 0.8rem 1.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-success {
+        background: var(--success-gradient);
+        color: white;
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(79, 172, 254, 0.4);
+        color: white;
+    }
+
+    /* Enhanced Card */
+    .marks-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .marks-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.8s ease;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .marks-card:hover::before {
+        left: 100%;
+    }
+
+    .card-header {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 1.5rem 2rem;
+        position: relative;
+    }
+
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.8s ease;
+    }
+
+    .card-header:hover::before {
+        left: 100%;
+    }
+
+    .card-header h5 {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-footer {
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        padding: 1.5rem 2rem;
+        text-align: center;
+    }
+
+    /* Enhanced Table */
+    .table-responsive {
+        border-radius: 0;
+        max-height: 500px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #667eea transparent;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--primary-gradient);
+        border-radius: 4px;
+    }
+
+    .table {
+        margin: 0;
+        background: transparent;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: rgba(102, 126, 234, 0.1);
+        color: #2c3e50;
+        border: none;
+        padding: 1.5rem 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .table tbody tr {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.8);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table tbody td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    /* Enhanced Mark Input */
+    .mark-input {
+        width: 100px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 1rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 8px;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+    }
+
+    .mark-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.25);
+        transform: scale(1.05);
+        background: white;
+    }
+
+    .mark-input.valid {
+        border-color: #4facfe;
+        background: rgba(79, 172, 254, 0.05);
+    }
+
+    .mark-input.invalid {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.05);
+    }
+
+    /* Student Info */
+    .reg-badge {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .student-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+        text-transform: capitalize;
+    }
+
+    /* Enhanced Alert */
+    .alert {
+        border-radius: 16px;
+        border: none;
+        padding: 1.5rem 2rem;
+        margin: 2rem 0;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 224, 64, 0.1) 100%);
+        color: #856404;
+        border: 1px solid rgba(250, 112, 154, 0.2);
+    }
+
+    /* Stats Display */
+    .stats-container {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .stat-item i {
+        color: #667eea;
+    }
+
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .filter-section {
+            padding: 1.5rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 1rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .mark-input {
+            width: 80px;
+            font-size: 0.9rem;
+        }
+
+        .stats-container {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Enhanced Page Header -->
+    <div class="page-header fade-in">
+        <h2>
+            <i class="bi bi-clipboard-data me-3"></i>
+            Student Marks Recording System
+        </h2>
+        <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 1.1rem; font-weight: 500;">
+            Record and manage student examination marks by class and subject
+        </p>
+    </div>
+
+    <!-- Enhanced Filter Section -->
+    <div class="filter-section fade-in">
+        <h3 class="section-title">
+            <i class="bi bi-funnel"></i>
+            Select Class & Examination Details
+        </h3>
+
+        <form method="get" class="row g-3" action="{% url 'record_marks' %}">
+            <div class="col-md-2">
+                <label for="grade" class="form-label">
+                    <i class="bi bi-mortarboard me-1"></i>Grade Level
+                </label>
+                <select name="grade" id="grade" class="form-select" required>
+                    <option value="">Select Grade</option>
+                    {% for g in grades %}
+                    <option value="{{ g }}" {% if g == selected_grade %}selected{% endif %}>{{ g }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="stream" class="form-label">
+                    <i class="bi bi-diagram-3 me-1"></i>Stream
+                </label>
+                <select name="stream" id="stream" class="form-select" required>
+                    <option value="">Select Stream</option>
+                    {% for s in streams %}
+                    <option value="{{ s }}" {% if s == selected_stream %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="term" class="form-label">
+                    <i class="bi bi-calendar3 me-1"></i>Academic Term
+                </label>
+                <select name="term" id="term" class="form-select" required>
+                    <option value="">Select Term</option>
+                    {% for t in term_choices %}
+                    <option value="{{ t }}" {% if t == selected_term %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="exam_type" class="form-label">
+                    <i class="bi bi-file-earmark-text me-1"></i>Exam Type
+                </label>
+                <select name="exam_type" id="exam_type" class="form-select" required>
+                    <option value="">Select Exam Type</option>
+                    {% for et in exam_types %}
+                    <option value="{{ et }}" {% if et == selected_exam_type %}selected{% endif %}>{{ et }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="subject" class="form-label">
+                    <i class="bi bi-book me-1"></i>Learning Areas
+                </label>
+                <select name="subject" id="subject" class="form-select" required>
+                    <option value="">Select Subject</option>
+                    {% for subj in subjects %}
+                    <option value="{{ subj }}" {% if subj == selected_subject %}selected{% endif %}>{{ subj }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-2"></i>Load Students
+                </button>
+                <!-- Button to open Strand Modal -->
+            </div>
+
+        </form>
+
+    </div>
+
+    {% if students %}
+    <!-- Marks Card -->
+    <div class="marks-card slide-up">
+        <form method="post" id="marksForm">
+            {% csrf_token %}
+            <div class="card-header">
+                <h5>
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Enter Marks - {{ selected_grade }} {{ selected_stream }} | {{ selected_term }} | {{
+                    selected_exam_type }} | {{ selected_subject }}
+                </h5>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-item">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Students: {{ students|length }}</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Registration No.</th>
+                            <th>Student Name</th>
+                            <th>Mark (0-100)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td><span class="reg-badge">{{ student.registration_no }}</span></td>
+                            <td>
+                                <div class="student-name">{{ student.first_name }} {{ student.surname }}</div>
+                            </td>
+                            <td>
+                                <input type="number" name="mark_{{ student.registration_no }}"
+                                    class="form-control mark-input" min="0" max="100"
+                                    value="{{ marks_map|get_item:student.registration_no }}">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-success btn-lg" id="saveButton">
+                    <i class="bi bi-check-circle me-2"></i>Save Marks
+                </button>
+            </div>
+        </form>
+    </div>
+    {% elif selected_grade and selected_stream and selected_subject %}
+    <div class="alert alert-warning fade-in">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        No students found for the selected filters.
+    </div>
+    {% endif %}
+</div>
+{% if messages %}
+<div class="modal fade show" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true"
+    style="display:block;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                {% comment %}
+                Detect if there's any error message.
+                We'll set a flag by looping once and storing it in a variable.
+                {% endcomment %}
+                {% with has_error=False %}
+                {% for message in messages %}
+                {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
+                {% with True as has_error %}
+                {% endwith %}
+                {% endif %}
+                {% endfor %}
+
+                <h5 class="modal-title" id="messageModalLabel">
+                    {% if has_error %}
+                    <i class="bi bi-exclamation-triangle me-2"></i>Error!
+                    {% else %}
+                    <i class="bi bi-check-circle me-2"></i>info!
+                    {% endif %}
+                </h5>
+                {% endwith %}
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                {% for message in messages %}
+                {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
+                <div style="font-size: 3rem; color: #dc3545;">✗</div>
+                {% else %}
+                <div style="font-size: 3rem; color: #4facfe;">✓</div>
+                {% endif %}
+                <p class="mt-3">{{ message }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const markInputs = document.querySelectorAll('.mark-input');
+        const form = document.getElementById('marksForm');
+
+        // Add animation to table rows
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.05}s`;
+            row.classList.add('fade-in');
+        });
+
+        // Enhanced mark input validation
+        markInputs.forEach(input => {
+            input.addEventListener('input', function () {
+                const value = parseInt(this.value);
+                const row = this.closest('tr');
+
+                // Remove existing classes
+                this.classList.remove('valid', 'invalid');
+
+                if (this.value === '') {
+                    // Empty input
+                    row.style.background = '';
+                } else if (value >= 0 && value <= 100) {
+                    // Valid input
+                    this.classList.add('valid');
+                    row.style.background = 'rgba(79, 172, 254, 0.05)';
+                } else {
+                    // Invalid input
+                    this.classList.add('invalid');
+                    row.style.background = 'rgba(255, 107, 107, 0.05)';
+                }
+
+                updateStats();
+            });
+
+            input.addEventListener('focus', function () {
+                this.closest('tr').style.transform = 'scale(1.02)';
+                this.closest('tr').style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.2)';
+            });
+
+            input.addEventListener('blur', function () {
+                this.closest('tr').style.transform = '';
+                this.closest('tr').style.boxShadow = '';
+            });
+        });
+
+        // Auto-save functionality
+        let autoSaveTimeout;
+        if (form) {
+            markInputs.forEach(input => {
+                input.addEventListener('input', function () {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(() => {
+                        saveToLocalStorage();
+                    }, 1000);
+                });
+            });
+
+            // Load from localStorage
+            loadFromLocalStorage();
+        }
+
+        // Form submission enhancement
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                const saveButton = document.getElementById('saveButton');
+                const invalidInputs = document.querySelectorAll('.mark-input.invalid');
+
+                if (invalidInputs.length > 0) {
+                    e.preventDefault();
+                    document.getElementById('marksForm').submit();
+                }
+            });
+</script>
+
+<!-- Quick Action Buttons (Optional Enhancement) -->
+<style>
+    .quick-actions {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .quick-action-btn {
+        padding: 0.8rem;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .quick-excellent {
+        background: var(--success-gradient);
+        color: white;
+        title: 'Fill all with 85 (Excellent)';
+    }
+
+    .quick-good {
+        background: var(--primary-gradient);
+        color: white;
+        title: 'Fill all with 70 (Good)';
+    }
+
+    .quick-average {
+        background: var(--warning-gradient);
+        color: white;
+        title: 'Fill all with 50 (Average)';
+    }
+
+    @media (max-width: 768px) {
+        .quick-actions {
+            position: relative;
+            bottom: auto;
+            right: auto;
+            flex-direction: row;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .quick-action-btn {
+            position: relative;
+        }
+    }
+</style>
+
+{% if students %}
+<div class="quick-actions">
+    <button class="quick-action-btn quick-excellent" onclick="fillAllMarks(85)" title="Fill all with 85 (Excellent)">
+        85
+    </button>
+    <button class="quick-action-btn quick-good" onclick="fillAllMarks(70)" title="Fill all with 70 (Good)">
+        70
+    </button>
+    <button class="quick-action-btn quick-average" onclick="fillAllMarks(50)" title="Fill all with 50 (Average)">
+        50
+    </button>
+</div>
+{% endif %}
+
+<script>
+        alert('Please correct invalid marks before submitting. Marks must be between 0 and 100.');
+        return false;
+    }
+
+    // Add loading state
+    saveButton.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Saving Marks...';
+    saveButton.disabled = true;
+
+    // Clear localStorage after successful submission
+    setTimeout(() => {
+        localStorage.removeItem('marksData_' + getCurrentKey());
+    }, 1000);
+});
+    }
+
+    // Initial stats calculation
+    updateStats();
+});
+
+    function updateStats() {
+        const markInputs = document.querySelectorAll('.mark-input');
+        const completedCountEl = document.getElementById('completedCount');
+        const progressPercentEl = document.getElementById('progressPercent');
+        const averageMarkEl = document.getElementById('averageMark');
+
+        let completed = 0;
+        let total = markInputs.length;
+        let sum = 0;
+        let validMarks = 0;
+
+        markInputs.forEach(input => {
+            if (input.value !== '') {
+                completed++;
+                const value = parseInt(input.value);
+                if (value >= 0 && value <= 100) {
+                    sum += value;
+                    validMarks++;
+                }
+            }
+        });
+
+        const progress = Math.round((completed / total) * 100);
+        const average = validMarks > 0 ? Math.round(sum / validMarks) : 0;
+
+        if (completedCountEl) completedCountEl.textContent = `Completed: ${completed}`;
+        if (progressPercentEl) progressPercentEl.textContent = `Progress: ${progress}%`;
+        if (averageMarkEl) averageMarkEl.textContent = `Average: ${validMarks > 0 ? average : '--'}`;
+    }
+
+    function calculateStats() {
+        const markInputs = document.querySelectorAll('.mark-input');
+        let marks = [];
+
+        markInputs.forEach(input => {
+            if (input.value !== '' && !input.classList.contains('invalid')) {
+                marks.push(parseInt(input.value));
+            }
+        });
+
+        if (marks.length === 0) {
+            alert('No valid marks entered yet.');
+            return;
+        }
+
+        const total = marks.length;
+        const sum = marks.reduce((a, b) => a + b, 0);
+        const average = Math.round(sum / total);
+        const highest = Math.max(...marks);
+        const lowest = Math.min(...marks);
+
+        alert(`Statistics Summary:\n\n` +
+            `Total Students: ${total}\n` +
+            `Average Mark: ${average}\n` +
+            `Highest Mark: ${highest}\n` +
+            `Lowest Mark: ${lowest}\n` +
+            `Total Points: ${sum}`);
+    }
+
+    function saveToLocalStorage() {
+        const markInputs = document.querySelectorAll('.mark-input');
+        const data = {};
+
+        markInputs.forEach(input => {
+            if (input.value !== '') {
+                data[input.name] = input.value;
+            }
+        });
+
+        const key = getCurrentKey();
+        localStorage.setItem('marksData_' + key, JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+        const key = getCurrentKey();
+        const saved = localStorage.getItem('marksData_' + key);
+
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(name => {
+                    const input = document.querySelector(`input[name="${name}"]`);
+                    if (input) {
+                        input.value = data[name];
+                        input.dispatchEvent(new Event('input'));
+                    }
+                });
+            } catch (e) {
+                console.warn('Could not restore marks data:', e);
+            }
+        }
+    }
+
+    function getCurrentKey() {
+        const params = new URLSearchParams(window.location.search);
+        return `${params.get('grade')}_${params.get('stream')}_${params.get('term')}_${params.get('exam_type')}_${params.get('subject')}`;
+    }
+
+    // Quick fill functions
+    function fillAllMarks(value) {
+        if (confirm(`Set all marks to ${value}?`)) {
+            const markInputs = document.querySelectorAll('.mark-input');
+            markInputs.forEach(input => {
+                input.value = value;
+                input.dispatchEvent(new Event('input'));
+            });
+        }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,937 @@
+{% extends 'base.html' %}
+{% block title %}Teachers Attendance{% endblock %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+        --secondary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.15);
+        --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Enhanced Page Header */
+    .page-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        padding: 2rem;
+        border-radius: 24px;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.8s ease;
+    }
+
+    .page-header:hover::before {
+        left: 100%;
+    }
+
+    .page-header h2 {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+        font-size: 2.2rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .page-header i {
+        color: #667eea;
+    }
+
+    /* Enhanced Navigation */
+    .nav-container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+        border-radius: 12px;
+        padding: 0.8rem 1.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-secondary {
+        background: var(--secondary-gradient);
+        color: white;
+        box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(44, 62, 80, 0.4);
+        color: white;
+    }
+
+    .btn-success {
+        background: var(--success-gradient);
+        color: white;
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(79, 172, 254, 0.4);
+        color: white;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    /* Enhanced Form Sections */
+    .form-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+        position: relative;
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.8s ease;
+        pointer-events: none;
+    }
+
+    .form-section:hover::before {
+        left: 100%;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 3px solid transparent;
+        border-image: var(--primary-gradient) 1;
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .section-title i {
+        color: #667eea;
+        margin-right: 0.5rem;
+    }
+
+    /* Enhanced Form Controls */
+    .form-control,
+    .form-select {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25), 0 4px 20px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.6rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Enhanced Radio Buttons */
+    .radio-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .radio-option:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .radio-option input[type="radio"] {
+        margin: 0;
+        transform: scale(1.2);
+    }
+
+    /* Enhanced Table Container */
+    .table-container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .table-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.8s ease;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .table-container:hover::before {
+        left: 100%;
+    }
+
+    /* Enhanced Table */
+    .table-responsive {
+        border-radius: 20px;
+        max-height: 500px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #667eea transparent;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--primary-gradient);
+        border-radius: 4px;
+    }
+
+    .table {
+        margin: 0;
+        background: transparent;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 1.5rem 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .table thead th:first-child {
+        border-top-left-radius: 16px;
+        padding-left: 1.5rem;
+    }
+
+    .table thead th:last-child {
+        border-top-right-radius: 16px;
+        padding-right: 1.5rem;
+    }
+
+    .table tbody tr {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .table tbody td {
+        padding: 1.5rem 1rem;
+        vertical-align: middle;
+        border: none;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .table tbody td:first-child {
+        padding-left: 1.5rem;
+    }
+
+    .table tbody td:last-child {
+        padding-right: 1.5rem;
+    }
+
+    /* Enhanced Badges */
+    .badge {
+        padding: 0.5rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge.bg-success {
+        background: var(--success-gradient) !important;
+    }
+
+    .badge.bg-danger {
+        background: var(--danger-gradient) !important;
+    }
+
+    .reg-badge {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .teacher-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+        text-transform: capitalize;
+    }
+
+    .time-text,
+    .date-text {
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+    }
+
+    .filter-section h3 {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .filter-section h3 i {
+        color: #667eea;
+        margin-right: 0.5rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .empty-state h5 {
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .empty-state p {
+        color: #adb5bd;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Loading States */
+    .loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid transparent;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .form-section,
+        .filter-section {
+            padding: 1.5rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 1rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .table thead th:first-child,
+        .table tbody td:first-child,
+        .table thead th:last-child,
+        .table tbody td:last-child {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .radio-group {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Enhanced Page Header -->
+    <div class="page-header fade-in">
+        <h2>
+            <i class="bi bi-calendar-check me-3"></i>
+            Teacher Attendance Management
+        </h2>
+        <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 1.1rem; font-weight: 500;">
+            Track and record daily teacher attendance
+        </p>
+    </div>
+
+    <!-- Enhanced Navigation -->
+    <div class="nav-container fade-in">
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-speedometer2"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Enhanced Attendance Form -->
+    <div class="form-section slide-up">
+        <h3 class="section-title">
+            <i class="bi bi-check2-circle"></i>
+            Daily Attendance Recording
+        </h3>
+
+        <form method="post" id="attendanceForm" onsubmit="confirmAndSubmit(event)">
+            {% csrf_token %}
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="term" class="form-label">
+                        <i class="bi bi-calendar3 me-1"></i>Academic Term
+                    </label>
+                    <select class="form-select" id="term" name="term" required>
+                        <option value="">Select Academic Term</option>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-card-text me-2"></i>Registration No</th>
+                                <th><i class="bi bi-person me-2"></i>Teacher Name</th>
+                                <th><i class="bi bi-check-circle me-2"></i>Attendance Status</th>
+                                <th><i class="bi bi-calendar-event me-2"></i>Date</th>
+                                <th><i class="bi bi-clock me-2"></i>Time In</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in teacher_list %}
+                            <tr>
+                                <td>
+                                    <span class="reg-badge">{{ item.teacher.registration_no }}</span>
+                                </td>
+                                <td>
+                                    <div class="teacher-name">
+                                        {{ item.teacher.first_name }} {{ item.teacher.surname }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if item.attendance %}
+                                    <span class="badge bg-success">{{ item.attendance.status }}</span>
+                                    {% else %}
+                                    <div class="radio-group">
+                                        <label class="radio-option">
+                                            <input type="radio" name="status_{{ item.teacher.registration_no }}"
+                                                value="Present" required>
+                                            <span>Present</span>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="status_{{ item.teacher.registration_no }}"
+                                                value="Absent">
+                                            <span>Absent</span>
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.attendance %}
+                                    <span class="date-text">{{ item.attendance.date_of_attendance }}</span>
+                                    {% else %}
+                                    <input type="date" name="date_of_attendance_{{ item.teacher.registration_no }}"
+                                        value="{{ now|date:'m:d:y' }}" class="form-control" required>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.attendance %}
+                                    <span class="time-text">{{ item.attendance.time_in }}</span>
+                                    {% else %}
+                                    <input type="time" name="time_in_{{ item.teacher.registration_no }}"
+                                        value="{{ now|date:'H:i' }}" class="form-control" required>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Submit Attendance
+                </button>
+            </div>
+        </form>
+    </div>
+    {% if messages %}
+    <div class="modal fade show" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true"
+        style="display:block;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    {% comment %}
+                    Detect if there's any error message.
+                    We'll set a flag by looping once and storing it in a variable.
+                    {% endcomment %}
+                    {% with has_error=False %}
+                    {% for message in messages %}
+                    {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
+                    {% with True as has_error %}
+                    {% endwith %}
+                    {% endif %}
+                    {% endfor %}
+
+                    <h5 class="modal-title" id="messageModalLabel">
+                        {% if has_error %}
+                        <i class="bi bi-exclamation-triangle me-2"></i>Error!
+                        {% else %}
+                        <i class="bi bi-check-circle me-2"></i>info!
+                        {% endif %}
+                    </h5>
+                    {% endwith %}
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body text-center">
+                    {% for message in messages %}
+                    {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
+                    <div style="font-size: 3rem; color: #dc3545;">✗</div>
+                    {% else %}
+                    <div style="font-size: 3rem; color: #4facfe;">✓</div>
+                    {% endif %}
+                    <p class="mt-3">{{ message }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modalEl = document.getElementById('messageModal');
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        });
+    </script>
+    {% endif %}
+
+    <!-- Enhanced Filter Section -->
+    <div class="filter-section slide-up">
+        <h3>
+            <i class="bi bi-funnel"></i>
+            Attendance Records & Filters
+        </h3>
+
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="date" class="form-label">
+                    <i class="bi bi-calendar-event me-1"></i>Filter by Date
+                </label>
+                <select class="form-select" name="date" id="date">
+                    <option value="">All Dates</option>
+                    <option value="today" {% if filter_date == "today" %}selected{% endif %}>Today Only</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="term_filter" class="form-label">
+                    <i class="bi bi-calendar3 me-1"></i>Filter by Term
+                </label>
+                <select class="form-select" name="term" id="term_filter">
+                    <option value="">All Terms</option>
+                    <option value="Term 1" {% if term == "Term 1" %}selected{% endif %}>Term 1</option>
+                    <option value="Term 2" {% if term == "Term 2" %}selected{% endif %}>Term 2</option>
+                    <option value="Term 3" {% if term == "Term 3" %}selected{% endif %}>Term 3</option>
+                </select>
+            </div>
+            <div class="col-md-4 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel me-2"></i>Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Enhanced Records Table -->
+    <div class="table-container slide-up">
+        <div
+            style="padding: 1.5rem 2rem 1rem; border-bottom: 2px solid transparent; border-image: var(--primary-gradient) 1;">
+            <h4 style="color: #2c3e50; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 1px;">
+                <i class="bi bi-table me-2" style="color: #667eea;"></i>
+                Attendance History
+            </h4>
+            <div
+                style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(102, 126, 234, 0.2); margin-top: 0.5rem; display: inline-block;">
+                <i class="bi bi-people-fill me-2"></i>
+                Total Records: {{ records|length }}
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-card-text me-2"></i>Reg No</th>
+                        <th><i class="bi bi-person me-2"></i>Teacher Name</th>
+                        <th><i class="bi bi-check-circle me-2"></i>Status</th>
+                        <th><i class="bi bi-calendar-event me-2"></i>Date</th>
+                        <th><i class="bi bi-clock me-2"></i>Time In</th>
+                        <th><i class="bi bi-calendar3 me-2"></i>Term</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td>
+                            <span class="reg-badge">{{ record.registration_no.registration_no }}</span>
+                        </td>
+                        <td>
+                            <div class="teacher-name">
+                                {{ record.registration_no.first_name }} {{ record.registration_no.surname }}
+                            </div>
+                        </td>
+                        <td>
+                            <span
+                                class="badge {% if record.status == 'Present' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ record.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="date-text">{{ record.date_of_attendance }}</span>
+                        </td>
+                        <td>
+                            <span class="time-text">{{ record.time_in }}</span>
+                        </td>
+                        <td>{{ record.term }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-0">
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <h5>No Attendance Records Found</h5>
+                                <p>No attendance records match your current filters. Try adjusting your search criteria
+                                    or record new attendance.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmAndSubmit(event) {
+        event.preventDefault();
+
+        if (confirm("Are you sure you want to submit the attendance records? This action cannot be undone.")) {
+            const form = document.getElementById('attendanceForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            // Add loading state
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Submitting...';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+
+            // Submit form
+            form.submit();
+        }
+    }
+
+    // Add enhanced interactions
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add animation to table rows
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.05}s`;
+            row.classList.add('fade-in');
+        });
+
+        // Enhanced radio button interactions
+        const radioOptions = document.querySelectorAll('.radio-option');
+        radioOptions.forEach(option => {
+            option.addEventListener('click', function () {
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+
+                    // Remove active class from siblings
+                    const name = radio.name;
+                    const siblings = document.querySelectorAll(`input[name="${name}"]`);
+                    siblings.forEach(sibling => {
+                        sibling.closest('.radio-option').classList.remove('active');
+                    });
+
+                    // Add active class to current
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Form validation enhancement
+        const form = document.getElementById('attendanceForm');
+        const requiredFields = form.querySelectorAll('[required]');
+
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', function () {
+                if (!this.value.trim()) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+
+            field.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .radio-option.active {
+        background: rgba(79, 172, 254, 0.15);
+        border: 1px solid rgba(79, 172, 254, 0.3);
+        box-shadow: 0 2px 8px rgba(79, 172, 254, 0.2);
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    }
+
+    .form-control.is-valid,
+    .form-select.is-valid {
+        border-color: #4facfe;
+        box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,492 @@
+{% extends 'base.html' %}
+{% load dict_extras %}
+{% load static %}
+{% block title %}Academic Results{% endblock %}
+{% block content %}
+
+<link href="{% static 'css/students/academics.css' %}" rel="stylesheet">
+<div class="main-container">
+    <!-- Enhanced Header -->
+    <div class="page-header fade-in">
+        <h3>
+            <i class="bi bi-speedometer2"></i>
+            Academic Performance
+        </h3>
+    </div>
+
+    <!-- Enhanced Action Buttons -->
+    <div class="action-section fade-in">
+        <div class="action-buttons">
+            <div class="action-card">
+                <div class="action-title">
+                    <div class="action-icon">📋</div>
+                    Report Forms Generation
+                </div>
+                <div class="mt-3">
+                    <a class="btn btn-action" href="#" data-bs-toggle="modal" data-bs-target="#selectTermModal" data-grade-group="Report Forms">
+                        Generate Reports
+                    </a>
+                </div>
+            </div>
+            <div class="action-card">
+                <div class="action-title">
+                    <div class="action-icon">📊</div>
+                    Results Generation
+                </div>
+                <div class="mt-3">
+                    <a class="btn btn-action btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#selectResultModal" data-grade-group="Results">
+                        Generate Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Filter Section -->
+    <div class="filter-section fade-in">
+        <div class="filter-title">
+            <div class="filter-icon">🔍</div>
+            Filter Academic Data
+        </div>
+        <form method="GET" class="search-filter-bar">
+            <div class="form-group">
+                <label for="grade" class="form-label">Grade</label>
+                <select class="form-select" id="grade" name="grade">
+                    <option value="">All Grades</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="stream" class="form-label">Stream</label>
+                <select class="form-select" id="stream" name="stream">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="term" class="form-label">Term</label>
+                <select class="form-select" id="term" name="term">
+                    <option value="">All Terms</option>
+                    {% for t in term_choices %}
+                        <option value="{{ t }}" {% if selected_term == t %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="exam_type" class="form-label">Exam Type</label>
+                <select class="form-select" id="exam_type" name="exam_type">
+                    <option value="">All Exam Types</option>
+                    {% for et in exam_type_choices %}
+                        {% if et %}
+                        <option value="{{ et }}" {% if selected_exam_type == et %}selected{% endif %}>{{ et }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-filter" type="submit">
+                <i class="bi bi-funnel me-1"></i>Apply Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Enhanced Table Section -->
+    <div class="table-section fade-in">
+        <div class="table-title">
+            <div class="table-icon">📋</div>
+            Academic Results
+        </div>
+        <div class="table-responsive">
+            <table id="progressTable" class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Reg No</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>Stream</th>
+                        <th>Term</th>
+                        <th>Exam Type</th>
+                        <th>Total Marks</th>
+                        <th>Mean Marks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mark in marks_list %}
+                    <tr>
+                        <td><strong>{{ mark.registration_no.registration_no }}</strong></td>
+                        <td>
+                            {% with student=student_map|get_item:mark.registration_no.registration_no %}
+                                {% if student %}
+                                    {{ student.first_name }} {{ student.second_name }} {{ student.surname }}
+                                {% else %}
+                                    <span class="text-danger">Unknown</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td><span class="badge" style="background: var(--primary-gradient);">{{ mark.registration_no.grade }}</span></td>
+                        <td>{{ mark.registration_no.stream }}</td>
+                        <td>{{ mark.term }}</td>
+                        <td>{{ mark.type_of_exam }}</td>
+                        <td><strong>{{ mark.total_marks }}</strong></td>
+                        <td><strong>{{ mark.mean_marks }}</strong></td>
+                        <td>
+                            
+                            <a href="{% url 'other_exams' mark.registration_no.registration_no %}" class="btn btn-table-action">
+                                <i class="bi bi-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <div style="color: var(--text-muted); font-style: italic;">
+                                <i class="bi bi-info-circle mb-2 d-block" style="font-size: 2rem; opacity: 0.5;"></i>
+                                No academic results found.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Modal for Report Forms Generation -->
+<div class="modal fade" id="selectTermModal" tabindex="-1" aria-labelledby="selectTermModalLabel" aria-hidden="true" style="top: 100px; height: 400px;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="termSelectForm" method="get" action="">
+        <div class="modal-header">
+          <h5 class="modal-title" id="selectTermModalLabel">
+            <i class="bi bi-gear me-2"></i>Select Term, Grade, and Stream
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal_term" class="form-label">
+              <i class="bi bi-calendar3 me-1"></i>Choose Term:
+            </label>
+            <select class="form-select" id="modal_term" name="term" required>
+              <option value="">-- Select Term --</option>
+              {% for t in term_choices %}
+                <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="modal_grade" class="form-label">
+              <i class="bi bi-bookmark me-1"></i>Choose Grade:
+            </label>
+            <select class="form-select" id="modal_1grade" name="grade" required>
+              <option value="">-- Select Grade --</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="modal_stream" class="form-label">
+              <i class="bi bi-collection me-1"></i>Choose Stream:
+            </label>
+            <select class="form-select" id="modal_1stream" name="stream" required>
+              <option value="">-- Select Stream --</option>
+            </select>
+          </div>
+          <input type="hidden" id="grade_group" name="grade_group" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle me-1"></i>Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Modal for Results Generation -->
+<div class="modal fade" id="selectResultModal" tabindex="-1" aria-labelledby="selectResultModalLabel" aria-hidden="true" style="top: 100px; height: 400px;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="resultSelectForm" method="get" action="">
+        <div class="modal-header">
+          <h5 class="modal-title" id="selectResultModalLabel">
+            <i class="bi bi-clipboard-data me-2"></i>Select Term, Grade, Stream, and Exam Type
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="result_modal_term" class="form-label">
+              <i class="bi bi-calendar3 me-1"></i>Choose Term:
+            </label>
+            <select class="form-select" id="result_modal_term" name="term" required>
+              <option value="">-- Select Term --</option>
+              {% for t in term_choices %}
+                <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="result_modal_grade" class="form-label">
+              <i class="bi bi-bookmark me-1"></i>Choose Grade:
+            </label>
+            <select class="form-select" id="modal_2grade" name="grade" required>
+              <option value="">-- Select Grade --</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="result_modal_stream" class="form-label">
+              <i class="bi bi-collection me-1"></i>Choose Stream:
+            </label>
+            <select class="form-select" id="modal_2stream" name="stream" required>
+              <option value="">-- Select Stream --</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="result_modal_exam_type" class="form-label">
+              <i class="bi bi-clipboard-check me-1"></i>Choose Exam Type:
+            </label>
+            <select class="form-select" id="result_modal_exam_type" name="exam_type" required>
+              <option value="">-- Select Exam Type --</option>
+              {% for et in exam_type_choices %}
+                {% if et %}
+                  <option value="{{ et }}">{{ et }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <input type="hidden" id="result_grade_group" name="grade_group" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle me-1"></i>Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced loading animation
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+    });
+
+    // For Report Forms Modal
+    var termSelectForm = document.getElementById('termSelectForm');
+    var gradeGroupInput = document.getElementById('grade_group');
+    document.querySelectorAll('[data-bs-target="#selectTermModal"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var group = btn.getAttribute('data-grade-group');
+            gradeGroupInput.value = group;
+            termSelectForm.action = "{% url 'report_forms' %}";
+        });
+    });
+
+    // For Results Generation Modal
+    var resultSelectForm = document.getElementById('resultSelectForm');
+    var resultGradeGroupInput = document.getElementById('result_grade_group');
+    document.querySelectorAll('[data-bs-target="#selectResultModal"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var group = btn.getAttribute('data-grade-group');
+            resultGradeGroupInput.value = group;
+            resultSelectForm.action = "{% url 'generate_result_papers' %}";
+        });
+    });
+
+    // Enhanced form interactions
+    const formSelects = document.querySelectorAll('.form-select');
+    formSelects.forEach(select => {
+        select.addEventListener('focus', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+        });
+        
+        select.addEventListener('blur', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+
+    // Enhanced hover effects for cards
+    const cards = document.querySelectorAll('.action-card, .filter-section, .table-section');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.willChange = 'transform, box-shadow';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.willChange = 'auto';
+        });
+    });
+
+    console.log('🎉 Enhanced Academic Results Dashboard loaded successfully!');
+});
+
+// Streams API preload - Preserved original functionality
+function normalizeGrade(g){ return (g || "").trim(); }
+
+function fillStreamSelect($el, streams, selected){
+    $el.innerHTML = '<option value="">All Streams</option>';
+    streams.forEach(s => {
+        let opt = document.createElement("option");
+        opt.value = s; opt.text = s;
+        if (s === selected) opt.selected = true;
+        $el.appendChild(opt);
+    });
+}
+
+function fillGradeSelect($el, grades, selected){
+    $el.innerHTML = '<option value="">All Grades</option>';
+    grades.forEach(g => {
+        let opt = document.createElement("option");
+        opt.value = g; opt.text = g;
+        if (g === selected) opt.selected = true;
+        $el.appendChild(opt);
+    });
+}
+
+// Main form grade/stream handling
+document.addEventListener("DOMContentLoaded", function(){
+    let gradeSel = document.getElementById("grade");
+    let streamSel = document.getElementById("stream");
+    let initGrade = normalizeGrade("{{ request.GET.grade|default_if_none:'' }}");
+    let initStream = "{{ request.GET.stream|default_if_none:'' }}";
+
+    fetch("{% url 'get_streams' %}")
+        .then(res => res.json())
+        .then(data => {
+            let grades = data.grades || Object.keys(data.streams_by_grade || {});
+            fillGradeSelect(gradeSel, grades, initGrade);
+
+            if(initGrade && data.streams_by_grade[initGrade]){
+                fillStreamSelect(streamSel, data.streams_by_grade[initGrade], initStream);
+            }
+
+            gradeSel.addEventListener("change", function(){
+                let g = normalizeGrade(this.value);
+                if (data.streams_by_grade[g]){
+                    fillStreamSelect(streamSel, data.streams_by_grade[g], null);
+                } else {
+                    streamSel.innerHTML = '<option value="">All Streams</option>';
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading streams data:', error);
+        });
+});
+
+// Modal 1 grade/stream handling
+document.addEventListener("DOMContentLoaded", function(){
+    let gradeSel = document.getElementById("modal_1grade");
+    let streamSel = document.getElementById("modal_1stream");
+    let initGrade = normalizeGrade("{{ request.GET.grade|default_if_none:'' }}");
+    let initStream = "{{ request.GET.stream|default_if_none:'' }}";
+
+    fetch("{% url 'get_streams' %}")
+        .then(res => res.json())
+        .then(data => {
+            let grades = data.grades || Object.keys(data.streams_by_grade || {});
+            fillGradeSelect(gradeSel, grades, initGrade);
+
+            if(initGrade && data.streams_by_grade[initGrade]){
+                fillStreamSelect(streamSel, data.streams_by_grade[initGrade], initStream);
+            }
+
+            gradeSel.addEventListener("change", function(){
+                let g = normalizeGrade(this.value);
+                if (data.streams_by_grade[g]){
+                    fillStreamSelect(streamSel, data.streams_by_grade[g], null);
+                } else {
+                    streamSel.innerHTML = '<option value="">All Streams</option>';
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading streams data for modal 1:', error);
+        });
+});
+
+// Modal 2 grade/stream handling
+document.addEventListener("DOMContentLoaded", function(){
+    let gradeSel = document.getElementById("modal_2grade");
+    let streamSel = document.getElementById("modal_2stream");
+    let initGrade = normalizeGrade("{{ request.GET.grade|default_if_none:'' }}");
+    let initStream = "{{ request.GET.stream|default_if_none:'' }}";
+
+    fetch("{% url 'get_streams' %}")
+        .then(res => res.json())
+        .then(data => {
+            let grades = data.grades || Object.keys(data.streams_by_grade || {});
+            fillGradeSelect(gradeSel, grades, initGrade);
+
+            if(initGrade && data.streams_by_grade[initGrade]){
+                fillStreamSelect(streamSel, data.streams_by_grade[initGrade], initStream);
+            }
+
+            gradeSel.addEventListener("change", function(){
+                let g = normalizeGrade(this.value);
+                if (data.streams_by_grade[g]){
+                    fillStreamSelect(streamSel, data.streams_by_grade[g], null);
+                } else {
+                    streamSel.innerHTML = '<option value="">All Streams</option>';
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading streams data for modal 2:', error);
+        });
+});
+
+// Enhanced table interactions
+document.addEventListener('DOMContentLoaded', function() {
+    const tableRows = document.querySelectorAll('.table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+
+    // Enhanced button hover effects
+    const actionButtons = document.querySelectorAll('.btn-table-action, .btn-action, .btn-filter, .btn-success');
+    actionButtons.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.willChange = 'transform, box-shadow';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.willChange = 'auto';
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + F to focus on grade filter
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            document.getElementById('grade')?.focus();
+        }
+        
+        // Alt + R to open report modal
+        if (e.altKey && e.key === 'r') {
+            e.preventDefault();
+            const reportModal = new bootstrap.Modal(document.getElementById('selectTermModal'));
+            reportModal.show();
+        }
+        
+        // Alt + G to open results modal
+        if (e.altKey && e.key === 'g') {
+            e.preventDefault();
+            const resultModal = new bootstrap.Modal(document.getElementById('selectResultModal'));
+            resultModal.show();
+        }
+    });
+});
+</script>
+
+{% endblock %}

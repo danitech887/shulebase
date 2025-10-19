@@ -1,0 +1,613 @@
+{% extends 'teacher_base.html' %}
+{% block title %}Manage Strands{% endblock %}
+{% block content %}
+{% load dict_extras %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page-header {
+        background: var(--primary-gradient);
+        padding: 2.5rem;
+        border-radius: 20px;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .page-header h2 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-size: 1.1rem !important;
+        position: relative;
+        z-index: 1;
+        margin: 0;
+    }
+
+    .filter-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+    }
+
+    .filter-section:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-2px);
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: #667eea;
+        font-size: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.65rem 1rem;
+        transition: var(--transition);
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.65rem 1.5rem;
+        font-weight: 600;
+        transition: var(--transition);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-success {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #718096;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4a5568;
+        transform: translateY(-2px);
+    }
+
+    .marks-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .card-header h5 {
+        margin: 0;
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .table-responsive {
+        padding: 1.5rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table tbody tr:hover {
+        background: #f7fafc;
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        color: #4a5568;
+        font-size: 0.95rem;
+    }
+
+    .strand-name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .modal-header .modal-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.3rem;
+    }
+
+    .text-muted {
+        font-style: italic;
+        padding: 2rem !important;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    /* Score input styling */
+    input[type="number"] {
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .page-header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .btn-sm {
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+        
+        .table-responsive {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+        <h2><i class="bi bi-list-task me-2"></i> Strand Management</h2>
+        <p>
+            Add, edit, and manage strands for each subject
+        </p>
+    </div>
+
+    <!-- Add Strand Form -->
+    <div class="filter-section fade-in">
+        <h3 class="section-title"><i class="bi bi-plus-circle"></i> Add New Strand</h3>
+        <form method="post" action="{% url 'strand_add' %}" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-4">
+                <label class="form-label">Subject</label>
+                <select name="subject" class="form-select" required>
+                    <option value="">-- Select Subject --</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Strand Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Enter strand name" required>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-check2-circle"></i> Save Strand
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Existing Strands -->
+    <div class="marks-card slide-up mt-4">
+        <div class="card-header">
+            <h5><i class="bi bi-collection me-2"></i> Existing Strands</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Strand</th>
+    
+                        <th>Created By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for strand in strands %}
+                    <tr id="strand-row-{{ strand.pk }}">
+                        <td>{{ strand.subject }}</td>
+                        <td class="strand-name">{{ strand.name }}</td>
+                        <td>{{ strand.created_by }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-strand-btn"
+                                    data-url="{% url 'strand_edit' strand.pk %}"
+                                    data-bs-toggle="modal" data-bs-target="#editStrandModal">
+                                <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-info manage-substrand-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#subStrandModal"
+                                    data-strand="{{ strand.pk }}"
+                                    data-strand-name="{{ strand.name }}">
+                                <i class="bi bi-diagram-3"></i> Sub-Strands
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No strands available yet. Create your first strand above!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Edit Strand Modal ===== -->
+<div class="modal fade" id="editStrandModal" tabindex="-1" aria-labelledby="editStrandModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Strand</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="editStrandModalBody">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== Manage Sub-Strands Modal ===== -->
+<div class="modal fade" id="subStrandModal" tabindex="-1" aria-hidden="true" style="top: 50px; height: 480px; overflow-y: scroll;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-diagram-3"></i> Manage Sub-Strands - <span id="subStrandTitle"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="subStrandModalBody">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Record Sub-Strand Marks Modal ===== -->
+<div class="modal fade" id="recordSubStrandModal" tabindex="-1" aria-hidden="true" style="top: 50px;">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil-square"></i> Record Marks - <span id="recordSubStrandTitle"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="recordSubStrandModalBody">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // ===== Edit Strand Modal =====
+  const editButtons = document.querySelectorAll('.edit-strand-btn');
+  const editModalBody = document.getElementById('editStrandModalBody');
+
+  editButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const url = this.dataset.url;
+      editModalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => { editModalBody.innerHTML = html; })
+        .catch(err => {
+          console.error('Failed to load edit form:', err);
+          editModalBody.innerHTML = '<div class="text-danger">Failed to load form. Please try again.</div>';
+        });
+    });
+  });
+
+  // ===== Record Scores Modal =====
+  const recordButtons = document.querySelectorAll('.record-score-btn');
+  const recordModal = document.getElementById('recordScoreModal');
+  const recordStrandName = document.getElementById('recordStrandName');
+
+  recordButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const strandName = this.dataset.strandName;
+      const strandId = this.dataset.strand;
+      recordStrandName.textContent = strandName;
+
+      // Load the form partial
+      fetch(`/record_scores/${strandId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+          const body = recordModal.querySelector('.modal-body');
+          body.innerHTML = html;
+
+          // Attach submit handler to the freshly injected form
+          const form = document.getElementById('recordScoresForm');
+          if (!form) return;
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            fetch(form.action, {
+              method: 'POST',
+              body: formData,
+              headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.status === 'success') {
+                bootstrap.Modal.getInstance(recordModal).hide();
+                location.reload();
+              } else {
+                alert(data.message || 'Failed to save scores.');
+              }
+            })
+            .catch(err => {
+              console.error('Failed to save scores:', err);
+              alert('Failed to save scores. Please try again.');
+            });
+          });
+        })
+        .catch(err => {
+          console.error('Failed to load record scores form:', err);
+        });
+    });
+  });
+
+  // ===== Manage Sub-Strands Modal =====
+  const subStrandButtons = document.querySelectorAll('.manage-substrand-btn');
+  const subStrandModalBody = document.getElementById('subStrandModalBody');
+  const subStrandTitle = document.getElementById('subStrandTitle');
+
+  subStrandButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const strandId = this.dataset.strand;
+      const strandName = this.dataset.strandName;
+      subStrandTitle.textContent = strandName;
+
+      // Remember the endpoint for POSTing and refreshing
+      const endpoint = `/sub_strands/${strandId}/`;
+      subStrandModalBody.dataset.endpoint = endpoint;
+
+      subStrandModalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+      fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+        .then(res => res.text())
+        .then(html => { subStrandModalBody.innerHTML = html; })
+        .catch(err => {
+          console.error('Failed to load sub-strands:', err);
+          subStrandModalBody.innerHTML = '<div class="text-danger">Failed to load sub-strands. Please try again.</div>';
+        });
+    });
+  });
+
+  // Delegated submit for Add Sub-Strand form loaded via AJAX into the modal body
+  document.addEventListener('submit', function(e) {
+    if (e.target && e.target.id === 'addSubStrandForm') {
+      e.preventDefault();
+      const form = e.target;
+      const endpoint = subStrandModalBody.dataset.endpoint;
+      if (!endpoint) {
+        console.warn('Sub-strands endpoint not set.');
+        return;
+      }
+      const formData = new FormData(form);
+
+      fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Clear the form and refresh the list
+          form.reset();
+          return fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+            .then(res => res.text())
+            .then(html => { subStrandModalBody.innerHTML = html; });
+        } else {
+          alert(data.message || 'Error adding sub-strand.');
+        }
+      })
+      .catch(err => {
+        console.error('Failed to add sub-strand:', err);
+        alert('Failed to add sub-strand. Please try again.');
+      });
+    }
+  });
+
+  // Delegated click for "Record Sub-Strand Marks" buttons (inside the modal body)
+  const recordSubStrandModalBody = document.getElementById('recordSubStrandModalBody');
+  const recordSubStrandTitle = document.getElementById('recordSubStrandTitle');
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.record-substrand-btn');
+    if (!btn) return;
+
+    const subStrandId = btn.dataset.substrand;
+    const subStrandName = btn.dataset.name;
+
+    recordSubStrandTitle.textContent = subStrandName;
+    recordSubStrandModalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+
+    fetch(`/record_substrand_scores/${subStrandId}/`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    })
+    .then(res => res.text())
+    .then(html => { recordSubStrandModalBody.innerHTML = html; })
+    .catch(err => {
+      console.error('Failed to load sub-strand scores form:', err);
+      recordSubStrandModalBody.innerHTML = '<div class="text-danger">Failed to load form. Please try again.</div>';
+    });
+  });
+});
+</script>
+
+{% endblock %}
