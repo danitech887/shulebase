@@ -562,65 +562,42 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for progress in progresses %}
-                        <tr>
-                            <form method="post">
-                                {% csrf_token %}
-                                <td>
-                                    <input type="text" name="grade" value="{{ progress.grade }}" class="form-control" />
+                        <tbody>
+                            {% for progress in progresses %}
+                            <tr>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <td><input type="text" name="grade" value="{{ progress.grade }}" class="form-control" /></td>
+                                    <td><input type="text" name="stream" value="{{ progress.stream }}" class="form-control" /></td>
+                                    <td><input type="text" name="subject" value="{{ progress.subject }}" class="form-control" /></td>
+                                    <td><input type="number" name="no_of_topics" value="{{ progress.no_of_topics }}" class="form-control" /></td>
+                                    <td><input type="text" name="topic" value="{{ progress.topic }}" class="form-control" /></td>
+                                    <td><input type="text" name="sub_topic" value="{{ progress.sub_topic }}" class="form-control" /></td>
+                                    <td><input type="date" name="date_of_teaching" value="{{ progress.date_of_teaching|date:'Y-m-d' }}" class="form-control" /></td>
+                                    <td><input type="date" name="date_finished" value="{{ progress.date_finished|date:'Y-m-d' }}" class="form-control" /></td>
+                                    <td>
+                                        <select name="status" class="form-control status-select">
+                                            <option value="completed" {% if progress.status == 'completed' %}selected{% endif %}>Completed</option>
+                                            <option value="on_going" {% if progress.status == 'on_going' %}selected{% endif %}>On Going</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="progress_id" value="{{ progress.id }}">
+                                        <button type="submit" name="update_progress" class="update-btn">Update</button>
+                                    </td>
+                                </form>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="no-data">
+                                    <div class="no-data-icon">📋</div>
+                                    <div>No teaching progress records found.</div>
+                                    <small>Start by adding your first progress record using the form above.</small>
                                 </td>
-                                <td>
-                                    <input type="text" name="stream" value="{{ progress.stream }}"
-                                        class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="text" name="subject" value="{{ progress.subject }}"
-                                        class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="number" name="no_of_topics" value="{{ progress.no_of_topics }}"
-                                        class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="text" name="topic" value="{{ progress.topic }}" class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="text" name="sub_topic" value="{{ progress.sub_topic }}"
-                                        class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="date" name="date_of_teaching"
-                                        value="{{ progress.date_of_teaching|date:'Y-m-d' }}" class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="date" name="date_finished"
-                                        value="{{ progress.date_finished|date:'Y-m-d' }}" class="form-control" />
-                                </td>
-                                <td>
-                                    <select name="status" class="form-control status-select">
-                                        <option value="completed" {% if progress.status=='completed' %}selected{% endif
-                                            %}>Completed</option>
-                                        <option value="on_going" {% if progress.status=='on_going' %}selected{% endif
-                                            %}>On Going</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="hidden" name="progress_id" value="{{ progress.id }}">
-                                    <button type="submit" name="update_progress" class="update-btn">Update</button>
-                                </td>
-                            </form>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="10" class="no-data">
-                                <div class="no-data-icon">📋</div>
-                                <div>No teaching progress records found.</div>
-                                <small>Start by adding your first progress record using the form above.</small>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
                 </table>
             </div>
         </div>

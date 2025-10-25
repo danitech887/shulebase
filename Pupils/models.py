@@ -137,6 +137,8 @@ from django.conf import settings
 
 class Strand(models.Model):
     school = models.ForeignKey("MasterSchool",on_delete = models.CASCADE)
+    grade = models.CharField(max_length = 10,default = '')
+    stream = models.CharField(max_length = 10,default = '')
     subject = models.CharField(max_length = 100,default = '')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)

@@ -231,6 +231,7 @@ def delete_school_database(db_name):
 from ..utils.per_school_db_utils import*
 from django.contrib.auth.models import User
 
+
 # Helper for normalized aliasing
 def standardize_alias(db_name):
     return db_name if db_name.startswith('school_') else f"school_{db_name}"
@@ -246,10 +247,13 @@ def school_registration(request):
 
         if form.is_valid():
             email = form.cleaned_data.get('email_address')
+            username = form.cleaned_data.get('username')
 
             # Prevent duplicate school emails
             if MasterSchool.objects.filter(email_address=email).exists():
                 messages.error(request, "❌ Email is already registered to another school.")
+            elif Users.objects.filter(username=username).exists():
+                messages.error(request,"Username is already taken")
             else:
                     admin_username = request.POST.get('username')
                     admin_email = email

@@ -619,9 +619,10 @@ def attendance_dashboard(request):
     for a in qs:
         grade, stream = students.get(a.registration_no, ("", ""))
         if not grade:
-            continue
+            print("Grade not found: ",grade)
         key = f"{grade} - {stream}"
         chart_map[key][a.status] += 1
+    print("Chart map: ",chart_map)
 
     labels = sorted(chart_map.keys())
     present_data = [chart_map[k]["Present"] for k in labels]
@@ -646,14 +647,18 @@ def attendance_dashboard(request):
 
     # Chart 3: Stacked bar by Grade
     grade_totals = defaultdict(lambda: {"Present": 0, "Absent": 0})
+    
     for key, vals in chart_map.items():
         grade = key.split(" - ")[0]
         grade_totals[grade]["Present"] += vals["Present"]
         grade_totals[grade]["Absent"] += vals["Absent"]
 
+    
     grade_labels = sorted(grade_totals.keys())
     grade_present = [grade_totals[g]["Present"] for g in grade_labels]
     grade_absent = [grade_totals[g]["Absent"] for g in grade_labels]
+    
+
 
     context = {
         "term": term,

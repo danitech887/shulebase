@@ -69,8 +69,11 @@ urlpatterns = [
     path('manage-strands/',strand_add,name = "strand_add"),
     # path('record_scores/<int:strand_id>/',record_scores,name ='record_scores'),
     path('edit_strands<int:pk>/',strand_edit,name = 'strand_edit'),
-    path('sub_strands/<int:strand_id>/',sub_strands_view, name='sub_strands'),
-    path('record_substrand_scores/<int:sub_strand_id>/',record_substrand_scores, name='record_substrand_scores'),
+    path('sub_strands/<int:strand_id>/<str:grade>/<str:stream>/',sub_strands_view, name='sub_strands'),
+    path('record_substrand_scores/<int:sub_strand_id>/<str:grade>/<str:stream>/', record_substrand_scores, name='record_substrand_scores'),
+    path("edit_substrand/<int:substrand_id>/", edit_substrand_view, name="edit_substrand"),
+
+
 
     path('teaching-progress',teaching_progress,name = 'teaching_progress'),
     path("account",teacher_account,name = "teacher_account"),

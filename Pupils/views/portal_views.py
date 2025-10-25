@@ -450,32 +450,37 @@ from ..forms import StrandForm
 def strand_list(request):
     for _ in messages.get_messages(request):
         pass
-    
     school_id = request.session.get('school_id')
     strands = Strand.objects.filter(school_id = school_id,created_by = request.user).all().order_by("subject", "name")
     teacher = request.session.get('teacher_no')
     roles = TeachersRole.objects.filter(school_id = school_id,registration_no=teacher)
+    grades = []
+    streams = []
     subjects = set()
     for role in roles:
         if role.subject:
+            grades.append(role.grade)
+            streams.append(role.stream)
             for subj in role.subject.split(","):
                 subj = subj.strip()
                 if subj:
                     subjects.add(subj)
     
     form = StrandForm()
-    return render(request, "teacher_portal/strands_list.html", {"strands": strands, "form": form,"subjects": subjects})
+    return render(request, "teacher_portal/strands_list.html", {"strands": strands, "form": form,"subjects": subjects,"grades": grades,"streams":streams})
 
 
-@login_required
+@login_required 
 def strand_add(request):
     school_id = request.session.get('school_id')
     school_instance = MasterSchool.objects.get(id = school_id)
     for _ in messages.get_messages(request):
         pass
+    
     if request.method == "POST":
         subject = request.POST.get("subject")
         form = StrandForm(request.POST)
+        
         if form.is_valid():
             strand = form.save(commit=False)
             strand.school = school_instance
@@ -623,13 +628,13 @@ from datetime import date
 
 
 @login_required
-def sub_strands_view(request, strand_id):
+def sub_strands_view(request, strand_id,grade,stream):
     for _ in messages.get_messages(request):
         pass
     logger = logging.getLogger(__name__)
     school_id = request.session['school_id']
     teacher_no = request.session.get('teacher_no')
-    strand = get_object_or_404(Strand, pk=strand_id)
+    strand = get_object_or_404(Strand, pk=strand_id,grade = grade,stream = stream)
     
     
     if request.method == "POST":
@@ -669,18 +674,69 @@ def sub_strands_view(request, strand_id):
         {"strand": strand, "sub_strands": sub_strands},
     )
 
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
+@require_http_methods(["GET", "POST"])
+@login_required
+@login_required
+
+
+def edit_substrand_view(request, sub_strand_id):
+    """Handle inline edit of a Sub-Strand (AJAX)."""
+    if request.method == "POST":
+        try:
+            sub_strand = get_object_or_404(SubStrand, pk=sub_strand_id)
+            name = request.POST.get("name", "").strip()
+            description = request.POST.get("description", "").strip()
+
+            if not name:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Sub-strand name is required."
+                }, status=400)
+
+            # ✅ Update and save
+            sub_strand.name = name
+            sub_strand.description = description
+            sub_strand.save()
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Sub-strand updated successfully.",
+                "data": {
+                    "id": sub_strand.id,
+                    "name": sub_strand.name,
+                    "description": sub_strand.description,
+                    "updated_at": sub_strand.updated_at.strftime("%b %d, %Y") if hasattr(sub_strand, "updated_at") else ""
+                }
+            })
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "message": f"Server error: {str(e)}"
+            }, status=500)
+    
+    return JsonResponse({
+        "status": "error",
+        "message": "Invalid request method."
+    }, status=405)
+
+
+
 from django.views.decorators.csrf import csrf_exempt
 @login_required
 @csrf_exempt
-def record_substrand_scores(request, sub_strand_id):
+def record_substrand_scores(request, sub_strand_id,grade,stream):
     for _ in messages.get_messages(request):
         pass
     school_id = request.session.get('school_id')
     sub_strand = get_object_or_404(SubStrand, pk=sub_strand_id)
     strand = sub_strand.strand
-    teacher_no = request.session.get('teacher_no')
-    grade =get_object_or_404(TeachersRole, school_id = school_id,registration_no=teacher_no).grade
-    stream = get_object_or_404(TeachersRole,grade = grade,school_id = school_id,registration_no = teacher_no).stream
+    print("Grade: ",grade)
+    print("Stream: ",stream)
+    
     students = StudentInfo.objects.filter(school_id=school_id,grade = grade,stream = stream).order_by('registration_no')
 
     term_choices = ['Term 1', 'Term 2', 'Term 3']
@@ -740,7 +796,7 @@ def record_substrand_scores(request, sub_strand_id):
         'remark': remark_map,
         'selected_term': selected_term,
     })
-strand_list
+
 @login_required
 def teaching_progress(request):
     for _ in messages.get_messages(request):

@@ -1,6 +1,6 @@
 {% load dict_extras %}
 
-<form id="recordSubStrandScoresForm" method="post" action="{% url 'record_substrand_scores' sub_strand.id %}">
+<form id="recordSubStrandScoresForm" method="post" action="{% url 'record_substrand_scores' sub_strand.id sub_strand.strand.grade sub_strand.strand.stream %}">
     {% csrf_token %}
 
     <div class="mb-3 col-md-3">
@@ -8,7 +8,7 @@
         <select name="term" class="form-select" required>
             <option value="" disabled {% if not selected_term %}selected{% endif %}>Select Term</option>
             {% for t in term_choices %}
-            <option value="{{ t }}" {% if selected_term==t %}selected{% endif %}>{{ t }}</option>
+            <option value="{{ t }}" {% if selected_term == t %}selected{% endif %}>{{ t }}</option>
             {% endfor %}
         </select>
     </div>

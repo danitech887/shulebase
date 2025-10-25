@@ -236,7 +236,7 @@ from .models import Strand
 class StrandForm(forms.ModelForm):
     class Meta:
         model = Strand
-        fields = ["name","subject"]
+        fields = ["grade","stream","name","subject"]
 
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter strand name"})

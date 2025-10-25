@@ -320,8 +320,26 @@
     <!-- Add Strand Form -->
     <div class="filter-section fade-in">
         <h3 class="section-title"><i class="bi bi-plus-circle"></i> Add New Strand</h3>
-        <form method="post" action="{% url 'strand_add' %}" class="row g-3">
+        <form method="post" action="{% url 'strand_add' %}" class="row g-3" ">
             {% csrf_token %}
+            <div class="col-md-4">
+              <label class="form-label">Grade</label>
+                <select name="grade" class="form-select" id="grade" required>
+                  <option value="">-- Select Grade --</option>
+                  {% for grade in grades %}
+                  <option value="{{ grade }}">{{ grade }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Stream</label>
+                <select name="stream" class="form-select id="stream" required>
+                  <option value="">-- Select stream --</option>
+                  {% for stream in streams %}
+                  <option value="{{ stream }}">{{ stream }}</option>
+                  {% endfor %}
+                </select>
+            </div>
             <div class="col-md-4">
                 <label class="form-label">Subject</label>
                 <select name="subject" class="form-select" required>
@@ -352,6 +370,8 @@
             <table class="table table-striped align-middle">
                 <thead>
                     <tr>
+                      <th>Grade</th>
+                      <th>Stream</th>
                         <th>Subject</th>
                         <th>Strand</th>
     
@@ -362,6 +382,8 @@
                 <tbody>
                     {% for strand in strands %}
                     <tr id="strand-row-{{ strand.pk }}">
+                      <td>{{ strand.grade }}</td>
+                      <td>{{ strand.stream }}</td>
                         <td>{{ strand.subject }}</td>
                         <td class="strand-name">{{ strand.name }}</td>
                         <td>{{ strand.created_by }}</td>
@@ -375,6 +397,8 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#subStrandModal"
                                     data-strand="{{ strand.pk }}"
+                                    data-grade="{{ strand.grade }}"
+                                    data-stream="{{ strand.stream }}"
                                     data-strand-name="{{ strand.name }}">
                                 <i class="bi bi-diagram-3"></i> Sub-Strands
                             </button>
@@ -436,7 +460,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          <i class="bi bi-pencil-square"></i> Record Marks - <span id="recordSubStrandTitle"></span>
+          <i class="bi bi-pencil-square"></i> Record Scores - <span id="recordSubStrandTitle"></span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
@@ -450,6 +474,7 @@
 </div>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
   // ===== Edit Strand Modal =====
   const editButtons = document.querySelectorAll('.edit-strand-btn');
@@ -527,11 +552,13 @@ document.addEventListener('DOMContentLoaded', function() {
   subStrandButtons.forEach(btn => {
     btn.addEventListener('click', function() {
       const strandId = this.dataset.strand;
+      const grade = this.dataset.grade;
+      const stream = this.dataset.stream;
       const strandName = this.dataset.strandName;
       subStrandTitle.textContent = strandName;
 
       // Remember the endpoint for POSTing and refreshing
-      const endpoint = `/sub_strands/${strandId}/`;
+      const endpoint = `/sub_strands/${strandId}/${grade}/${stream}/`;
       subStrandModalBody.dataset.endpoint = endpoint;
 
       subStrandModalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
@@ -592,11 +619,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const subStrandId = btn.dataset.substrand;
     const subStrandName = btn.dataset.name;
+    const grade = btn.dataset.strandGrade || btn.dataset.grade;
+    const stream = btn.dataset.strandStream || btn.dataset.stream;
 
     recordSubStrandTitle.textContent = subStrandName;
     recordSubStrandModalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
-    fetch(`/record_substrand_scores/${subStrandId}/`, {
+    // Prefer a server-generated URL from data-url, fallback to building with grade/stream
+    const prebuiltUrl = btn.getAttribute('data-url');
+    const targetUrl = prebuiltUrl || `/record_substrand_scores/${encodeURIComponent(subStrandId)}/${encodeURIComponent(grade)}/${encodeURIComponent(stream)}/`;
+
+    fetch(targetUrl, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'same-origin'
     })

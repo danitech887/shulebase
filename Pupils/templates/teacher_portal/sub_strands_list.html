@@ -1,15 +1,18 @@
 {% load dict_extras %}
 
+<!-- 🟢 Add Sub-Strand Form -->
 <form id="addSubStrandForm" method="post" class="mb-4">
     {% csrf_token %}
     <div class="mb-3">
         <label class="form-label fw-semibold">Sub-Strand Name</label>
         <input type="text" name="name" class="form-control" placeholder="Enter sub-strand name" required>
     </div>
+
     <div class="mb-3">
         <label class="form-label fw-semibold">Description</label>
         <textarea name="description" class="form-control" rows="2" placeholder="Optional description..."></textarea>
     </div>
+
     <button type="submit" class="btn btn-success w-100">
         <i class="bi bi-plus-circle"></i> Add Sub-Strand
     </button>
@@ -21,112 +24,127 @@
 
 <ul class="list-group" id="subStrandList">
     {% for ss in sub_strands %}
-    <li class="list-group-item">
-        <div class="d-flex justify-content-between align-items-start flex-wrap">
-            <div class="flex-grow-1">
-                <span class="fw-semibold"><i class="bi bi-diagram-3 me-1"></i> {{ ss.name }}</span>
-                <small class="text-muted d-block">{{ ss.created_at|date:"M d, Y" }}</small>
-                {% if ss.description %}
-                <p class="text-secondary small mb-1">{{ ss.description }}</p>
-                {% endif %}
-            </div>
+    <li class="list-group-item" id="substrand-item-{{ ss.id }}">
+        <!-- 📘 Static display -->
+        <div class="substrand-display" id="display-{{ ss.id }}">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div class="flex-grow-1">
+                    <span class="fw-semibold"><i class="bi bi-diagram-3 me-1"></i> {{ ss.name }}</span>
+                    <small class="text-muted d-block">{{ ss.created_at|date:"M d, Y" }}</small>
+                    {% if ss.description %}
+                        <p class="text-secondary small mb-1">{{ ss.description }}</p>
+                    {% endif %}
+                </div>
 
-            <div class="text-end">
-                <button class="btn btn-sm btn-outline-primary record-substrand-btn mt-2 mt-sm-0"
-                    data-substrand="{{ ss.id }}" data-name="{{ ss.name }}" data-bs-toggle="modal"
-                    data-bs-target="#recordSubStrandModal">
-                    <i class="bi bi-pencil-square"></i> Record Marks
-                </button>
+                <div class="text-end d-flex gap-2">
+                    <!-- ✏️ Edit -->
+                    <button 
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        onclick="toggleEditForm({{ ss.id }})">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+
+                    <!-- 📘 Record Scores -->
+                    <button 
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        data-substrand="{{ ss.id }}"
+                        {% if ss.strand %}
+                            data-strand-grade="{{ ss.strand.grade }}"
+                            data-strand-stream="{{ ss.strand.stream }}"
+                            data-url="{% url 'record_substrand_scores' ss.id ss.strand.grade ss.strand.stream %}"
+                        {% endif %}
+                        data-bs-toggle="modal"
+                        data-bs-target="#recordSubStrandModal">
+                        <i class="bi bi-pencil-square"></i> Record Scores
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- ✏️ Inline edit form -->
+        <form id="form-{{ ss.id }}" class="substrand-edit-form d-none mt-3 border-top pt-3" data-id="{{ ss.id }}">
+            {% csrf_token %}
+            <div class="mb-2">
+                <label class="small fw-semibold">Sub-Strand Name</label>
+                <input type="text" name="name" class="form-control form-control-sm" value="{{ ss.name }}" required>
+            </div>
+            <div class="mb-2">
+                <label class="small fw-semibold">Description</label>
+                <textarea name="description" class="form-control form-control-sm" rows="2">{{ ss.description }}</textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-primary flex-fill" onclick="saveSubStrand({{ ss.id }})">
+                    <i class="bi bi-save"></i> Save
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="cancelEdit({{ ss.id }})">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+            </div>
+        </form>
     </li>
     {% empty %}
     <li class="list-group-item text-muted text-center">No sub-strands yet.</li>
     {% endfor %}
 </ul>
 
-{% if messages %}
-<div class="modal fade show" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true"
-    style="display:block;">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                {% comment %}
-                Detect if there's any error message.
-                We'll set a flag by looping once and storing it in a variable.
-                {% endcomment %}
-                {% with has_error=False %}
-                {% for message in messages %}
-                {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
-                {% with True as has_error %}
-                {% endwith %}
-                {% endif %}
-                {% endfor %}
-
-                <h5 class="modal-title" id="messageModalLabel">
-                    {% if has_error %}
-                    <i class="bi bi-exclamation-triangle me-2"></i>Error!
-                    {% else %}
-                    <i class="bi bi-check-circle me-2"></i>info!
-                    {% endif %}
-                </h5>
-                {% endwith %}
-
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body text-center">
-                {% for message in messages %}
-                {% if message.level_tag == 'error' or message.tags == 'error' or message.level_tag == 'danger' %}
-                <div style="font-size: 3rem; color: #dc3545;">✗</div>
-                {% else %}
-                <div style="font-size: 3rem; color: #4facfe;">✓</div>
-                {% endif %}
-                <p class="mt-3">{{ message }}</p>
-                {% endfor %}
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var modalEl = document.getElementById('messageModal');
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    });
-</script>
-{% endif %}
+async function toggleEditForm(id) {
+    document.getElementById(`display-${id}`).classList.add('d-none');
+    document.getElementById(`form-${id}`).classList.remove('d-none');
+    
+}
 
-<script>
-    /**
-     * Delegated event listener for the Sub-Strand form submission.
-     * Works even after re-rendering the modal body dynamically.
-     */
-    document.addEventListener('click', async function (e) {
-        if (e.target.classList.contains('record-substrand-btn')) {
-            const id = e.target.getAttribute('data-substrand');
-            const modalBody = document.querySelector('#recordSubStrandModal .modal-body');
+function cancelEdit(id) {
+    document.getElementById(`form-${id}`).classList.add('d-none');
+    document.getElementById(`display-${id}`).classList.remove('d-none');
+}
 
-            // show loading
-            modalBody.innerHTML = '<p class="text-center py-3">Loading...</p>';
+async function saveSubStrand(id) {
+    const form = document.getElementById(`form-${id}`);
+    const btn = form.querySelector('button.btn-primary');
+    const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
+    const formData = new FormData(form);
 
-            try {
-                const res = await fetch(`/record_substrand_scores/${id}/`, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    credentials: 'same-origin'
-                });
-                const html = await res.text();
-                modalBody.innerHTML = html;
-            } catch (err) {
-                console.error('Error loading modal content:', err);
-                modalBody.innerHTML = '<p class="text-danger text-center">Failed to load data.</p>';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Saving...';
+
+    try {
+        const res = await fetch(`/edit_substrand/${id}/`, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': csrf },
+            credentials: 'same-origin'
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            // Update the visible display immediately
+            const item = document.getElementById(`substrand-item-${id}`);
+            item.querySelector('.fw-semibold').innerHTML = `<i class="bi bi-diagram-3 me-1"></i> ${formData.get('name')}`;
+            
+            const desc = formData.get('description');
+            const descEl = item.querySelector('.text-secondary');
+            if (descEl) {
+                descEl.textContent = desc;
+            } else if (desc) {
+                const p = document.createElement('p');
+                p.className = 'text-secondary small mb-1';
+                p.textContent = desc;
+                item.querySelector('.flex-grow-1').appendChild(p);
             }
-        }
-    });
 
+            cancelEdit(id);
+        } else {
+            alert(data.message || 'Failed to update.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error while saving changes.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-save"></i> Save';
+    }
+}
 </script>
