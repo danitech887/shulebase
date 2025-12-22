@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% block title %}Academic Dashboard{% endblock %}
+{% block content %}
+{% load static %}
+{% load dict_extras %}
+
+<link href="{% static 'css/students/academic_dashboard.css' %}" rel="stylesheet">
+
+<style>
+/* Basic Card Container */
+.subject-dashboard-section {
+    padding: 1.5rem 0;
+}
+.subject-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    min-height: 250px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #fff;
+}
+.subject-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Card Header (Subject Title and Blue Line) */
+.card-header-subject {
+    /* Mimic the blue line */
+    border-bottom: 2px solid #0d6efd; /* Bootstrap Primary Blue */
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: transparent;
+}
+.card-header-subject h5 {
+    font-weight: 600;
+    color: #343a40;
+}
+
+/* Main Metrics (Average Marks & Total Students) */
+.main-metrics-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem 0.5rem 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+.metric-box {
+    text-align: center;
+    flex-basis: 48%; /* Adjust spacing */
+}
+.metric-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+.metric-value-large {
+    font-size: 2rem; /* Large size for the number */
+    font-weight: 800;
+    color: #343a40;
+}
+.metric-value-large.avg {
+    color: #0d6efd; /* Blue for the average mark */
+}
+
+/* Level Distribution List */
+.level-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #f8f9fa; /* Very light separator */
+}
+.level-detail:last-child {
+    border-bottom: none;
+}
+.level-text {
+    font-size: 0.95rem;
+    color: #343a40;
+}
+.level-count-badge {
+    /* Mimic the subtle colored box in the image */
+    background-color: #5bc0de !important; /* Default light blue/info color */
+    color: #fff;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.3rem;
+    min-width: 40px;
+}
+/* Specific badge colors (matching the image palette) */
+.badge-excellent { background-color: #28a745 !important; } /* Green */
+.badge-good { background-color: #17a2b8 !important; } /* Cyan/Info */
+.badge-satisfactory { background-color: #6c757d !important; } /* Dark Grey/Secondary */
+</style>
+
+
+<div class="dashboard-container">
+    <div class="dashboard-header fade-in">
+        <h3>
+            <i class="bi bi-speedometer2"></i>
+            Academic Dashboard
+        </h3>
+    </div>
+
+    <div class="nav-section fade-in">
+        <nav>
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link{% if request.resolver_match.url_name == 'academic_home' %} active{% endif %}" href="{% url 'academic_home' %}">
+                        <i class="bi bi-plus-circle me-2"></i>More
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="filter-section fade-in">
+    <div class="filter-title">
+        <div class="filter-icon">🔍</div>
+        Filter Academic Data
+    </div>
+    <form method="get" class="row g-3 align-items-center">
+        
+        <div class="col-auto">
+            <label for="year" class="col-form-label">Year:</label>
+        </div>
+        <div class="col-auto">
+            <select name="year" id="year" class="form-select">
+                <option value="">All</option>
+                {% for y in years %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-auto">
+            <label for="term" class="col-form-label">Term:</label>
+        </div>
+        <div class="col-auto">
+            <select name="term" id="term" class="form-select">
+                <option value="">All</option>
+                {% for t in terms %}
+                    <option value="{{ t }}" {% if t == selected_term %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <label for="grade" class="col-form-label">Grade:</label>
+        </div>
+        <div class="col-auto">
+            <select name="grade" id="grade" class="form-select">
+                <option value="">All</option>
+                {% for g in grades %}
+                    <option value="{{ g }}" {% if g == selected_grade %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-auto">
+            <label for="stream" class="col-form-label">Stream:</label>
+        </div>
+        <div class="col-auto">
+            <select name="stream" id="stream" class="form-select">
+                <option value="">All</option>
+                {% for s in streams %}
+                    <option value="{{ s }}" {% if s == selected_stream %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-auto">
+            <label for="assessment_type" class="col-form-label">Exam Type:</label>
+        </div>
+        <div class="col-auto">
+            <select name="assessment_type" id="assessment_type" class="form-select">
+                <option value="">All</option>
+                {% for et in assessment_types %}
+                    <option value="{{ et }}" {% if et == selected_assessment_type %}selected{% endif %}>{{ et }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel me-1"></i>Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+    <div class="subject-dashboard-section">
+        <h4 class="section-title fade-in mb-4">📚 Subject Performance Analysis</h4>
+        
+        <div class="row g-4">
+            {% for data in learning_areas %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card subject-card fade-in">
+                    
+                    <div class="card-header-subject">
+                        <h5 class="mb-0">{{ data.name }} {{ data.grade }} {{ data.stream }}</h5>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        
+                        <div class="main-metrics-container">
+                            <div class="metric-box">
+                                <div class="metric-label">Average Marks</div>
+                                <div class="metric-value-large avg">
+                                    {% if data.avg_level_area %}
+                                        {{ data.avg_level_area|mul:"33.33"|floatformat:1 }}% 
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-label">Total Students</div>
+                                <div class="metric-value-large">
+                                    {{ data.total_students|default:0 }}
+                                </div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-label">Avg Score</div>
+                                <div class="metric-value-large">
+                                    {{ data.avg_score|default:0 }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="level-distribution-list">
+                            {% if data.total_students > 0 %}
+                                {% for label, count in data.level_distribution.items %}
+                                    <div class="level-detail">
+                                        <span class="level-text">{{ label }}</span>
+                                        <span class="badge level-count-badge 
+                                            {% if 'Excellent' in label %} badge-excellent
+                                            {% elif 'Good' in label %} badge-good
+                                            {% elif 'Satisfactory' in label %} badge-satisfactory
+                                            {% endif %}">
+                                            {{ count }}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-data text-center text-muted py-3">
+                                    <i class="bi bi-bar-chart-line d-block" style="font-size: 2rem; opacity: 0.5;"></i>
+                                    No scores recorded.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">No Subject/Learning Area data found for the current filters.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="charts-section">
+        <h4 class="section-title fade-in">📊 Performance Analytics</h4>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="chart-container fade-in">
+                    <h5 class="chart-title">Students per Grade (Pie Chart)</h5>
+                    <canvas id="studentsPie"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="chart-container fade-in">
+                    <h5 class="chart-title">Average Marks per Grade (Line Chart)</h5>
+                    <canvas id="avgMarksLine"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // NOTE: Chart.js initialization logic remains unchanged from your original input
+    
+    // Enhanced Chart Configuration
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                    padding: 20,
+                    font: { 
+                        size: 12, 
+                        weight: 'bold',
+                        family: 'Inter, sans-serif'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#2d3748',
+                bodyColor: '#4a5568',
+                borderColor: '#e2e8f0',
+                borderWidth: 1,
+                cornerRadius: 8,
+                padding: 12
+            }
+        },
+        animation: {
+            duration: 1000,
+            easing: 'easeOutQuart'
+        }
+    };
+
+    // Enhanced Pie Chart: Students per Grade
+    new Chart(document.getElementById('studentsPie').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ pie_labels|safe }},
+            datasets: [{
+                data: {{ pie_data|safe }},
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(72, 187, 120, 0.8)',
+                    'rgba(237, 137, 54, 0.8)',
+                    'rgba(245, 101, 101, 0.8)',
+                    'rgba(156, 39, 176, 0.8)',
+                    'rgba(0, 150, 136, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(121, 85, 72, 0.8)',
+                    'rgba(96, 125, 139, 0.8)'
+                ],
+                borderColor: [
+                    '#667eea',
+                    '#48bb78',
+                    '#ed8936',
+                    '#f56565',
+                    '#9c27b0',
+                    '#009688',
+                    '#ffc107',
+                    '#795548',
+                    '#607d8b'
+                ],
+                borderWidth: 3,
+                hoverBorderWidth: 4,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            ...chartOptions,
+            cutout: '60%',
+            plugins: {
+                ...chartOptions.plugins,
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Enhanced Line Chart: Average Marks per Grade
+    new Chart(document.getElementById('avgMarksLine').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: {{ line_labels|safe }},
+            datasets: [{
+                label: 'Average Marks',
+                data: {{ line_data|safe }},
+                borderColor: '#48bb78',
+                backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#48bb78',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: '#38a169',
+                pointHoverBorderColor: '#ffffff',
+                pointHoverBorderWidth: 3
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    grid: { 
+                        color: 'rgba(226, 232, 240, 0.5)',
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        font: { weight: 'bold' },
+                        color: '#4a5568'
+                    }
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { 
+                        font: { weight: 'bold' },
+                        color: '#4a5568'
+                    }
+                }
+            }
+        }
+    });
+
+    // Enhanced Interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add staggered animations
+        const animatedElements = document.querySelectorAll('.fade-in');
+        animatedElements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Enhanced form interactions
+        const formSelects = document.querySelectorAll('.form-select');
+        formSelects.forEach(select => {
+            select.style.transition = 'transform 0.2s ease-out, box-shadow 0.2s ease-out';
+            select.addEventListener('focus', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+            });
+            
+            select.addEventListener('blur', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '';
+            });
+        });
+
+        // Enhanced hover effects for cards
+        const cards = document.querySelectorAll('.subject-card, .chart-container');
+        cards.forEach(card => {
+            card.style.transition = 'transform 0.3s ease-out, box-shadow 0.3s ease-out';
+            card.addEventListener('mouseenter', function() {
+                // Hover effect logic is now in CSS (.subject-card:hover)
+            });
+        });
+
+        console.log('🎉 Enhanced Academic Dashboard loaded successfully!');
+    });
+</script>
+
+{% endblock %}

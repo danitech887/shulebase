@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% block title %}Student Fee{% endblock %}
+{% load static %}
+{% load humanize %} 
+
+{% block content %}
+<style>
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .page-header {
+        animation: fadeInDown 0.6s ease-out;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    .page-header h2, .page-header p {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+    }
+
+    .page-header p {
+        opacity: 0.95;
+    }
+
+    .portal-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        animation: fadeInUp 0.6s ease-out backwards;
+        border-width: 2px;
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+        animation: fadeInDown 0.6s ease-out 0.2s backwards;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+
+    .filter-section .form-select {
+        border-radius: 8px;
+        border: 2px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: scale(1.02);
+    }
+
+    .filter-section .btn-primary {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .portal-card:nth-child(1) { animation-delay: 0.1s; }
+    .portal-card:nth-child(2) { animation-delay: 0.2s; }
+    .portal-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .portal-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.18) !important;
+    }
+
+    .portal-card i {
+        transition: transform 0.3s ease;
+    }
+
+    .portal-card:hover i {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    .portal-card h4 {
+        font-weight: 700;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .portal-card:hover h4 {
+        transform: scale(1.05);
+    }
+
+    .payment-history-card {
+        animation: fadeInUp 0.8s ease-out;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        border-bottom: 2px solid #667eea;
+        padding: 1.25rem;
+    }
+
+    .table-responsive {
+        animation: fadeInUp 0.6s ease-out 0.4s backwards;
+    }
+
+    .table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+        animation: slideInLeft 0.4s ease-out backwards;
+    }
+
+    .table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+    .table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+    .table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+    .table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+
+    .table tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.08) !important;
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .btn-primary {
+        transition: all 0.3s ease;
+        border-radius: 6px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary i {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-primary:hover i {
+        transform: translateY(-2px);
+    }
+
+    .text-success.fw-bold {
+        position: relative;
+        display: inline-block;
+    }
+
+    .text-success.fw-bold::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        transition: width 0.3s ease;
+    }
+
+    tr:hover .text-success.fw-bold::after {
+        width: 100%;
+    }
+
+    .divider-line {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #667eea, transparent);
+        margin: 2rem 0;
+        animation: fadeInUp 0.6s ease-out 0.3s backwards;
+    }
+
+    .empty-state {
+        animation: scaleIn 0.6s ease-out;
+        padding: 3rem 2rem;
+    }
+
+    .empty-state::before {
+        content: '📋';
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .portal-card h4 {
+            font-size: 1.4rem;
+        }
+
+        .page-header {
+            padding: 1rem;
+        }
+    }
+
+    .card-body .d-flex {
+        position: relative;
+    }
+
+    .card-body .d-flex::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        opacity: 0.1;
+        transition: all 0.3s ease;
+    }
+
+    .border-info .card-body .d-flex::before {
+        background: #17a2b8;
+    }
+
+    .border-success .card-body .d-flex::before {
+        background: #28a745;
+    }
+
+    .border-danger .card-body .d-flex::before {
+        background: #dc3545;
+    }
+
+    .border-primary .card-body .d-flex::before {
+        background: #667eea;
+    }
+
+    .portal-card:hover .card-body .d-flex::before {
+        transform: scale(1.5);
+        opacity: 0.15;
+    }
+
+    .table-dark {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    }
+
+    .text-uppercase {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h2 class="mb-2"><i class="bi bi-cash-stack me-2"></i> Fee Payment Statement</h2>
+                <p>Review your current fee status and detailed payment history, **{{ student.first_name }}**.</p>
+            </div>
+        </div>
+    </div>
+
+        <!-- Filter section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold"><i class="bi bi-funnel-fill me-2"></i>Select Term:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            {% for term in term_choices %}
+                                <option value="{{ term }}" {% if term == current_term %}selected{% endif %}>{{ term }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow border-info portal-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-wallet2 text-info fs-3 me-3"></i>
+                        <div>
+                            <p class="text-uppercase text-muted mb-0">Expected Fee</p>
+                            <h4 class="mb-0 text-info">Ksh {{ expected_fee|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow border-success portal-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill text-success fs-3 me-3"></i>
+                        <div>
+                            <p class="text-uppercase text-muted mb-0">Total Paid</p>
+                            <h4 class="mb-0 text-success">Ksh {{ total_fees_paid|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12 mb-4">
+            {% comment %} 
+                Render the entire card based on the IF/ELSE condition. 
+                This completely bypasses the complex WITH/IF nesting issues.
+            {% endcomment %}
+            
+            {% if balance > 0 %}
+            <div class="card shadow border-danger portal-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-3 me-3"></i>
+                        <div>
+                            <p class="text-uppercase text-muted mb-0">Balance Due</p>
+                            <h4 class="mb-0 text-danger">Ksh {{ balance|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card shadow border-primary portal-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-patch-check-fill text-primary fs-3 me-3"></i>
+                        <div>
+                            <p class="text-uppercase text-muted mb-0">No Balance Due</p>
+                            <h4 class="mb-0 text-primary">Ksh {{ balance|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+    </div>
+    
+    <div class="divider-line"></div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow payment-history-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-columns me-2"></i> Payment History ({{ fee_records|length }} Records)</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if fee_records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Payment Date</th>
+                                    <th scope="col">Amount Paid</th>
+                                    <th scope="col">Transaction ID / Reference</th>
+                                    <th scope="col">Term/Purpose</th>
+                                    <th scope="col">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in fee_records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ fee.date_of_payment|date:"F j, Y" }}</td>
+                                    <td class="text-success fw-bold">Ksh {{ fee.amount|intcomma }}</td>
+                                    <td>{{ fee.transaction_code|default:"N/A" }}</td>
+                                    <td>{{ fee.term|default:"General Fee" }}</td>
+                                    <td>
+                                        <a href="{% url 'generate_receipt' fee.pk %}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-file-earmark-arrow-down"></i> Receipt
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center text-muted">
+                        <p>No fee payment records found yet. Payment history will appear here once a fee is recorded.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

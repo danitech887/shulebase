@@ -1,0 +1,988 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Students Personal Details{% endblock %}
+{% load dict_extras %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #8b5cf6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --dark: #1e293b;
+    --light: #f8fafc;
+    --border: #e2e8f0;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+body {
+    background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Overlays */
+.overlay, .overlay2, .overlay3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(12px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.overlay.show, .overlay2.show, .overlay3.show {
+    display: flex;
+    opacity: 1;
+}
+
+/* Modal Cards */
+.card, .card2 {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 750px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideDown 0.4s ease-out;
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border-radius: 12px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 24px;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 50px rgba(99, 102, 241, 0.3);
+    animation: slideDown 0.6s ease-out;
+}
+
+.page-header h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.page-header p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0.5rem 0 0 0;
+    font-size: 1rem;
+}
+
+/* Form Sections */
+.form-section {
+    background: rgba(99, 102, 241, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+.form-section h4 {
+    color: var(--dark);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+}
+
+/* Forms */
+.form-control, .form-select {
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    background: #fafafa;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    outline: none;
+    background: white;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 14px;
+    padding: 0.875rem 1.75rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    margin: 0 0.25rem;
+}
+
+/* Search Filter Bar */
+.search-filter-bar {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+    animation: fadeIn 0.8s ease-out;
+}
+
+.search-filter-bar .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Table Container */
+.table-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+    border-radius: 16px;
+}
+
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+}
+
+.table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background: var(--dark);
+    color: white;
+    border: none;
+    padding: 1.25rem 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table thead th:first-child {
+    border-radius: 14px 0 0 0;
+}
+
+.table thead th:last-child {
+    border-radius: 0 14px 0 0;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--border);
+}
+
+.table tbody tr:hover {
+    background: #f8fafc;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.table tbody td {
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Grade Stream Row */
+.grade-stream-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: all 0.3s ease;
+}
+
+.grade-stream-row:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.grade-stream-row input {
+    flex: 1;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.grade-stream-row input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.grade-stream-row button {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grade-stream-row button:hover {
+    transform: scale(1.15);
+}
+
+.btn-add {
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: white;
+}
+
+.btn-remove {
+    background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    color: white;
+}
+
+/* Modal Enhancements */
+.modal-content {
+    border-radius: 24px;
+    border: none;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    padding: 1.5rem 2rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border: none;
+    padding: 1rem 2rem 1.5rem;
+    justify-content: center;
+}
+
+/* Badge */
+.badge {
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Loading State */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card, .card2 {
+        padding: 1.5rem;
+        width: 95%;
+    }
+
+    .page-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .search-filter-bar {
+        padding: 1.5rem;
+    }
+}
+</style>
+
+<!-- Grade Stream Configuration Modal -->
+<div class="overlay2" id="overlay2">
+    <div class="card2 p-4 shadow-lg">
+        <button class="close-btn" onclick="closeDialog2();" title="Close">&times;</button>
+        <h2 style="color: var(--dark); font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
+            <i class="bi bi-gear-fill me-2" style="color: var(--primary);"></i>
+            Grade & Stream Configuration
+        </h2>
+        <form method="post" action="{% url 'gradestream_config' %}">
+            {% csrf_token %}
+            <div class="form-section">
+                <h4>
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Add Grade & Stream Combinations
+                </h4>
+                <div id="grade-streams">
+                    <div class="grade-stream-row">
+                        <input type="text" name="grade[]" placeholder="Enter Grade (e.g., Grade 1)" required>
+                        <input type="text" name="stream[]" placeholder="Enter Stream (e.g., A, B, C)" required>
+                        <button type="button" onclick="addRow()" class="btn-add" title="Add Row">+</button>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="button" onclick="addRow()" class="btn btn-success me-2">
+                        <i class="bi bi-plus-circle me-2"></i>Add More
+                    </button>
+                </div>
+            </div>
+            <div class='text-center'>
+                <button type="submit" class="btn btn-primary mt-4">
+                    <i class="bi bi-check-circle me-2"></i>Save Configuration
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Registration Form Overlay -->
+<div class="overlay" id="overlay">
+    <div class="card p-4 shadow-lg">
+        <button class="close-btn" onclick="closeDialog();" title="Close">&times;</button>
+        <h2 style="color: var(--dark); font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
+            <i class="bi bi-person-plus-fill me-2" style="color: var(--primary);"></i>
+            Register New Student
+        </h2>
+        <form method="post" action="{% url 'manage_details' %}" id="registrationForm">
+            {% csrf_token %}
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h4>
+                    <i class="bi bi-person-badge me-2"></i>
+                    Personal Information
+                </h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Registration Number</label>
+                        <select class="form-select" id="id_registration_no" name="registration_no" required>
+                            {% if suggested_regno %}
+                            <option value="{{ suggested_regno }}">{{ suggested_regno }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Second Name</label>
+                        {{ form.second_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Surname</label>
+                        {{ form.surname }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Gender</label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Information Section -->
+            <div class="form-section">
+                <h4>
+                    <i class="bi bi-mortarboard me-2"></i>
+                    Academic Information
+                </h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Grade</label>
+                        {{ form.grade }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Stream</label>
+                        {{ form.stream }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date of Registration</label>
+                        {{ form.date_of_registration }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="form-section">
+                <h4>
+                    <i class="bi bi-telephone me-2"></i>
+                    Contact Information
+                </h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Address</label>
+                        {{ form.address }}
+                    </div>
+                </div>
+            </div>
+
+            <div class='text-center'>
+                <button type="submit" class="btn btn-primary mt-4" style="padding: 1rem 2rem;">
+                    <i class="bi bi-check-circle me-2"></i>Register Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Messages Modal -->
+{% if messages %}
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                
+                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <p class="text-muted small mb-4">
+                {% for msg in messages %}
+                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
+                {% endfor %}
+            </p> 
+                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+                    .Ok
+                </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+<!-- Page Header -->
+<div class="page-header">
+    <h3>
+        <i class="bi bi-people-fill"></i>
+        Personal Details Management
+    </h3>
+    <p>Comprehensive student records and academic information system</p>
+</div>
+
+<div class="container mt-4">
+    <!-- Action Buttons -->
+    <div style="margin-bottom: 2rem;">
+        <button class="btn btn-primary mb-3 me-3" onclick="showDialog()">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>New Student</span>
+        </button>
+        <button class="btn btn-primary mb-3" onclick="showDialog2()">
+            <i class="bi bi-gear-fill"></i>
+            <span>Grade Configuration</span>
+        </button>
+    </div>
+
+    <h2 style="color: var(--dark); font-weight: 700; margin-bottom: 1.5rem;">
+        <i class="bi bi-list-ul me-2" style="color: var(--primary);"></i>
+        Students List
+    </h2>
+
+    <!-- Search and Filter Bar -->
+    <form method="GET" class="search-filter-bar">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">
+                    <i class="bi bi-search me-1"></i>Search by Registration No.
+                </label>
+                <input type="text" class="form-control" placeholder="e.g. REG123" name="search" id="search"
+                    value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <label for="grade" class="form-label">
+                    <i class="bi bi-mortarboard me-1"></i>Grade Level
+                </label>
+                <select class="form-select" id="grade" name="grade">
+                    <option value="">All Grades</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="stream" class="form-label">
+                    <i class="bi bi-diagram-3 me-1"></i>Stream
+                </label>
+                <select class="form-select" id="stream" name="stream">
+                    <option value="">All Streams</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary w-100" type="submit">
+                    <i class="bi bi-funnel"></i>
+                    <span>Filter</span>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Table -->
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0" style="color: var(--dark); font-weight: 600;">
+                <i class="bi bi-table me-2"></i>Pupil Records
+            </h5>
+            <div class="badge" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
+                Total: {{ pupils|length }} students
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table id="progressTable" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="bi bi-card-text me-2"></i>Registration No.</th>
+                        <th><i class="bi bi-person me-2"></i>Full Name</th>
+                        <th><i class="bi bi-mortarboard me-2"></i>Grade</th>
+                        <th><i class="bi bi-diagram-3 me-2"></i>Stream</th>
+                        <th class="text-center"><i class="bi bi-gear me-2"></i>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if pupils %}
+                    {% for pupil in pupils %}
+                    <tr>
+                        <td><strong style="color: var(--primary);">{{ pupil.registration_no }}</strong></td>
+                        <td>{{ pupil.first_name }} {{ pupil.second_name }} {{ pupil.surname }}</td>
+                        <td><span class="badge bg-secondary">{{ pupil.grade }}</span></td>
+                        <td><span class="badge bg-info">{{ pupil.stream }}</span></td>
+                        <td class="text-center">
+                            <a class="btn btn-primary btn-sm" href="{% url 'update_pupil' pupil.registration_no %}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="btn btn-danger btn-sm" onclick="triggerDelete('{{ pupil.registration_no }}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+                                <i class="bi bi-inbox" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                                <p>No pupils available</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i class="bi bi-exclamation-triangle text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Delete Student Data?</h5>
+            <p class="text-muted small mb-4">
+                Are you sure <p>you want to delete data for this student?  <strong id="pupil_details" class="text-dark"><strong>
+            <form id="delForm" method="POST">
+                {% csrf_token %}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger rounded-pill py-2 fw-bold">
+                        <i class="bi bi-trash me-2"></i>Confirm Delete
+                    </button>
+                    <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+                        .Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // delete student....
+function triggerDelete(id) {
+       
+        document.getElementById('delForm').action = `/delete/${id}/`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+// Loading state helper
+function setLoadingState(element, isLoading) {
+    if (isLoading) {
+        element.classList.add('loading');
+    } else {
+        element.classList.remove('loading');
+    }
+}
+
+// Registration form loading
+const paymentForm = document.getElementById('registrationForm');
+if (paymentForm) {
+    paymentForm.addEventListener('submit', function (e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Processing...';
+        submitBtn.disabled = true;
+        setLoadingState(this, true);
+    });
+}
+
+// Normalize grade values
+function normalizeGrade(g) {
+    return (g || "").trim();
+}
+
+// Fill stream select
+function fillStreamSelect($select, streams, includeAllOption, selectedValue) {
+    if (!$select || !$select.length) return;
+    $select.prop('disabled', true).empty();
+    $select.append('<option value="">' + (includeAllOption ? 'All Streams' : 'Select Stream') + '</option>');
+    (streams || []).forEach(function (s) {
+        $select.append($('<option/>', { value: s, text: s }));
+    });
+    if (selectedValue) {
+        $select.val(selectedValue);
+    }
+    $select.prop('disabled', false);
+}
+
+// Fill grade select
+function fillGradeSelect($select, grades, includeAllOption, selectedValue) {
+    if (!$select || !$select.length) return;
+    var placeholder = includeAllOption ? 'All Grades' : 'Select Grade';
+    $select.prop('disabled', true).empty();
+    $select.append('<option value="">' + placeholder + '</option>');
+    (grades || []).forEach(function (g) {
+        $select.append($('<option/>', { value: g, text: g }));
+    });
+    if (selectedValue) {
+        $select.val(selectedValue);
+    }
+    $select.prop('disabled', false);
+}
+
+// Fetch streams for grade
+function fetchStreamsForGrade(grade, onDone) {
+    $.ajax({
+        url: "{% url 'get_streams' %}",
+        data: { grade: normalizeGrade(grade) },
+        dataType: "json"
+    }).done(function (resp) {
+        onDone((resp && resp.streams) ? resp.streams : []);
+    }).fail(function (xhr) {
+        console.warn('Failed to load streams for grade:', grade, xhr.status);
+        onDone([]);
+    });
+}
+
+// Preload streams mapping
+var streamsByGrade = null;
+var allGrades = [];
+function preloadStreamsMapping(onReady) {
+    $.ajax({
+        url: "{% url 'get_streams' %}",
+        dataType: "json"
+    }).done(function (resp) {
+        if (resp && resp.streams_by_grade) {
+            var map = {};
+            Object.keys(resp.streams_by_grade).forEach(function (g) {
+                var key = normalizeGrade(g);
+                var arr = (resp.streams_by_grade[g] || []).slice().sort();
+                map[key] = arr;
+            });
+            streamsByGrade = map;
+            if (resp.grades && resp.grades.length) {
+                allGrades = resp.grades.slice().sort();
+            } else {
+                allGrades = Object.keys(streamsByGrade).sort();
+            }
+        }
+    }).always(function () {
+        if (typeof onReady === 'function') onReady();
+    });
+}
+
+// Loading state helper
+function setLoadingState(element, isLoading) {
+    if (isLoading) {
+        element.classList.add('loading');
+    } else {
+        element.classList.remove('loading');
+    }
+}
+
+$(document).ready(function () {
+    // Handle registration form grade change
+    $("#id_grade").on("change", function () {
+        var grade = normalizeGrade($(this).val());
+        var $stream = $("#id_stream");
+
+        if (streamsByGrade && streamsByGrade.hasOwnProperty(grade)) {
+            fillStreamSelect($stream, streamsByGrade[grade], false, null);
+        } else {
+            fetchStreamsForGrade(grade, function (streams) {
+                fillStreamSelect($stream, streams, false, null);
+            });
+        }
+    });
+
+    // Preload mapping, then initialize both registration form and filter bar
+    preloadStreamsMapping(function () {
+        fillGradeSelect($("#grade"), allGrades, true, normalizeGrade("{{ request.GET.grade|default_if_none:'' }}"));
+        fillGradeSelect($("#id_grade"), allGrades, false, normalizeGrade($("#id_grade").val()));
+        
+        var initFilterGrade = normalizeGrade("{{ request.GET.grade|default_if_none:'' }}");
+        var $regGrade = $("#id_grade");
+        var currentRegGrade = normalizeGrade($regGrade.val());
+        
+        fillGradeSelect($("#grade"), allGrades, true, initFilterGrade);
+        fillGradeSelect($regGrade, allGrades, false, currentRegGrade);
+
+        // Registration form initial stream population
+        var $regStream = $("#id_stream");
+        var initRegGrade = normalizeGrade($regGrade.val());
+        var initRegStream = $regStream.val();
+        
+        if (initRegGrade) {
+            if (streamsByGrade && streamsByGrade.hasOwnProperty(initRegGrade)) {
+                fillStreamSelect($regStream, streamsByGrade[initRegGrade], false, initRegStream);
+            } else {
+                fetchStreamsForGrade(initRegGrade, function (streams) {
+                    fillStreamSelect($regStream, streams, false, initRegStream);
+                });
+            }
+        } else {
+            fillStreamSelect($regStream, [], false, null);
+        }
+
+        // Filter bar: populate streams when grade changes
+        $("#grade").on("change", function () {
+            var g = normalizeGrade($(this).val());
+            var $filterStream = $("#stream");
+            
+            if (streamsByGrade && streamsByGrade.hasOwnProperty(g)) {
+                fillStreamSelect($filterStream, streamsByGrade[g], true, null);
+            } else if (g) {
+                fetchStreamsForGrade(g, function (streams) {
+                    fillStreamSelect($filterStream, streams, true, null);
+                });
+            } else {
+                fillStreamSelect($("#stream"), [], true, null);
+            }
+        });
+
+        // Filter bar initial restore of streams
+        var initFilterStream = "{{ request.GET.stream|default_if_none:'' }}";
+        if (initFilterGrade) {
+            if (streamsByGrade && streamsByGrade.hasOwnProperty(initFilterGrade)) {
+                fillStreamSelect($("#stream"), streamsByGrade[initFilterGrade], true, initFilterStream);
+            } else {
+                fetchStreamsForGrade(initFilterGrade, function (streams) {
+                    fillStreamSelect($("#stream"), streams, true, initFilterStream);
+                });
+            }
+        }
+    });
+});
+
+// Dialog functions
+function showDialog() {
+    document.getElementById("overlay").classList.add("show");
+}
+
+function closeDialog() {
+    document.getElementById("overlay").classList.remove("show");
+}
+
+function showDialog2() {
+    document.getElementById("overlay2").classList.add("show");
+}
+
+function closeDialog2() {
+    document.getElementById("overlay2").classList.remove("show");
+}
+
+// Add row function for grade stream configuration
+function addRow() {
+    var container = document.getElementById('grade-streams');
+    var row = document.createElement('div');
+    row.className = 'grade-stream-row';
+    row.innerHTML = '<input type="text" name="grade[]" placeholder="Enter Grade (e.g., Grade 1)" required>' +
+        '<input type="text" name="stream[]" placeholder="Enter Stream (e.g., A, B, C)" required>' +
+        '<button type="button" class="btn-remove" onclick="this.parentNode.remove()">-</button>';
+    container.appendChild(row);
+}
+
+// Show messages modal on load
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,693 @@
+{% extends 'base.html' %}
+{% block title %}Children Fee{% endblock %}
+{% load static %}
+{% load humanize %} 
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    body {
+        background: #f8f9fe;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header p {
+        margin: 0;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Student Switcher */
+    .student-switcher {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .selection-label {
+        color: #6c757d;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        text-transform: uppercase;
+    }
+
+    .selection-label i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+
+    .student-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        margin: 5px 8px 5px 0;
+        border-radius: 50px;
+        border: 2px solid transparent;
+        background: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .student-pill i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .student-pill.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .student-pill:hover:not(.active) {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Fee Summary Cards */
+    .fee-summary-card {
+        border-radius: 16px;
+        border: none;
+        background: white;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fee-summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        transition: height 0.3s ease;
+    }
+
+    .fee-summary-card.card-info::before { background: var(--info-gradient); }
+    .fee-summary-card.card-success::before { background: var(--success-gradient); }
+    .fee-summary-card.card-danger::before { background: var(--danger-gradient); }
+    .fee-summary-card.card-primary::before { background: var(--primary-gradient); }
+
+    .fee-summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .fee-summary-card:hover::before {
+        height: 100%;
+        opacity: 0.05;
+    }
+
+    .fee-summary-card .card-body {
+        padding: 1.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .fee-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        margin-right: 1.25rem;
+    }
+
+    .fee-icon-wrapper.info-icon {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+        color: #4facfe;
+    }
+
+    .fee-icon-wrapper.success-icon {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        color: #11998e;
+    }
+
+    .fee-icon-wrapper.danger-icon {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%);
+        color: #fa709a;
+    }
+
+    .fee-icon-wrapper.primary-icon {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+    }
+
+    .fee-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .fee-amount {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .fee-amount.text-info { color: #4facfe; }
+    .fee-amount.text-success { color: #11998e; }
+    .fee-amount.text-danger { color: #fa709a; }
+    .fee-amount.text-primary { color: #667eea; }
+
+    /* Payment History Card */
+    .payment-history-card {
+        border-radius: 16px;
+        border: none;
+        background: white;
+        overflow: hidden;
+    }
+
+    .payment-history-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+
+    .payment-history-card .card-header h5 {
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .payment-history-card .badge {
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* Table Styling */
+    .table-responsive {
+        border-radius: 0 0 16px 16px;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+    .table thead th {
+        background: #2d3748;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border: none;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: #f8f9fe;
+        transform: scale(1.01);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Receipt Button */
+    .receipt-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+        border: none;
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .receipt-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        color: #718096;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 1rem;
+    }
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-section .form-select {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-section .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Section Divider */
+    .section-divider {
+        margin: 3rem 0;
+        position: relative;
+        text-align: center;
+    }
+
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+    }
+
+    /* New Modal Styles */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+    .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 20px 20px 0 0;
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem;
+        border: 2px solid #f1f3f5;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: none;
+        background: #fdfdfd;
+    }
+    .btn-submit-mpesa {
+        background: var(--success-gradient);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    .btn-submit-mpesa:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .page-header h2 { font-size: 1.5rem; }
+        .fee-amount { font-size: 1.5rem; }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header shadow-lg d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2><i class="bi bi-cash-stack me-2"></i> Fee Payment Statement</h2>
+                    <p>Reviewing records for: <strong>{{ student.first_name }} {{ student.last_name }}</strong></p>
+                </div>
+                <button type="button" class="btn btn-light fw-bold px-4 py-2 mt-3 mt-md-0 shadow-sm" data-bs-toggle="modal" data-bs-target="#mpesaModal">
+                    <i class="bi bi-phone-fill me-2 text-primary"></i> Report M-Pesa Payment
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- term filter -->
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <input type="hidden" name="student_id" value="{{ student.registration_no }}">
+                    
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold">
+                            <i class="bi bi-funnel-fill me-2"></i>Select Term:
+                        </label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            <option value="Term 1" {% if current_term == "Term 1" %}selected{% endif %}>Term 1</option>
+                            <option value="Term 2" {% if current_term == "Term 2" %}selected{% endif %}>Term 2</option>
+                            <option value="Term 3" {% if current_term == "Term 3" %}selected{% endif %}>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i> Apply Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if students.count > 1 %}
+    <div class="row">
+        <div class="col-12">
+            <div class="student-switcher">
+                <div class="selection-label">
+                    <i class="bi bi-people-fill"></i> Select Student to View Fees
+                </div>
+                <div class="d-flex flex-wrap">
+                    {% for s in students %}
+                        <a href="?student_id={{ s.registration_no }}" 
+                           class="student-pill {% if s.registration_no == student.registration_no %}active{% endif %}">
+                            <i class="bi bi-person-circle"></i> {{ s.first_name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card fee-summary-card card-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="fee-icon-wrapper info-icon"><i class="bi bi-wallet2"></i></div>
+                        <div>
+                            <div class="fee-label">Expected Fee</div>
+                            <div class="fee-amount text-info">Ksh {{ expected_fee|intcomma }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card fee-summary-card card-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="fee-icon-wrapper success-icon"><i class="bi bi-check-circle-fill"></i></div>
+                        <div>
+                            <div class="fee-label">Total Paid</div>
+                            <div class="fee-amount text-success">Ksh {{ total_fees_paid|intcomma }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="card fee-summary-card {% if balance > 0 %}card-danger{% else %}card-primary{% endif %} shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="fee-icon-wrapper {% if balance > 0 %}danger-icon{% else %}primary-icon{% endif %}">
+                            <i class="bi {% if balance > 0 %}bi-exclamation-triangle-fill{% else %}bi-patch-check-fill{% endif %}"></i>
+                        </div>
+                        <div>
+                            <div class="fee-label">{% if balance > 0 %}Balance Due{% else %}No Balance Due{% endif %}</div>
+                            <div class="fee-amount {% if balance > 0 %}text-danger{% else %}text-primary{% endif %}">Ksh {{ balance|intcomma }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if pending_payments %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card payment-history-card border border-warning shadow-sm">
+                <div class="card-header bg-warning text-dark py-2" style="background: var(--warning-gradient) !important; color: white !important;">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i> Pending Verification</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Transaction Code</th>
+                                <th>Amount</th>
+                                <th>Date Reported</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pending_payments %}
+                            <tr>
+                                <td class="fw-bold">{{ p.transaction_code }}</td>
+                                <td class="text-dark">Ksh {{ p.amount|intcomma }}</td>
+                                <td>{{ p.date_of_payment|date:"M j, Y" }}</td>
+                                <td><span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Under Review</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section-divider"></div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card payment-history-card shadow-lg">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                    <h5><i class="bi bi-shield-check me-2"></i> Confirmed Payment History</h5>
+                    <span class="badge bg-white text-dark mt-2 mt-md-0">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>Verified
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    {% if confirmed_payments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Payment Date</th>
+                                    <th>Amount Paid</th>
+                                    <th>Transaction ID</th>
+                                    <th>Term</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in confirmed_payments %}
+                                <tr>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
+                                    <td><i class="bi bi-calendar3 me-2 text-muted"></i>{{ fee.date_of_payment|date:"F j, Y" }}</td>
+                                    <td><span class="badge bg-light text-dark border">ksh {{ fee.amount|intcomma }}</span></td>
+                                    <td class="text-success fw-bold">{{ fee.transaction_code }}</td>
+                                    <td class="text-success fw-bold">{{ fee.term }}</td>
+                                    
+                                    {% if fee.status == 'Pending' %}
+                                        <td><span class="badge bg-light text-dark border">{{ fee.status }}</span></td>
+                                    {% else %}
+                                        <td><span class="badge bg-light text-success border">{{ fee.status }}</span></td>
+                                        <td class="text-center">
+                                            <a href="{% url 'generate_receipt' fee.pk %}" class="btn btn-sm receipt-btn">
+                                                <i class="bi bi-file-earmark-arrow-down me-1"></i> Download
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                    
+                                    
+                                    
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center">
+                        <i class="bi bi-inbox"></i>
+                        <p class="fw-bold mb-2">No Verified Records</p>
+                        <p class="text-muted small">No official payments have been recorded yet for {{ student.first_name }}.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="mpesaModal" tabindex="-1" aria-labelledby="mpesaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header shadow-sm">
+                <h5 class="modal-title fw-bold" id="mpesaModalLabel"><i class="bi bi-phone me-2"></i> Report M-Pesa Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="alert alert-info border-0 shadow-sm small mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i> Enter details exactly as they appear in your M-Pesa confirmation SMS.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">M-Pesa Transaction Code</label>
+                        <input type="text" name="transaction_code" class="form-control" placeholder="e.g. QRT789XYZ" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Amount (Ksh)</label>
+                                <input type="number" name="amount" class="form-control" placeholder="5000" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">For Term</label>
+                                <select name="term" class="form-select" required>
+                                    <option value="Term 1">Term 1</option>
+                                    <option value="Term 2">Term 2</option>
+                                    <option value="Term 3">Term 3</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Date of Payment</label>
+                        <input type="date" name="date_of_payment" class="form-control" value="{% now 'Y-m-d' %}" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" name="submit_mpesa" class="btn btn-submit-mpesa w-100 py-3 shadow">
+                        <i class="bi bi-send-check me-2"></i> Submit for Verification
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                
+                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <p class="text-muted small mb-4">
+                {% for msg in messages %}
+                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
+                {% endfor %}
+            </p> 
+                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+                    .Ok
+                </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+{% endblock content %}

@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% block title %}Students Attendance% endblock %}
+{% load static %}
+{% load humanize %} 
+
+{% block content %}
+<style>
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    @keyframes badgePulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 8px rgba(40, 167, 69, 0);
+        }
+    }
+
+    .page-header {
+        animation: fadeInDown 0.6s ease-out;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    .page-header h2, .page-header p {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+    }
+
+    .page-header p {
+        opacity: 0.95;
+    }
+
+    .portal-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        animation: fadeInUp 0.6s ease-out backwards;
+        border-width: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+        animation: fadeInDown 0.6s ease-out 0.2s backwards;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+
+    .filter-section .form-select {
+        border-radius: 8px;
+        border: 2px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: scale(1.02);
+    }
+
+    .filter-section .btn-primary {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .portal-card:nth-child(1) { animation-delay: 0.1s; }
+    .portal-card:nth-child(2) { animation-delay: 0.2s; }
+    .portal-card:nth-child(3) { animation-delay: 0.3s; }
+    .portal-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .portal-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .portal-card:hover::before {
+        opacity: 1;
+    }
+
+    .portal-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+    }
+
+    .portal-card i {
+        transition: all 0.4s ease;
+        display: inline-block;
+    }
+
+    .portal-card:hover i {
+        transform: scale(1.2) rotate(10deg);
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    .portal-card h4 {
+        font-weight: 700;
+        font-size: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .portal-card:hover h4 {
+        transform: scale(1.08);
+    }
+
+    .attendance-records-card {
+        animation: fadeInUp 0.8s ease-out 0.5s backwards;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        border-bottom: 3px solid #28a745;
+        padding: 1.25rem;
+    }
+
+    .table-responsive {
+        animation: fadeInUp 0.6s ease-out 0.6s backwards;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.5s ease-out backwards;
+    }
+
+    .table tbody tr:nth-child(odd) { animation-delay: 0.1s; }
+    .table tbody tr:nth-child(even) { animation-delay: 0.15s; }
+
+    .table tbody tr:hover {
+        background-color: rgba(32, 201, 151, 0.08) !important;
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .badge {
+        transition: all 0.3s ease;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%) !important;
+    }
+
+    tr:hover .badge {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .bg-success:hover {
+        animation: badgePulse 1.5s ease-in-out infinite;
+    }
+
+    .divider-line {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #28a745, transparent);
+        margin: 2rem 0;
+        animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        border: none;
+    }
+
+    .empty-state {
+        animation: scaleIn 0.6s ease-out;
+        padding: 3rem 2rem;
+    }
+
+    .empty-state::before {
+        content: '📅';
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .table-dark {
+        background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%) !important;
+    }
+
+    .text-uppercase {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    .stat-circle {
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        opacity: 0.08;
+        transition: all 0.4s ease;
+    }
+
+    .border-secondary .stat-circle {
+        background: #6c757d;
+    }
+
+    .border-success .stat-circle {
+        background: #28a745;
+    }
+
+    .border-danger .stat-circle {
+        background: #dc3545;
+    }
+
+    .border-primary .stat-circle {
+        background: #667eea;
+    }
+
+    .portal-card:hover .stat-circle {
+        transform: scale(1.5);
+        opacity: 0.12;
+    }
+
+    .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+        .portal-card h4 {
+            font-size: 1.5rem;
+        }
+
+        .page-header {
+            padding: 1rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.6rem;
+        }
+    }
+
+    .card-header h5 {
+        animation: fadeInDown 0.6s ease-out 0.7s backwards;
+    }
+
+    .table thead th {
+        position: relative;
+        color: white;
+    }
+
+    .table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #20c997;
+        transition: width 0.3s ease;
+    }
+
+    .table thead th:hover::after {
+        width: 100%;
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h2 class="mb-2"><i class="bi bi-calendar-check me-2"></i> Attendance Overview</h2>
+                <p>Detailed records of your class attendance. Consistency is key to success!</p>
+            </div>
+        </div>
+    </div>
+
+        <!-- Filter section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold"><i class="bi bi-funnel-fill me-2"></i>Select Term:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            {% for term in term_choices %}
+                                <option value="{{ term }}" {% if term == current_term %}selected{% endif %}>{{ term }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5 text-center">
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-secondary portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-secondary fs-3 mb-2"><i class="bi bi-calendar-range"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Total Marked Days</p>
+                    <h4 class="mb-0 text-secondary">{{ total_days|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-success portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-success fs-3 mb-2"><i class="bi bi-check-circle-fill"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Present Days</p>
+                    <h4 class="mb-0 text-success">{{ present_days|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-danger portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-danger fs-3 mb-2"><i class="bi bi-x-circle-fill"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Absent Days</p>
+                    <h4 class="mb-0 text-danger">{{ absent_days|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-primary portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-primary fs-3 mb-2"><i class="bi bi-award"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Attendance Rate</p>
+                    <h4 class="mb-0 text-primary">{{ attendance_percentage|floatformat:1 }}%</h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="divider-line">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow attendance-records-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i> Daily Attendance Records (Recent First)</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if attendance_records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Day of Week</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Recorded By</th>
+                                    <th scope="col">Notes/Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance_records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ record.date_of_attendance|date:"F j, Y" }}</td>
+                                    <td>{{ record.date_of_attendance|date:"l" }}</td>
+                                    <td>
+                                        {% if record.status == 'Present' %}
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Present</span>
+                                        {% elif record.status == 'Absent' %}
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Absent</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-question-circle"></i> {{ record.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.recorded_by|default:"System" }}</td>
+                                    <td>{{ record.notes|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center text-muted">
+                        <p>No attendance records found for your registration number yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

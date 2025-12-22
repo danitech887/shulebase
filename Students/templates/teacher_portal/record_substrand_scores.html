@@ -1,0 +1,176 @@
+{% load dict_extras %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<form id="recordSubStrandScoresForm" method="post" action="{% url 'record_substrand_scores' sub_strand.id sub_strand.strand.grade sub_strand.strand.stream %}">
+    {% csrf_token %}
+
+    <div class="mb-3 col-md-3">
+        <label class="form-label">Academic Term</label>
+        <select name="term" class="form-select" required>
+            <option value="" disabled {% if not selected_term %}selected{% endif %}>Select Term</option>
+            {% for t in term_choices %}
+            <option value="{{ t }}" {% if selected_term == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3 row-md-3">
+        <label class="form-label">Assessment Type</label>
+        <select name="assessment_type" class="form-select" required>
+            <option value="" disabled {% if not selected_assessment_type %}selected{% endif %}>Select Assessment Type</option>
+            
+            {% for type in assessment_types %}
+            <option value="{{ type }}" {% if selected_assessment_type == type %}selected{% endif %}>{{ type }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-primary">
+                <tr>
+                    <th>Student</th>
+                    <th>Score</th>
+                    <th>Level</th>
+                    <th>Remark</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.first_name }} {{ student.surname }}</td>
+                    <td>
+                        <input type="number" name="score_{{ student.registration_no }}" min="0" max="100" step="any"
+                            class="form-control" value="{{ scores|get_item:student.registration_no|default:'' }}">
+                    </td>
+                    <td>
+                        <select name="level_{{ student.registration_no }}" class="form-select">
+                            
+                            <option value="" disabled {% if not level_map|get_item:student.registration_no %}selected{% endif %}>Level</option>
+                            
+                            {% for lvl in levels %}
+                            <option 
+                                value="{{ forloop.counter }}" 
+                                {% if level_map|get_item:student.registration_no == forloop.counter %}selected{% endif %}
+                            >
+                                {{ lvl }}
+                            </option>
+                            {% endfor %}
+                            
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="remark_{{ student.registration_no }}" class="form-control"
+                            value="{{ remark|get_item:student.registration_no|default:'' }}">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-success w-100">Save Scores</button>
+        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+    </div>
+</form>
+
+{% if messages %}
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                
+                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <p class="text-muted small mb-4">
+                {% for msg in messages %}
+                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
+                {% endfor %}
+            </p> 
+                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+                    .Ok
+                </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // ✅ Attach listener globally (handles dynamically loaded forms too)
+    document.addEventListener('submit', async function (e) {
+        const form = e.target;
+
+        // Handle only our form
+        if (!form.matches('#recordSubStrandScoresForm')) return;
+
+        e.preventDefault(); // stop default redirect behavior
+
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Saving...';
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            });
+
+            // ✅ Make sure it’s JSON, not HTML
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error('Server did not return JSON. It returned HTML instead.');
+            }
+
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                // ✅ Close modal
+                const modalEl = document.getElementById('recordSubStrandModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                // ✅ Show nice success popup
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Scores Saved!',
+                    text: `${data.updated} score${data.updated !== 1 ? 's' : ''} recorded successfully.`,
+                    confirmButtonColor: '#198754',
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+
+                // Optional: Refresh after success
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Save Failed',
+                    text: data.message || 'Something went wrong while saving.'
+                });
+            }
+
+        } catch (err) {
+            console.error('❌ Error saving sub-strand scores:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Network or Response Error',
+                text: 'Server returned non-JSON data or failed to respond properly.'
+            });
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Save Scores';
+        }
+    });
+</script>

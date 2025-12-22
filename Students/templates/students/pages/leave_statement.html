@@ -1,0 +1,784 @@
+{% extends 'base.html' %}
+{% block title %}Leave Statement{% endblock %}
+{% block content %}
+<style>
+    .page-container {
+        background: linear-gradient(135deg, #f5f7ff 0%, #e8f2ff 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+        position: relative;
+    }
+    
+    .page-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="documents" width="30" height="30" patternUnits="userSpaceOnUse"><rect x="10" y="8" width="10" height="14" fill="none" stroke="rgba(102, 126, 234, 0.04)" stroke-width="1" rx="1"/><line x1="12" y1="12" x2="18" y2="12" stroke="rgba(102, 126, 234, 0.04)" stroke-width="1"/><line x1="12" y1="15" x2="16" y2="15" stroke="rgba(102, 126, 234, 0.04)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23documents)"/></svg>');
+        pointer-events: none;
+    }
+    
+    .student-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .student-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 150%;
+        height: 200%;
+        background: radial-gradient(ellipse, rgba(255,255,255,0.1) 0%, transparent 60%);
+        animation: float 8s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(5deg); }
+    }
+    
+    .student-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+        letter-spacing: -0.5px;
+    }
+    
+    .student-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.95;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+        font-weight: 300;
+    }
+    
+    .student-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .info-item {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .info-item:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .info-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.8;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .back-button {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+    
+    .back-button:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+    }
+    
+    .search-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.3s ease;
+    }
+    
+    .search-section:hover {
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .search-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .search-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .search-input-group {
+        position: relative;
+        max-width: 500px;
+    }
+    
+    .search-input {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1rem 3.5rem 1rem 1rem;
+        transition: all 0.3s ease;
+        background: #fafafa;
+        width: 100%;
+        font-size: 1rem;
+    }
+    
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+        background: white;
+        transform: translateY(-2px);
+    }
+    
+    .search-input:hover {
+        border-color: #cbd5e0;
+        background: white;
+    }
+    
+    .search-button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .search-button:hover {
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .statements-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .statements-section:hover {
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .statements-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 2rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    
+    .statements-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #374151;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .statements-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+        border-radius: 0 0 16px 16px;
+    }
+    
+    .table {
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem 1.25rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.025em;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.03));
+        transform: translateX(8px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+    
+    .table tbody td {
+        padding: 1.5rem 1.25rem;
+        font-weight: 500;
+        color: #374151;
+        border: none;
+        vertical-align: middle;
+    }
+    
+    .date-display {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1rem;
+    }
+    
+    .reason-primary {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        min-width: 100px;
+    }
+    
+    .reason-other {
+        font-style: italic;
+        color: #6b7280;
+        background: #f9fafb;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border-left: 3px solid #e5e7eb;
+        font-size: 0.9rem;
+    }
+    
+    .term-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        min-width: 80px;
+    }
+    
+    .return-date {
+        color: #059669;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #9ca3af;
+    }
+    
+    .no-data-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .no-data-text {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-data-subtitle {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+    
+    .stats-summary {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem 2rem;
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+        color: #6b7280;
+    }
+    
+    .total-count {
+        font-weight: 700;
+        color: #374151;
+        font-size: 1.1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .page-container {
+            padding: 1rem 0;
+        }
+        
+        .student-header {
+            padding: 2rem 1.5rem;
+        }
+        
+        .student-title {
+            font-size: 2rem;
+        }
+        
+        .student-info {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .search-section, .statements-section {
+            margin: 1rem;
+        }
+        
+        .statements-header {
+            padding: 1.5rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .table thead th,
+        .table tbody td {
+            padding: 1rem 0.75rem;
+        }
+        
+        .search-input-group {
+            max-width: 100%;
+        }
+        
+        .stats-summary {
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: center;
+        }
+    }
+    
+    .fade-in {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Enhanced Scrollbar */
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    }
+    
+    .highlight-search {
+        background: linear-gradient(135deg, #fef3c7, #fcd34d);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-weight: 700;
+    }
+</style>
+
+<div class="page-container">
+    <div class="container fade-in">
+        <!-- Enhanced Student Header -->
+        <div class="student-header">
+            <!-- Back Button -->
+            <a href="javascript:history.back()" class="back-button">
+                <i class="bi bi-arrow-left"></i>
+                Back to Leave Management
+            </a>
+            
+            <h1 class="student-title">
+                <i class="bi bi-file-earmark-text me-3"></i>
+                Leave Statements
+            </h1>
+            <p class="student-subtitle">Complete leave history and records</p>
+            
+            <div class="student-info">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="bi bi-person me-1"></i>Student Name
+                    </div>
+                    <div class="info-value">{{ student.first_name }} {{ student.second_name }} {{ student.surname }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="bi bi-person-badge me-1"></i>Registration Number
+                    </div>
+                    <div class="info-value">{{ student.registration_no }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="bi bi-bookmark me-1"></i>Grade & Stream
+                    </div>
+                    <div class="info-value">{{ student.grade }} - {{ student.stream }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Search Section -->
+        <div class="search-section">
+            <div class="search-title">
+                <div class="search-icon">🔍</div>
+                Filter Leave Records
+            </div>
+            <form method="GET">
+                <div class="search-input-group">
+                    <input type="text" 
+                           class="search-input" 
+                           placeholder="Search by Term (e.g., Term 1, Term 2, Term 3)" 
+                           name="search" 
+                           value="{{ request.GET.search }}">
+                    <button type="submit" class="search-button">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Enhanced Statements Table Section -->
+        <div class="statements-section">
+            <div class="statements-header">
+                <h2 class="statements-title">
+                    <div class="statements-icon">
+                        <i class="bi bi-calendar-x"></i>
+                    </div>
+                    Leave History & Details
+                </h2>
+            </div>
+            
+            <div class="table-container">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-calendar-date me-2"></i>Leave Date</th>
+                            <th><i class="bi bi-chat-quote me-2"></i>Primary Reason</th>
+                            <th><i class="bi bi-pencil me-2"></i>Additional Details</th>
+                            <th><i class="bi bi-calendar3 me-2"></i>Term</th>
+                            <th><i class="bi bi-calendar-check me-2"></i>Return Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if statements %}
+                            {% for statement in statements %}
+                            <tr>
+                                <td>
+                                    <span class="date-display">{{ statement.date_of_leave|date:"M d, Y" }}</span>
+                                </td>
+                                <td>
+                                    <span class="reason-primary">{{ statement.reason }}</span>
+                                </td>
+                                <td>
+                                    {% if statement.other_reason %}
+                                        <span class="reason-other">{{ statement.other_reason }}</span>
+                                    {% else %}
+                                        <span class="text-muted font-italic">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="term-badge">{{ statement.term }}</span>
+                                </td>
+                                <td>
+                                    <span class="return-date">
+                                        {% if statement.return_date %}
+                                            {{ statement.return_date|date:"M d, Y" }}
+                                        {% else %}
+                                            <span class="text-warning">Not specified</span>
+                                        {% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="no-data">
+                                    <div class="no-data-icon">📭</div>
+                                    <div class="no-data-text">No Leave Records Found</div>
+                                    <div class="no-data-subtitle">
+                                        {% if request.GET.search %}
+                                            No leave records found for "{{ request.GET.search }}". Try a different search term.
+                                        {% else %}
+                                            This student has no leave history on record.
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if statements %}
+            <div class="stats-summary">
+                <span class="total-count">
+                    <i class="bi bi-list-ol me-2"></i>
+                    Total Leave Records: {{ statements|length }}
+                </span>
+                <span>
+                    <i class="bi bi-clock me-2"></i>
+                    Last Updated: {{ statements.0.date_of_leave|date:"M d, Y" }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add staggered animations
+        const sections = document.querySelectorAll('.search-section, .statements-section');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.2}s`;
+            section.classList.add('fade-in');
+        });
+        
+        // Enhanced table row interactions
+        const tableRows = document.querySelectorAll('tbody tr:not(:has(.no-data))');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(12px)';
+                this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.15)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+        
+        // Auto-focus search input
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput && !searchInput.value) {
+            setTimeout(() => searchInput.focus(), 500);
+        }
+        
+        // Add smooth scrolling to table
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            tableContainer.addEventListener('scroll', function() {
+                const scrollPercentage = this.scrollTop / (this.scrollHeight - this.clientHeight);
+                const header = this.querySelector('thead');
+                if (header) {
+                    header.style.boxShadow = scrollPercentage > 0 ? 
+                        '0 4px 8px rgba(0,0,0,0.15)' : '0 2px 4px rgba(0,0,0,0.1)';
+                }
+            });
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F to focus search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                searchInput?.focus();
+            }
+            
+            // ESC to clear search
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.form.submit();
+            }
+        });
+        
+        // Highlight search terms
+        const searchTerm = "{{ request.GET.search }}";
+        if (searchTerm) {
+            const termBadges = document.querySelectorAll('.term-badge');
+            termBadges.forEach(badge => {
+                if (badge.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    badge.classList.add('highlight-search');
+                    badge.style.transform = 'scale(1.05)';
+                }
+            });
+        }
+        
+        // Add loading state to form submission
+        const searchForm = document.querySelector('form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('.search-button');
+                submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    submitBtn.innerHTML = '<i class="bi bi-search"></i>';
+                    submitBtn.disabled = false;
+                }, 1000);
+            });
+        }
+        
+        // Enhanced hover effects for info items
+        const infoItems = document.querySelectorAll('.info-item');
+        infoItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px) scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-2px) scale(1)';
+            });
+        });
+        
+        // Add ripple effect to buttons
+        const buttons = document.querySelectorAll('.search-button, .back-button');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('div');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+    });
+    
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .search-input:focus + .search-button {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .table tbody tr {
+            cursor: pointer;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+{% endblock %}

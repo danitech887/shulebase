@@ -1,19 +1,50 @@
 {% if user.is_authenticated %} 
-    {% if id == '(None,)' %}
 
-        <div class="position-relative me-3">
-            <div class="header">
-                <div class="text-center text-danger fw-bold">
-                    Oops! Something went wrong. Please login again.
+    {% if id == '(None,)' %}
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Session Error | ShuleBase</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+            <style>
+                .session-error-container {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    text-align: center;
+                }
+                .session-error-box {
+                    background-color: #fff;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    max-width: 500px;
+                    width: 100%;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="session-error-container">
+                <div class="session-error-box">
+                    <i class="bi bi-exclamation-octagon-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                    <h2 class="text-danger fw-bold mb-3">Session Error</h2>
+                    <p class="lead mb-4">
+                        We could not retrieve your unique user details (ID). This often happens due to an expired session or incorrect redirection.
+                    </p>
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Click here to Log In Again
+                    </a>
                 </div>
             </div>
-            <a href="{% url 'login' %}" class="text-decoration-none text-dark">
-                <i class="fa-solid fa-bell fa-lg"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    Login
-                </span>
-            </a>
-        </div>
+        </body>
+        </html>
 
     {% elif id != '(None,)' %}
         <!DOCTYPE html>
@@ -24,362 +55,611 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>{% block title %}ShuleBase{% endblock %}</title>
             <link rel="manifest" href="{% static 'manifest.json' %}">
-            <meta name="theme-color" content="#1976d2">
+            <meta name="theme-color" content="#0d6efd">
             <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
             <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+            
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            {% block extra_css %}
             <style>
-        :root {
-            --header-height: 70px;
-            --sidebar-width: 250px;
-            /* Global typography scale */
-            --font-base: 16px;
-            --font-small: 0.875rem;
-            --font-lead: 1.1rem;
-            --lh-base: 1.6;
-        }
+                :root {
+                    --header-height: 70px;
+                    --sidebar-width: 250px;
+                    /* New Color Palette */
+                    --color-primary: #0d6efd; 
+                    --color-accent: #ffc107;
+                    --font-base: 16px;
+                }
+                
+                html { font-size: var(--font-base); }
+                body {
+                    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    margin: 0;
+                    overflow-x: hidden;
+                    background-color: #f8f9fa;
+                }
+                
+                /* HEADER */
+                .base_header {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: var(--header-height);
+                    background-color: var(--color-primary); 
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    z-index: 1100;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); 
+                    padding: 0 20px;
+                }
 
-        html { font-size: var(--font-base); }
-        body {
-            font-size: 1rem;
-            line-height: var(--lh-base);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        h1 { font-size: 1.8rem; font-weight: 700; line-height: 1.25; }
-        h2 { font-size: 1.6rem; font-weight: 700; line-height: 1.3; }
-        h3 { font-size: 1.35rem; font-weight: 600; line-height: 1.35; }
-        h4 { font-size: 1.2rem; font-weight: 600; line-height: 1.4; }
-        h5 { font-size: 1.05rem; font-weight: 600; line-height: 1.45; }
-        h6 { font-size: 0.95rem; font-weight: 600; line-height: 1.5; }
+                .base_header .header-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
 
-        p, li, td, th, input, select, textarea, button { font-size: 1rem; line-height: var(--lh-base); }
-        small, .small { font-size: var(--font-small); }
-        .lead { font-size: var(--font-lead); }
+                .base_header .logo-img {
+                    width: 100px;
+                    height: 70px;
+                    object-fit: contain;
+                    border-radius: 8px;
+                    padding: 2px;
+                }
 
-        .modal-body, .table { font-size: 1rem; }
-        .text-muted { color: #6c757d !important; }
+                .base_header .school-title {
+                    font-size: 2.45rem; 
+                    text-transform: uppercase;
+                    font-weight: 700;
+                    letter-spacing: .5px;
+                    margin: 0;
+                    color: #fff;
+                    text-shadow: none; 
+                    flex-grow: 1;
+                    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+                }
+                
+                .base_header .header-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.25rem;
+                }
 
-        @media (max-width: 576px) {
-            html { font-size: 15px; }
-            h1 { font-size: 1.6rem; }
-            h2 { font-size: 1.45rem; }
-            h3 { font-size: 1.25rem; }
-        }
+                .base_header .user-avatar {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 2px solid #fff;
+                }
 
-        /* Utility to normalize extreme inline sizes when needed */
-        .u-text-normalize { font-size: 1rem !important; line-height: var(--lh-base) !important; }
+                .base_header .user-name {
+                    font-weight: 600;
+                    color: #fff;
+                    font-size: 1rem;
+                    letter-spacing: .5px;
+                }
 
-        body,
-        html {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            margin: 0;
-            overflow-x: hidden;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-        }
+                .base_header .menu-btn {
+                    background: transparent;
+                    border: none;
+                    color: #fff;
+                    font-size: 1.5rem;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background 0.2s;
+                }
 
-        /* HEADER */
-        .base_header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--header-height);
-            background: linear-gradient(90deg,#1976d2 100%);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 1100;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-            padding: 0 30px;
-        }
+                /* SIDEBAR */
+                .sidebar {
+                    width: var(--sidebar-width);
+                    height: calc(100vh - var(--header-height));
+                    position: fixed;
+                    top: var(--header-height);
+                    left: calc(-1 * var(--sidebar-width));
+                    background-color: var(--color-primary);
+                    color: white;
+                    overflow-y: auto;
+                    z-index: 1050;
+                    transition: left 0.25s ease;
+                    display: flex;
+                    flex-direction: column;
+                    padding-top: 12px;
+                }
+                
+                /* <<<--- THE CRUCIAL FIX FOR THE MENU BUTTON --- >>> */
+                .sidebar.show {
+                    left: 0;
+                }
+                
+                /* Backdrop for Mobile Menu */
+                .sidebar-backdrop {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    z-index: 1040;
+                    display: none;
+                }
+                /* Show backdrop only when sidebar has the 'show' class */
+                .sidebar.show + .content + .sidebar-backdrop {
+                    display: block;
+                }
 
-        .base_header .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+                @media (min-width: 992px) {
+                    .sidebar {
+                        left: 0;
+                    }
+                    
+                    .sidebar.closed {
+                        left: calc(-1 * var(--sidebar-width));
+                    }
 
-        .base_header .logo-img {
-            width: 160px;
-            height: 90px;
-            object-fit: contain;
-            border-radius: 10px;
-            padding: 4px;
+                    .content {
+                        margin-left: var(--sidebar-width);
+                    }
+                    
+                    .content.full-width {
+                        margin-left: 0;
+                    }
+                }
+                
+                /* Hide sidebar and reset content on smaller screens */
+                @media (max-width: 991.98px) {
+                    .sidebar { left: calc(-1 * var(--sidebar-width)); }
+                    .content { margin-left: 0; }
+                }
 
-        }
+                .sidebar .nav {
+                    flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-around; /* Distribute links evenly */
+                }
 
-        .base_header .school-title {
-            font-family: 'Elephant', serif;
-            font-size: 2.35rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: .8px;
-            margin: 0;
-            color: #fff;
-            text-shadow: 1px 1px 2px #1976d2;
-        }
+                .sidebar .nav-link {
+                    color: white;
+                    padding: .6rem 1rem;
+                    display: flex; 
+                    align-items: center;
+                    gap: 20px;
+                }
 
-        .base_header .header-center {
-            flex: 1 1 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+                .sidebar .nav-link:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                    text-decoration: none;
+                }
 
-        .base_header .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+                .sidebar .nav-link.active {
+                    background: rgba(255, 255, 255, 0.25);
+                    color: #fff !important;
+                    font-weight: 600;
+                    border-left: 4px solid var(--color-accent);
+                }
 
-        .base_header .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #fff;
-            background: #e0e0e0;
-        }
+                .content {
+                    flex: 1;
+                    padding: 20px;
+                    margin-top: var(--header-height);
+                    transition: margin-left 0.25s ease, margin-top 0.2s ease;
+                }
+                
+                /* Mobile Overrides */
+                @media (max-width: 768px) {
+                    :root { --header-height: 54px; --sidebar-width: 220px; }
+                    .base_header { padding: 0 10px; }
+                    .base_header .school-title { font-size: 1rem; }
+                    .base_header .logo-img { width: 60px; height: 60px; }
+                    .base_header .user-name { display: none; }
+                    .base_header .header-right { gap: 0.5rem; }
+                    .base_header .user-avatar { width: 36px; height: 36px; }
+                }
+                
+                footer {
+                    margin-top: 0px;
+                }
+                
+                /* Footer Styles */
+                .footer-title {
+                    font-weight: 700;
+                    color: white;
+                    margin-bottom: 15px;
+                    position: relative;
+                }
+                .footer-title::after {
+                    content: '';
+                    position: absolute;
+                    width: 30px;
+                    height: 3px;
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    bottom: -5px;
+                    left: 0;
+                    border-radius: 2px;
+                }
+                .footer-link {
+                    color: rgba(255, 255, 255, 0.7);
+                    text-decoration: none;
+                    transition: color 0.3s ease, transform 0.3s ease;
+                    display: block;
+                    margin-bottom: 8px;
+                }
+                .footer-link:hover {
+                    color: white;
+                    transform: translateX(5px);
+                }
+                .newsletter-input {
+                    background: rgba(255, 255, 255, 0.9);
+                    border: none;
+                    border-radius: 10px 0 0 10px;
+                    padding: 10px 15px;
+                }
+                .newsletter-btn {
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    border: none;
+                    color: white;
+                    font-weight: 600;
+                    border-radius: 0 10px 10px 0;
+                    transition: opacity 0.3s;
+                }
+                .newsletter-btn:hover { opacity: 0.9; }
 
-        .base_header .user-name {
-            font-weight: 600;
-            color: #fff;
-            font-size: 1rem;
-            letter-spacing: .5px;
-            text-shadow: 1px 1px 2px #1976d2;
-        }
-
-        .base_header .menu-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 2rem;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .base_header .menu-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            height: calc(100vh - var(--header-height));
-            position: fixed;
-            top: var(--header-height);
-            left: calc(-1 * var(--sidebar-width));
-            background-color: #0d6efd;
-            color: white;
-            padding-top: 12px;
-            overflow-y: auto;
-            z-index: 1050;
-            transition: left 0.25s ease;
-        }
-
-        .sidebar.show {
-            left: 0;
-        }
-
-        .sidebar .nav-link {
-            color: white;
-            padding: .6rem 1rem;
-            display: block;
-        }
-
-        .sidebar .nav-link:hover {
-            background: rgba(255, 255, 255, 0.08);
-            text-decoration: none;
-        }
-
-        .sidebar .nav-link.active {
-            background: rgba(255, 255, 255, 0.25);
-            color: #fff !important;
-            font-weight: 600;
-            border-left: 4px solid #ffc107;
-        }
-
-        .content {
-            flex: 1;
-
-            padding: 20px;
-            margin-top: var(--header-height);
-            transition: margin-left 0.25s ease, margin-top 0.2s ease;
-        }
-
-        @media (min-width: 992px) {
-            .sidebar {
-                left: 0;
-            }
-
-            .content {
-                margin-left: var(--sidebar-width);
-            }
-        }
-
-        @media (max-width: 991.98px) {
-            .sidebar {
-                left: calc(-1 * var(--sidebar-width));
-            }
-
-            .content {
-                margin-left: 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-            :root {
-                --header-height: 54px;
-                --sidebar-width: 180px;
-            }
-
-            .base_header .school-title {
-                font-size: 1rem;
-            }
-
-            .base_header .logo-img {
-                width: 40px;
-                height: 40px;
-            }
-
-            .base_header .user-avatar {
-                width: 32px;
-                height: 32px;
-            }
-
-            .base_header .menu-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 1.3rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            :root {
-                --header-height: 44px;
-                --sidebar-width: 140px;
-            }
-
-            .base_header .school-title {
-                font-size: 0.9rem;
-            }
-
-            .base_header .logo-img {
-                width: 32px;
-                height: 32px;
-            }
-
-            .base_header .user-avatar {
-                width: 28px;
-                height: 28px;
-            }
-
-            .base_header .menu-btn {
-                width: 28px;
-                height: 28px;
-                font-size: 1.1rem;
-            }
-        }
-
-        footer {
-            margin-top: 0px;
-        }
-    </style>
+            </style>
+            {% endblock %}
         </head>
         <body>
 
-        <!-- Header -->
         <header class="base_header" role="banner">
             <div class="header-left">
                 <img src="{% static 'images/logo.png' %}" alt="logo" class="logo-img">
-                <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle navigation">&#9776;</button>
+                <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle navigation"><i class="bi bi-list"></i></button>
             </div>
             <div class="header-center">
-                <span class="school-title">{{ school_name }}</span>
+                <span class="school-title">{{ school_name|default:"SCHOOL NAME" }}</span>
             </div>
             <div class="header-right">
                 <img src="{% static 'images/teacher.png' %}" alt="avatar" class="user-avatar">
-                <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                {% if user.role == 'Admin' or user.role == 'teacher' %}
+                    <span class="user-name d-none d-md-inline">{{ user.username }}</span>
+                {% elif user.role == 'parent' %}
+                    <span class="user-name d-none d-md-inline">{{ parent_name }}</span>
+                {% else %}
+                    <span class="user-name d-none d-md-inline">{{ student_name }}</span>
+                {% endif %}
+
             </div>
         </header>
 
-        <!-- Sidebar -->
-        <div id="sidebar" class="sidebar">
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
-               href="{% url 'dashboard' %}">
-               Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'manage_details' %}active{% endif %}" 
-               href="{% url 'manage_details' %}">
-               Manage Details
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'fee_dashboard' %}active{% endif %}" 
-               href="{% url 'fee_dashboard' %}">
-               Fees
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'leave_home' %}active{% endif %}" 
-               href="{% url 'leave_home' %}">
-               Leave
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'academic_dashboard' %}active{% endif %}" 
-               href="{% url 'academic_dashboard' %}">
-               Academics
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'attendance_dashboard' %}active{% endif %}" 
-               href="{% url 'attendance_dashboard' %}">
-               Pupil Attendance
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}" 
-               href="{% url 'teacher_dashboard' %}">
-               Manage Teacher
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'account' %}active{% endif %}" 
-               href="{% url 'account' %}">
-               Account
-            </a>
-        </li>
-    </ul>
-    <div class="px-3 mt-3">
-        <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
-    </div>
-</div>
+        {% if user.role == 'Admin' %}
+            <div id="sidebar" class="sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                            href="{% url 'dashboard' %}">
+                            <i class="bi bi-grid-fill"></i> Dashboard 
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manage_details' %}active{% endif %}" 
+                            href="{% url 'manage_details' %}">
+                            <i class="bi bi-person-lines-fill"></i>Students Details
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'fee_dashboard' %}active{% endif %}" 
+                            href="{% url 'fee_dashboard' %}">
+                            <i class="bi bi-currency-dollar"></i> Fee
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'leave_home' %}active{% endif %}" 
+                            href="{% url 'leave_home' %}">
+                            <i class="bi bi-box-arrow-right"></i> Leave
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'academic_dashboard' %}active{% endif %}" 
+                            href="{% url 'academic_dashboard' %}">
+                            <i class="bi bi-journal-check"></i> Academics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'attendance_dashboard' %}active{% endif %}" 
+                            href="{% url 'attendance_dashboard' %}">
+                            <i class="bi bi-clipboard-check"></i> Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}" 
+                            href="{% url 'teacher_dashboard' %}">
+                            <i class="bi bi-people-fill"></i> Manage Teacher
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'announcement_list' %}active{% endif %}" 
+                            href="{% url 'announcement_list' %}">
+                            <i class="bi bi-megaphone-fill me-2"></i> Announcements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'account' %}active{% endif %}" 
+                            href="{% url 'account' %}">
+                            <i class="bi bi-person-gear"></i> Account
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'reviews' %}active{% endif %}" 
+                            href="{% url 'reviews' %}">
+                            <i class="bi bi-grid-fill"></i> Reviews 
+                        </a>
+                    </li>
+                </ul>
+                <div class="px-3 mt-3">
+                    <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        {% elif user.role == 'teacher' %}
+            <div id="sidebar" class="sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'teacher_portal' %}active{% endif %}"
+                            href="{% url 'teacher_portal' %}">
+                            <i class="bi bi-grid-fill"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'record_marks' %}active{% endif %}"
+                            href="{% url 'record_marks' %}">
+                            <i class="bi bi-journal-check"></i> Academics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'strand_list' %}active{% endif %}"
+                            href="{% url 'strand_list' %}">
+                            <i class="bi bi-list-task"></i> Manage Strands
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}"
+                            href="{% url 'manage_resources' %}">
+                            <i class="bi bi-list-task"></i> Manage Resources
+                        </a>
+                    </li>
+                    
+
+                    {% if is_class_teacher %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'attendance' %}active{% endif %}"
+                            href="{% url 'attendance' %}">
+                            <i class="bi bi-calendar-check"></i> Attendance
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'teaching_progress' %}active{% endif %}"
+                            href="{% url 'teaching_progress' %}">
+                            <i class="bi bi-graph-up"></i> Teaching Progress
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'teacher_announcements' %}active{% endif %}"
+                            href="{% url 'teacher_announcements' %}">
+                            <i class="bi bi-megaphone-fill"></i> Announcements
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'reviews' %}active{% endif %}" 
+                            href="{% url 'reviews' %}">
+                            <i class="bi bi-grid-fill"></i> Reviews 
+                        </a>
+                    </li>
 
 
-        <!-- Main content -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'teacher_account' %}active{% endif %}"
+                            href="{% url 'teacher_account' %}">
+                            <i class="bi bi-person-gear"></i> Account
+                        </a>
+                    </li>
+                </ul>
+                <div class="px-3 mt-3">
+                    <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        {% elif user.role == 'student' %}
+            <div id="sidebar" class="sidebar">
+                <ul class="nav flex-column">
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_portal_dashboard' %}active{% endif %}"
+                            href="{% url 'student_portal_dashboard' %}">
+                            <i class="bi bi-grid-fill"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_portal_fee_payment' %}active{% endif %}"
+                            href="{% url 'student_portal_fee_payment' %}">
+                            <i class="bi bi-currency-dollar"></i> Fee Payment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_portal_attendance' %}active{% endif %}"
+                            href="{% url 'student_portal_attendance' %}">
+                            <i class="bi bi-calendar-check"></i> Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_portal_leave_statement' %}active{% endif %}"
+                            href="{% url 'student_portal_leave_statement' %}">
+                            <i class="bi bi-box-arrow-right"></i> Leave
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_portal_academics' %}active{% endif %}"
+                            href="{% url 'student_portal_academics' %}">
+                            <i class="bi bi-journal-check"></i> Academics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'students_announcements' %}active{% endif %}" 
+                            href="{% url 'students_announcements' %}">
+                            <i class="bi bi-megaphone-fill me-2"></i> Announcements
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'reviews' %}active{% endif %}" 
+                            href="{% url 'reviews' %}">
+                            <i class="bi bi-grid-fill"></i> Reviews 
+                        </a>
+                    </li>
+                    
+
+
+                </ul>
+                <div class="px-3 mt-3">
+                    <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+
+        {% else %}
+            <div id="sidebar" class="sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_portal_dashboard' %}active{% endif %}"
+                            href="{% url 'parent_portal_dashboard' %}">
+                            <i class="bi bi-grid-fill"></i>
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'parent_student_portal_fee_payment' %}active{% endif %}"
+                            href="{% url 'parent_student_portal_fee_payment' %}">
+                            <i class="bi bi-currency-dollar"></i>
+                            Fee
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'parent_portal_student_attendance' %}active{% endif %}"
+                            href="{% url 'parent_portal_student_attendance' %}">
+                            <i class="bi bi-calendar-check"></i>
+                            Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'parent_student_portal_leave_statement' %}active{% endif %}"
+                            href="{% url 'parent_student_portal_leave_statement' %}">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Leave
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'parent_student_portal_academics' %}active{% endif %}"
+                            href="{% url 'parent_student_portal_academics' %}">
+                            <i class="bi bi-journal-check"></i>
+                            Academics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'parents_announcements' %}active{% endif %}" 
+                            href="{% url 'parents_announcements' %}">
+                            <i class="bi bi-megaphone-fill me-2"></i>
+                            Announcements
+                        </a>
+                    </li>
+
+
+                </ul>
+                <div class="px-3 mt-3">
+                    <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+
+        {% endif %}
+
+
+
+
         <div class="content">
             <div class="container-fluid">
                 {% block content %}{% endblock %}
             </div>
         </div>
-        <footer class="bg-dark text-white text-center py-3 mt-5">
-            <p>&copy; 2025 Pupil Management System. All Rights Reserved.</p>
+        
+        <div id="sidebar-backdrop" class="sidebar-backdrop d-lg-none" onclick="toggleSidebar()"></div>
+
+        <footer class="bg-dark text-white py-5 mt-5">
+            <div class="container">
+              <div class="row g-4">
+                <div class="col-md-4">
+                  <h4 class="footer-title">ShuleBase</h4>
+                  <p class="text-white-50">Modern management solution built to streamline school administration across Kenya.</p>
+                  <p class="text-white-50 mt-3">
+                    <i class="fas fa-map-marker-alt me-2"></i>Nairobi, Kenya<br>
+                    <i class="fas fa-envelope me-2"></i>daniel@gmail.com
+                  </p>
+                </div>
+        
+                <div class="col-6 col-md-2">
+                  <h4 class="footer-title">Product</h4>
+                  <a href="#features" class="footer-link">Features Overview</a>
+                  <a href="#contact" class="footer-link">Sign Up</a>
+                  <a href="#login" class="footer-link">Login</a>
+                  <a href="#contact" class="footer-link">Request Demo</a>
+                </div>
+        
+                <div class="col-6 col-md-2">
+                  <h4 class="footer-title">Company</h4>
+                  <a href="#about" class="footer-link">About Us</a>
+                  <a href="#blog" class="footer-link">Blog</a>
+                  <a href="#" class="footer-link">Terms of Service</a>
+                  <a href="#" class="footer-link">Privacy Policy</a>
+                </div>
+        
+                <div class="col-md-4">
+                  <h4 class="footer-title">Newsletter</h4>
+                  <p class="text-white-50">Get the latest EdTech news and updates directly to your inbox.</p>
+                  <form class="input-group mb-3">
+                    <input type="email" class="form-control newsletter-input" placeholder="Your email address" aria-label="Email for newsletter">
+                    <button class="btn newsletter-btn" type="button">Subscribe</button>
+                  </form>
+                </div>
+              </div>
+        
+              <hr class="text-white-50 mt-4 mb-3">
+        
+              <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <p class="text-white-50 mb-0 order-2 order-md-1">
+                  © 2025 ShuleBase. Built with <i class="fas fa-heart text-danger"></i> for education.
+                </p>
+                <div class="social-icons mb-3 mb-md-0 order-1 order-md-2">
+                  <a href="https://www.fb.com/l/6lp1kJRRR" class="text-white me-3" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                  <a href="https://whatsapp.com/dl/code=XQKPNlIIn4?mode=tac" class="text-white me-3" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                  <a href="https://www.linkedin.com/in/daniel-maina-7706542a0" class="text-white" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+              </div>
+            </div>
         </footer>
     {% endif %}
 
@@ -387,13 +667,27 @@
     {% include 'home/home.html' %}
 {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script>
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('show');
-    }
-    function closeSidebar(){
-        document.getElementById('sidebase').classList.remove('show');
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const content = document.querySelector('.content');
+        
+        if (window.innerWidth >= 992) {
+            sidebar.classList.toggle('closed');
+            if (content) content.classList.toggle('full-width');
+        } else {
+            // Core toggle functionality
+            sidebar.classList.toggle('show');
+
+            // Toggle backdrop visibility
+            if (sidebar.classList.contains('show')) {
+                backdrop.style.display = 'block';
+            } else {
+                backdrop.style.display = 'none';
+            }
+        }
     }
 </script>
 </body>

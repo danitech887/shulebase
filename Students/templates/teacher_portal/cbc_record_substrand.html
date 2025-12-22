@@ -1,0 +1,92 @@
+{% load dict_extras %}
+<form id="cbcRecordSubStrandForm" method="post" action="{% url 'cbc_record_substrand' sub_strand.id sub_strand.strand.grade sub_strand.strand.stream %}">
+  {% csrf_token %}
+
+  <div class="mb-3 col-md-3">
+    <label class="form-label">Academic Term</label>
+    <select name="term" class="form-select" required>
+      <option value="" disabled {% if not selected_term %}selected{% endif %}>Select Term</option>
+      {% for t in term_choices %}
+      <option value="{{ t }}" {% if selected_term == t %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="alert alert-info py-2">
+    Select proficiency level per learner (1–4). Hover a level to see its descriptor.
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead class="table-primary">
+        <tr>
+          <th>Student</th>
+          <th>Level</th>
+          <th>Comment (optional)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>{{ student.first_name }} {{ student.surname }}</td>
+          <td>
+            <select name="level_{{ student.registration_no }}" class="form-select">
+              <option value="">—</option>
+              {% for lvl in '1,2,3,4'|cut:',' %}
+              {% with l=lvl|add:0 %}
+              <option value="{{ l }}" title="{{ descriptors|get_item:l|default:'Level ' }}" {% if existing_levels|get_item:student.registration_no == l %}selected{% endif %}>Level {{ l }}</option>
+              {% endwith %}
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <input type="text" name="comment_{{ student.registration_no }}" class="form-control" placeholder="Optional note" />
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-3 d-flex gap-2">
+    <button type="submit" class="btn btn-success w-100">Save Levels</button>
+    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+  </div>
+</form>
+
+<script>
+// Submit via AJAX
+(function(){
+  const form = document.getElementById('cbcRecordSubStrandForm');
+  if (!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Saving...';
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      if (data.status === 'success' || data.status === 'partial') {
+        const modalEl = document.getElementById('recordSubStrandModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        // optional toast
+      } else {
+        alert(data.message || 'Failed to save levels');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while saving.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Save Levels';
+    }
+  });
+})();
+</script>

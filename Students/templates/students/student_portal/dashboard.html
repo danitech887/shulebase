@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% block title %}Students Dashboard{% endblock %}
+{% load static %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .welcome-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        animation: fadeIn 0.6s ease-out;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .welcome-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    .stat-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease-out backwards;
+        border-left-width: 4px !important;
+        border-top: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+    }
+
+    .icon-lg {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: slideInRight 0.5s ease-out;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .portal-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        animation: fadeInUp 0.6s ease-out backwards;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .portal-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+
+    .portal-card .icon-lg {
+        transition: transform 0.3s ease;
+    }
+
+    .portal-card:hover .icon-lg {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .portal-card .btn {
+        transition: all 0.3s ease;
+    }
+
+    .portal-card:hover .btn {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .quick-actions-title {
+        animation: fadeIn 0.8s ease-out;
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .quick-actions-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 70%;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+        animation: fadeInDown 0.6s ease-out 0.2s backwards;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+
+    .filter-section .form-select {
+        border-radius: 8px;
+        border: 2px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: scale(1.02);
+    }
+
+    .filter-section .btn-primary {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .col-xl-3:nth-child(1) .portal-card { animation-delay: 0.2s; }
+    .col-md-6:nth-child(2) .portal-card { animation-delay: 0.3s; }
+    .col-md-6:nth-child(3) .portal-card { animation-delay: 0.4s; }
+    .col-md-6:nth-child(4) .portal-card { animation-delay: 0.5s; }
+
+    a.text-decoration-none {
+        display: block;
+        height: 100%;
+    }
+
+    .card-body {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card .card-body::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover .card-body::before {
+        opacity: 1;
+    }
+
+    .text-muted {
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .card-title {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        color: #2d3748;
+    }
+
+    .card-text {
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .icon-lg {
+            font-size: 2rem;
+        }
+    }
+
+    .row {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg welcome-card text-white border-0">
+                <div class="card-body p-4" style="position: relative; z-index: 1;">
+                    <h2 class="mb-0">👋 Welcome back, {{ student.first_name|default:"Student" }}!</h2> 
+                    <p class="lead mb-0">Your portal overview for the current academic year ({{ year }}).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Filter section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold"><i class="bi bi-funnel-fill me-2"></i>Select Term:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            {% for term in term_choices %}
+                                <option value="{{ term }}" {% if term == current_term %}selected{% endif %}>{{ term }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100 portal-card border-success shadow">
+                <div class="card-body">
+                    <div class="text-success icon-lg"><i class="bi bi-calendar-check"></i></div>
+                    <div class="text-muted text-uppercase fw-bold mb-2">Attendance Rate</div>
+                    <div class="stat-value text-success">{{ attendance_percentage|floatformat:1 }}%</div>
+                    <small class="text-muted">Total Days: {{ total_days }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100 portal-card border-warning shadow">
+                <div class="card-body">
+                    <div class="text-warning icon-lg"><i class="bi bi-currency-dollar"></i></div>
+                    <div class="text-muted text-uppercase fw-bold mb-2">Fee Balance Due</div>
+                    <div class="stat-value text-warning">Ksh {{ balance|floatformat:2 }}</div>
+                    <small class="text-muted">Expected: Ksh {{ expected_fee|floatformat:2 }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100 portal-card border-info shadow">
+                <div class="card-body">
+                    <div class="text-info icon-lg"><i class="bi bi-wallet2"></i></div>
+                    <div class="text-muted text-uppercase fw-bold mb-2">Total Fees Paid</div>
+                    <div class="stat-value text-info">Ksh {{ total_fees_paid|floatformat:2 }}</div>
+                    <small class="text-muted">Your payment history</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card h-100 portal-card border-danger shadow">
+                <div class="card-body">
+                    <div class="text-danger icon-lg"><i class="bi bi-file-person"></i></div>
+                    <div class="text-muted text-uppercase fw-bold mb-2">Approved Leaves</div>
+                    <div class="stat-value text-danger">{{ total_leaves }}</div>
+                    <small class="text-muted">Requests this year</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <h3 class="mb-4 mt-3 text-secondary quick-actions-title">Quick Actions & Navigation</h3>
+    
+    <div class="row">
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'student_portal_academics' %}" class="text-decoration-none">
+                <div class="card h-100 portal-card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-bookmark-fill icon-lg text-primary"></i>
+                        <h5 class="card-title fw-bold">My Grades</h5>
+                        <p class="card-text text-muted small">View marks, progress reports, and teacher feedback.</p>
+                        <span class="btn btn-sm btn-outline-primary mt-2">View Reports</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'student_portal_attendance' %}" class="text-decoration-none">
+                <div class="card h-100 portal-card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-range icon-lg text-success"></i>
+                        <h5 class="card-title fw-bold">Attendance History</h5>
+                        <p class="card-text text-muted small">Detailed breakdown of present and absent days.</p>
+                        <span class="btn btn-sm btn-outline-success mt-2">See Details</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'student_portal_fee_payment' %}" class="text-decoration-none">
+                <div class="card h-100 portal-card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-receipt icon-lg text-info"></i>
+                        <h5 class="card-title fw-bold">Fee Statements</h5>
+                        <p class="card-text text-muted small">Check payment records and download receipts.</p>
+                        <span class="btn btn-sm btn-outline-info mt-2">Manage Fees</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'student_portal_leave_statement' %}" class="text-decoration-none">
+                <div class="card h-100 portal-card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-send-fill icon-lg text-danger"></i>
+                        <h5 class="card-title fw-bold">Leave Applications</h5>
+                        <p class="card-text text-muted small">Apply for leave and view application status.</p>
+                        <span class="btn btn-sm btn-outline-danger mt-2">Apply/View</span>
+                    </div>
+                </div>
+            </a>
+        </div> 
+    </div>
+</div>
+{% endblock content %}

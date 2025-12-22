@@ -1,0 +1,890 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+  <title>School Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+      --success-gradient: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --shadow-primary: 0 15px 40px rgba(102, 126, 234, 0.2);
+      --shadow-secondary: 0 8px 25px rgba(0, 0, 0, 0.1);
+      --border-radius: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--primary-gradient);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      position: relative;
+      overflow-x: hidden;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 60%),
+        radial-gradient(circle at 75% 75%, rgba(118, 75, 162, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .registration-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-primary);
+      border: 1px solid var(--glass-border);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .registration-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--primary-gradient);
+    }
+
+    .logo-section {
+      margin-bottom: 1.5rem;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      border-radius: 15px;
+      transition: var(--transition);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-title {
+      font-weight: 700;
+      font-size: 2.2rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .subtitle {
+      color: #6c757d;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      font-weight: 500;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    /* Enhanced Form Styles */
+    .form-section {
+      text-align: left;
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-icon {
+      width: 18px;
+      height: 18px;
+      background: var(--primary-gradient);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .form-control {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(5px);
+      width: 100%;
+    }
+
+    .form-control:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      outline: none;
+      background: white;
+      transform: translateY(-1px);
+    }
+
+    .form-control:hover {
+      border-color: #667eea;
+    }
+
+    /* Password field enhancements */
+    .password-field {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #6c757d;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: var(--transition);
+      z-index: 10;
+      padding: 0.25rem;
+    }
+
+    .password-toggle:hover {
+      color: #667eea;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .password-field .form-control {
+      padding-right: 2.75rem;
+    }
+
+    /* Enhanced Button */
+    .btn-submit {
+      background: var(--primary-gradient);
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      width: 100%;
+      transition: var(--transition);
+      box-shadow: var(--shadow-secondary);
+      position: relative;
+      overflow: hidden;
+      margin-top: 1rem;
+      min-height: 50px;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: var(--transition);
+    }
+
+    .btn-submit:hover::before {
+      left: 100%;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-submit:active {
+      transform: translateY(-1px);
+    }
+
+    /* Login Link */
+    .login-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .login-link:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    /* Enhanced Alerts */
+    .alert {
+      border: none;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      animation: slideInDown 0.5s ease-out;
+      font-size: 0.9rem;
+    }
+
+    .alert-success {
+      background: rgba(40, 167, 69, 0.1);
+      color: #155724;
+      border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+
+    .alert-danger {
+      background: rgba(220, 53, 69, 0.1);
+      color: #721c24;
+      border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .alert ul {
+      margin-bottom: 0;
+      padding-left: 1.2rem;
+    }
+
+    .alert li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* File Upload Enhancement */
+    .file-upload {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-upload .form-control {
+      cursor: pointer;
+    }
+
+    .file-upload:hover .form-control {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    /* Validation styles */
+    .form-control.is-valid {
+      border-color: #28a745;
+      box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+    }
+
+    .form-control.is-invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+    }
+
+    .invalid-feedback {
+      display: none;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: #dc3545;
+    }
+
+    .invalid-feedback.d-block {
+      display: block;
+    }
+
+    /* Mobile-First Responsive Design */
+    @media (min-width: 576px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .registration-container {
+        padding: 2.5rem;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      
+      .page-title {
+        font-size: 2.5rem;
+      }
+      
+      .subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .logo {
+        width: 80px;
+        height: 80px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 2rem;
+      }
+      
+      .registration-container {
+        padding: 3rem;
+        margin: 2rem auto;
+      }
+      
+      .form-control {
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+      }
+      
+      .password-toggle {
+        right: 1rem;
+        font-size: 1.1rem;
+      }
+      
+      .password-field .form-control {
+        padding-right: 3rem;
+      }
+      
+      .btn-submit {
+        padding: 1.25rem 2rem;
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.25rem;
+      }
+      
+      .registration-container {
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+      
+      .page-title {
+        font-size: 1.8rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .logo {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .form-control {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9rem;
+      }
+      
+      .form-label {
+        font-size: 0.85rem;
+      }
+      
+      .form-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 0.7rem;
+      }
+      
+      .password-toggle {
+        right: 0.75rem;
+        font-size: 0.9rem;
+      }
+      
+      .password-field .form-control {
+        padding-right: 2.5rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .registration-container {
+        padding: 1.25rem;
+        margin: 0.125rem;
+      }
+      
+      .page-title {
+        font-size: 1.6rem;
+      }
+      
+      .form-control {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    @keyframes fadeInDown {
+      from { 
+        opacity: 0; 
+        transform: translateY(-20px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    @keyframes slideInDown {
+      from {
+        transform: translateY(-15px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Loading state */
+    .btn-submit.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .btn-submit.loading::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Touch improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .form-control:hover {
+        transform: none;
+      }
+      
+      .btn-submit:hover {
+        transform: none;
+      }
+      
+      .btn-submit:active {
+        transform: scale(0.98);
+      }
+    }
+
+    /* Focus improvements for accessibility */
+    .form-control:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    .btn-submit:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="registration-container">
+    <!-- Enhanced Logo Section -->
+    <div class="logo-section">
+      <img src="{% static 'images/logo.png' %}" alt="School Logo" class="logo">
+    </div>
+
+    <h1 class="page-title">School Registration</h1>
+    <p class="subtitle">Create your institution's digital profile</p>
+
+    <!-- Django messages -->
+{% if messages %}
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                
+                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <p class="text-muted small mb-4">
+                {% for msg in messages %}
+                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
+                {% endfor %}
+            </p> 
+                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+                    .Ok
+                </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+    <!-- Form errors -->
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="form-section">
+      <form method="post" enctype="multipart/form-data" novalidate id="registrationForm">
+        {% csrf_token %}
+        
+        <!-- School Information -->
+        <div class="form-group">
+          <label for="{{ form.school_name.id_for_label }}" class="form-label">
+            <div class="form-icon"><i class="bi bi-building"></i></div>
+            {{ form.school_name.label }}
+          </label>
+          {{ form.school_name }}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.po_box.id_for_label }}" class="form-label">
+              <div class="form-icon"><i class="bi bi-mailbox"></i></div>
+              {{ form.po_box.label }}
+            </label>
+            {{ form.po_box }}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.address.id_for_label }}" class="form-label">
+              <div class="form-icon"><i class="bi bi-geo-alt"></i></div>
+              {{ form.address.label }}
+            </label>
+            {{ form.address }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.contact.id_for_label }}" class="form-label">
+              <div class="form-icon"><i class="bi bi-telephone"></i></div>
+              {{ form.contact.label }}
+            </label>
+            {{ form.contact }}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.email_address.id_for_label }}" class="form-label">
+              <div class="form-icon"><i class="bi bi-envelope"></i></div>
+              {{ form.email_address.label }}
+            </label>
+            {{ form.email_address }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.motto.id_for_label }}" class="form-label">
+            <div class="form-icon"><i class="bi bi-quote"></i></div>
+            {{ form.motto.label }}
+          </label>
+          {{ form.motto }}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.vision.id_for_label }}" class="form-label">
+            <div class="form-icon"><i class="bi bi-eye"></i></div>
+            {{ form.vision.label }}
+          </label>
+          {{ form.vision }}
+        </div>
+
+        <div class="form-group file-upload">
+          <label for="{{ form.logo_path.id_for_label }}" class="form-label">
+            <div class="form-icon"><i class="bi bi-image"></i></div>
+            {{ form.logo_path.label }}
+          </label>
+          {{ form.logo_path }}
+        </div>
+        <div class="form-group username">
+          <label for="Username" class="form-label">
+            <div class="form-icon"><i class="bi bi-lock"></i></div>
+            Username
+          </label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+      
+        <div class="form-group password-field">
+          <label for="{{ form.db_password.id_for_label }}" class="form-label">
+            <div class="form-icon"><i class="bi bi-lock"></i></div>
+            Password
+          </label>
+            <input type="password" class="form-control" id="password" name="password" required>
+
+          <button type="button" class="password-toggle" onclick="togglePassword('{{ form.db_password.id_for_label }}', this)" aria-label="Toggle password visibility">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+
+        <div class="form-group password-field">
+          <label for="confirm_password" class="form-label">
+            <div class="form-icon"><i class="bi bi-shield-check"></i></div>
+            Confirm Password
+          </label>
+          <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+          <button type="button" class="password-toggle" onclick="togglePassword('confirm_password', this)" aria-label="Toggle password visibility">
+            <i class="bi bi-eye"></i>
+          </button>
+          <div class="invalid-feedback" id="password-error"></div>
+        </div>
+
+        <button type="submit" class="btn btn-submit" id="submitBtn">
+          <i class="bi bi-building-add me-2"></i>Register School
+        </button>
+        
+        <a href="{% url 'login' %}" class="login-link">
+          <i class="bi bi-box-arrow-in-right me-1"></i>Already have an account? Sign in
+        </a>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('registrationForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const passwordField = document.getElementById('password');
+      const confirmPasswordField = document.getElementById('confirm_password');
+      const passwordError = document.getElementById('password-error');
+
+      // Enhanced form controls
+      const formControls = document.querySelectorAll('.form-control');
+      formControls.forEach(control => {
+        // Add focus/blur animations for desktop
+        if (window.matchMedia('(hover: hover)').matches) {
+          control.addEventListener('focus', function() {
+            this.style.transform = 'translateY(-1px)';
+          });
+          
+          control.addEventListener('blur', function() {
+            this.style.transform = 'translateY(0)';
+          });
+        }
+
+        // Add real-time validation feedback
+        control.addEventListener('input', function() {
+          if (this.checkValidity() && this.value.trim() !== '') {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+          } else if (this.value.trim() !== '') {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+          } else {
+            this.classList.remove('is-valid', 'is-invalid');
+          }
+        });
+      });
+
+      // Password confirmation validation
+      function validatePasswords() {
+        const password = passwordField.value;
+        const confirmPassword = confirmPasswordField.value;
+        
+        if (confirmPassword && password !== confirmPassword) {
+          confirmPasswordField.classList.add('is-invalid');
+          confirmPasswordField.classList.remove('is-valid');
+          passwordError.classList.add('d-block');
+          passwordError.textContent = 'Passwords do not match';
+          return false;
+        } else if (confirmPassword && password === confirmPassword) {
+          confirmPasswordField.classList.remove('is-invalid');
+          confirmPasswordField.classList.add('is-valid');
+          passwordError.classList.remove('d-block');
+          return true;
+        } else {
+          confirmPasswordField.classList.remove('is-invalid', 'is-valid');
+          passwordError.classList.remove('d-block');
+          return true;
+        }
+      }
+
+      // Real-time password validation
+      passwordField.addEventListener('input', validatePasswords);
+      confirmPasswordField.addEventListener('input', validatePasswords);
+
+      // Form submission
+      form.addEventListener('submit', function(e) {
+        if (!validatePasswords()) {
+          e.preventDefault();
+          confirmPasswordField.focus();
+          return false;
+        }
+
+        // Add loading state
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '<span>Registering...</span>';
+        
+        // Prevent double submission
+        submitBtn.disabled = true;
+      });
+
+      // Enhanced file upload feedback
+      const fileInput = form.querySelector('input[type="file"]');
+      if (fileInput) {
+        fileInput.addEventListener('change', function() {
+          const label = this.closest('.form-group').querySelector('.form-label');
+          if (this.files[0]) {
+            label.style.color = '#28a745';
+            setTimeout(() => {
+              label.style.color = '#374151';
+            }, 2000);
+            this.classList.add('is-valid');
+          }
+        });
+      }
+
+      // Add smooth scroll for error messages
+      const alerts = document.querySelectorAll('.alert');
+      if (alerts.length > 0) {
+        alerts[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      // Prevent zoom on iOS when focusing inputs
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      }
+
+      console.log('Mobile-Responsive School Registration Form loaded successfully');
+    });
+
+    // Password toggle functionality
+    function togglePassword(fieldId, button) {
+      const field = document.getElementById(fieldId);
+      const icon = button.querySelector('i');
+      
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+        button.setAttribute('aria-label', 'Hide password');
+      } else {
+        field.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+        button.setAttribute('aria-label', 'Show password');
+      }
+    }
+
+    // Handle orientation change on mobile
+    window.addEventListener('orientationchange', function() {
+      setTimeout(function() {
+        window.scrollTo(0, 0);
+      }, 100);
+    });
+
+    // Improve touch experience
+    document.querySelectorAll('.password-toggle, .btn-submit').forEach(element => {
+      element.addEventListener('touchstart', function() {
+        this.style.opacity = '0.8';
+      });
+      
+      element.addEventListener('touchend', function() {
+        this.style.opacity = '1';
+      });
+    });
+  </script>
+</body>
+</html>

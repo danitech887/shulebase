@@ -1,0 +1,573 @@
+{% extends 'base.html' %}
+{% block title %}Children Dashboard{% endblock %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    body {
+        background: #f8f9fe;
+    }
+
+    /* Welcome Card with Gradient */
+    .welcome-card {
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .welcome-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .welcome-card h2 {
+        font-weight: 700;
+        font-size: 2rem;
+    }
+
+    .welcome-card .lead {
+        opacity: 0.95;
+    }
+
+    /* Student Switcher - Improved */
+    .student-switcher {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .switcher-label {
+        color: #6c757d;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+    }
+
+    .switcher-label i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+
+    .student-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        margin: 5px 8px 5px 0;
+        border-radius: 50px;
+        border: 2px solid transparent;
+        background: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .student-pill i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .student-pill.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .student-pill:hover:not(.active) {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Modern Stat Cards */
+    .stat-card {
+        border-radius: 16px;
+        border: none;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+        position: relative;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        transition: height 0.3s ease;
+    }
+
+    .stat-card.card-success::before { background: var(--success-gradient); }
+    .stat-card.card-warning::before { background: var(--warning-gradient); }
+    .stat-card.card-info::before { background: var(--info-gradient); }
+    .stat-card.card-danger::before { background: var(--danger-gradient); }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card:hover::before {
+        height: 100%;
+        opacity: 0.05;
+    }
+
+    .stat-card .card-body {
+        padding: 1.75rem;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.75rem;
+    }
+
+    .stat-icon.success-icon {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        color: #11998e;
+    }
+
+    .stat-icon.warning-icon {
+        background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
+        color: #f5576c;
+    }
+
+    .stat-icon.info-icon {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+        color: #4facfe;
+    }
+
+    .stat-icon.danger-icon {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%);
+        color: #fa709a;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value.text-success { color: #11998e; }
+    .stat-value.text-warning { color: #f5576c; }
+    .stat-value.text-info { color: #4facfe; }
+    .stat-value.text-danger { color: #fa709a; }
+
+    .stat-meta {
+        font-size: 0.85rem;
+        color: #adb5bd;
+    }
+
+    /* Section Headers */
+    .section-header {
+        margin: 3rem 0 1.5rem;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .section-header h3 {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-section .form-select {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-section .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Action Cards */
+    .action-card {
+        border-radius: 16px;
+        border: none;
+        background: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .action-card:hover::before {
+        opacity: 0.05;
+    }
+
+    .action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-card .card-body {
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .action-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        font-size: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .action-card:hover .action-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .action-icon.primary-icon {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+    }
+
+    .action-icon.success-icon {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        color: #11998e;
+    }
+
+    .action-icon.info-icon {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+        color: #4facfe;
+    }
+
+    .action-icon.danger-icon {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%);
+        color: #fa709a;
+    }
+
+    .action-card .card-title {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .action-card .card-text {
+        color: #718096;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 1.25rem;
+    }
+
+    .action-btn {
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 8px 24px;
+        border-radius: 50px;
+        border-width: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        transform: translateX(5px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .welcome-card h2 {
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card welcome-card shadow-lg border-0">
+                <div class="card-body p-4" style="position: relative; z-index: 1;">
+                    <h2 class="mb-2">👋 Welcome Back, Parent</h2> 
+                    <p class="lead mb-0">Viewing records for: <strong>{{ student.first_name }} {{ student.last_name }}</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- term filter -->
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <input type="hidden" name="student_id" value="{{ student.registration_no }}">
+                    
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold">
+                            <i class="bi bi-funnel-fill me-2"></i>Select Term:
+                        </label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            <option value="Term 1" {% if current_term == "Term 1" %}selected{% endif %}>Term 1</option>
+                            <option value="Term 2" {% if current_term == "Term 2" %}selected{% endif %}>Term 2</option>
+                            <option value="Term 3" {% if current_term == "Term 3" %}selected{% endif %}>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i> Apply Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Switcher -->
+    {% if students.count > 1 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="student-switcher">
+                <div class="switcher-label">
+                    <i class="bi bi-people-fill"></i>
+                    SWITCH CHILD
+                </div>
+                <div class="d-flex flex-wrap">
+                    {% for s in students %}
+                        <a href="?student_id={{ s.registration_no }}" 
+                           class="student-pill {% if s.registration_no == student.registration_no %}active{% endif %}">
+                            <i class="bi bi-person-circle"></i>
+                            {{ s.first_name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card card-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-icon success-icon">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <div class="stat-label">Attendance Rate</div>
+                    <div class="stat-value text-success">{{ attendance_percentage|floatformat:1 }}%</div>
+                    <div class="stat-meta">Total Days: {{ total_days }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card card-warning shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-icon warning-icon">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                    <div class="stat-label">Fee Balance Due</div>
+                    <div class="stat-value text-warning">Ksh {{ balance|floatformat:2 }}</div>
+                    <div class="stat-meta">Expected: Ksh {{ expected_fee|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card card-info shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-icon info-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="stat-label">Total Fees Paid</div>
+                    <div class="stat-value text-info">Ksh {{ total_fees_paid|floatformat:2 }}</div>
+                    <div class="stat-meta">Payment history for {{ student.first_name }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card card-danger shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-icon danger-icon">
+                        <i class="bi bi-file-person-fill"></i>
+                    </div>
+                    <div class="stat-label">Leave Records</div>
+                    <div class="stat-value text-danger">{{ total_leaves }}</div>
+                    <div class="stat-meta">Requests this year</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Header -->
+    <div class="section-header">
+        <h3>Quick Actions & Navigation</h3>
+    </div>
+    
+    <!-- Action Cards -->
+    <div class="row">
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'parent_student_portal_academics' %}" class="text-decoration-none">
+                <div class="card action-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="action-icon primary-icon">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                        <h5 class="card-title">Academic Reports</h5>
+                        <p class="card-text">View {{ student.first_name }}'s marks and progress reports.</p>
+                        <span class="btn action-btn btn-outline-primary">View Reports <i class="bi bi-arrow-right ms-2"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'parent_portal_student_attendance' %}" class="text-decoration-none">
+                <div class="card action-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="action-icon success-icon">
+                            <i class="bi bi-calendar-range"></i>
+                        </div>
+                        <h5 class="card-title">Attendance History</h5>
+                        <p class="card-text">Detailed breakdown of present and absent days.</p>
+                        <span class="btn action-btn btn-outline-success">See Details <i class="bi bi-arrow-right ms-2"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'parent_student_portal_fee_payment' %}" class="text-decoration-none">
+                <div class="card action-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="action-icon info-icon">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+                        <h5 class="card-title">Fee Statements</h5>
+                        <p class="card-text">Check payment records and download receipts.</p>
+                        <span class="btn action-btn btn-outline-info">Manage Fees <i class="bi bi-arrow-right ms-2"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'parent_student_portal_leave_statement' %}" class="text-decoration-none">
+                <div class="card action-card shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="action-icon danger-icon">
+                            <i class="bi bi-send-fill"></i>
+                        </div>
+                        <h5 class="card-title">Leave Applications</h5>
+                        <p class="card-text">Apply for leave for {{ student.first_name }} and view status.</p>
+                        <span class="btn action-btn btn-outline-danger">Apply/View <i class="bi bi-arrow-right ms-2"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div> 
+    </div>
+</div>
+{% endblock content %}

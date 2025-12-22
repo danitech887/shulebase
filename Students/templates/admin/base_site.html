@@ -1,0 +1,32 @@
+<!-- {% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/style.css' %}">
+    
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'images/logo.png' %}" alt="ShuleBase Logo">
+        <span>SHULEBASE PANEL</span>
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="{% url 'admin:logout' %}">Logout</a></li>
+    </ul>
+{% endblock %}
+
+{% block footer %}
+    <div class="footer-content">
+        <span>&copy; {% now "Y" %} ShuleBase. All rights reserved.</span>
+        <div class="footer-meta">
+            <span>Admin Panel v2.0 | Powered by Django | Made with ❤️</span>
+        </div>
+    </div>
+{% endblock %} -->

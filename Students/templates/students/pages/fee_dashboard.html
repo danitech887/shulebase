@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+{% block title %}Fee Dashboard{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+    .dashboard-container {
+        background: linear-gradient(135deg, #f5f7ff 0%, #e8f2ff 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+        position: relative;
+    }
+    
+    .dashboard-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.8" fill="rgba(102, 126, 234, 0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+        pointer-events: none;
+    }
+    
+    .main-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    .main-header h3 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .main-header i {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .nav-pills-custom {
+        background: white;
+        padding: 1rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    
+    .nav-pills-custom .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .nav-pills-custom .nav-link:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        transform: translateY(-2px);
+    }
+    
+    .nav-pills-custom .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .filter-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.3s ease;
+    }
+    
+    .filter-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .filter-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+    }
+    
+    .form-select, .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+        background: white;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .data-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .data-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .data-card-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    
+    .data-card-header h4 {
+        margin: 0;
+        color: #374151;
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .data-card-body {
+        padding: 0;
+    }
+    
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border-radius: 0 0 16px 16px;
+    }
+    
+    .table {
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.025em;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: scale(1.001);
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        height: 450px;
+    }
+    
+    .chart-container:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .chart-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 3rem;
+        color: #9ca3af;
+        font-style: italic;
+    }
+    
+    .no-data i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem 0;
+        }
+        
+        .main-header h3 {
+            font-size: 1.8rem;
+        }
+        
+        .chart-container {
+            padding: 1rem;
+        }
+        
+        .filter-card .row {
+            gap: 1rem;
+        }
+        
+        .col-auto {
+            width: 100%;
+        }
+        
+        .btn-primary {
+            width: 100%;
+        }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container fade-in">
+        <!-- Enhanced Header -->
+        <div class="main-header">
+            <h3>
+                <i class="bi bi-speedometer2"></i>
+                Fee Dashboard
+            </h3>
+        </div>
+
+        <!-- Enhanced Navigation -->
+        <nav class="nav-pills-custom">
+            <ul class="nav nav-pills mb-0">
+                <li class="nav-item">
+                    <a class="nav-link{% if request.resolver_match.url_name == 'fee_payment' %} active{% endif %}" href="{% url 'fee_payment' %}">
+                        <i class="bi bi-plus-circle"></i> More Options
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Enhanced Filter Form -->
+        <div class="filter-card">
+            <div class="filter-title">
+                <div class="filter-icon">🔍</div>
+                Filter Options
+            </div>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-auto">
+                    <label for="year" class="form-label fw-semibold">Year:</label>
+                    <select name="year" id="year" class="form-select">
+                        <option value="">All Years</option>
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label for="term" class="form-label fw-semibold">Term:</label>
+                    <select name="term" id="term" class="form-select">
+                        <option value="">All Terms</option>
+                        <option value="Term 1" {% if term == "Term 1" %}selected{% endif %}>Term 1</option>
+                        <option value="Term 2" {% if term == "Term 2" %}selected{% endif %}>Term 2</option>
+                        <option value="Term 3" {% if term == "Term 3" %}selected{% endif %}>Term 3</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Enhanced Data Table -->
+        <div class="data-card">
+            <div class="data-card-header">
+                <h4>
+                    <i class="bi bi-table"></i>
+                    Fee Balances Per Grade
+                </h4>
+            </div>
+            <div class="data-card-body">
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-bookmark"></i> Grade</th>
+                                <th><i class="bi bi-collection"></i> Stream</th>
+                                <th><i class="bi bi-cash-coin"></i> Total Paid</th>
+                                <th><i class="bi bi-credit-card-2-front"></i> Fee Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if fee_balances %}
+                                {% for data in fee_balances %}
+                                    <tr>
+                                        <td><strong>{{ data.grade }}</strong></td>
+                                        <td>{{ data.stream }}</td>
+                                        <td><span class="text-success fw-bold">{{ data.total_paid|floatformat:2 }}</span></td>
+                                        <td><span class="text-primary fw-bold">{{ data.balance|floatformat:2 }}</span></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="no-data">
+                                        <i class="bi bi-inbox"></i>
+                                        <div>No data available for the selected filters.</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Charts Grid -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <div class="chart-icon">📊</div>
+                        Cash vs M-Pesa by Grade-Stream
+                    </div>
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <div class="chart-icon">🥧</div>
+                        Overall % Cash vs M-Pesa
+                    </div>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-lg-8">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <div class="chart-icon">📈</div>
+                        Fee Collection Trends (Monthly)
+                    </div>
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <div class="chart-icon">📊</div>
+                        Payment Methods by Grade
+                    </div>
+                    <canvas id="stackedBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Enhanced Chart Configuration
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                    padding: 20,
+                    font: { size: 12, weight: 'bold' }
+                }
+            }
+        }
+    };
+
+    // Chart 1: Bar (Cash vs Mpesa by Grade-Stream)
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels_json|safe }},
+            datasets: [
+                {
+                    label: 'Cash',
+                    backgroundColor: 'linear-gradient(135deg, #4ade80, #22c55e)',
+                    borderColor: '#16a34a',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    data: {{ cash_json|safe }},
+                },
+                {
+                    label: 'M-Pesa',
+                    backgroundColor: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                    borderColor: '#1e40af',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    data: {{ mpesa_json|safe }},
+                }
+            ]
+        },
+        options: {
+            ...chartOptions,
+            scales: { 
+                x: { stacked: true, grid: { display: false } }, 
+                y: { beginAtZero: true, stacked: true, grid: { color: 'rgba(0,0,0,0.1)' } } 
+            }
+        }
+    });
+
+    // Chart 2: Pie (Overall % Cash vs Mpesa)
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Cash', 'M-Pesa'],
+            datasets: [{
+                data: [{{ total_cash_json }}, {{ total_mpesa_json }}],
+                backgroundColor: [
+                    'linear-gradient(135deg, #4ade80, #22c55e)',
+                    'linear-gradient(135deg, #3b82f6, #1d4ed8)'
+                ],
+                borderWidth: 3,
+                borderColor: '#ffffff',
+                hoverBorderWidth: 5,
+            }]
+        },
+        options: {
+            ...chartOptions,
+            cutout: '60%',
+            plugins: {
+                ...chartOptions.plugins,
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Chart 3: Line (Totals per Month)
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: {{ month_labels_json|safe }},
+            datasets: [{
+                label: 'Total Fees Collected',
+                data: {{ month_totals_json|safe }},
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#f59e0b',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.1)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Chart 4: Stacked Bar (Cash+Mpesa per Grade)
+    const stackedBarCtx = document.getElementById('stackedBarChart').getContext('2d');
+    new Chart(stackedBarCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ grade_labels_json|safe }},
+            datasets: [
+                {
+                    label: 'Cash',
+                    backgroundColor: 'linear-gradient(135deg, #4ade80, #22c55e)',
+                    borderColor: '#16a34a',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    data: {{ grade_cash_json|safe }},
+                },
+                {
+                    label: 'M-Pesa',
+                    backgroundColor: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                    borderColor: '#1e40af',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    data: {{ grade_mpesa_json|safe }},
+                }
+            ]
+        },
+        options: {
+            ...chartOptions,
+            scales: { 
+                x: { stacked: true, grid: { display: false } }, 
+                y: { beginAtZero: true, stacked: true, grid: { color: 'rgba(0,0,0,0.1)' } } 
+            }
+        }
+    });
+
+    // Add loading states and animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate elements on page load
+        const cards = document.querySelectorAll('.data-card, .chart-container, .filter-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in');
+        });
+
+        // Add hover effects to table rows
+        const tableRows = document.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

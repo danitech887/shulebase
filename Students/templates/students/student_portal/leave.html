@@ -1,0 +1,606 @@
+{% extends 'base.html' %}
+{% block title %}Students Leave{% endblock %}
+{% load static %}
+{% load humanize %} 
+
+{% block content %}
+<style>
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes badgeGlow {
+        0%, 100% {
+            box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+        }
+        50% {
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+        }
+    }
+
+    .page-header {
+        animation: fadeInDown 0.6s ease-out;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    .page-header h2, .page-header p {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header p {
+        opacity: 0.95;
+    }
+
+    .portal-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        animation: fadeInUp 0.6s ease-out backwards;
+        border-width: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+        animation: fadeInDown 0.6s ease-out 0.2s backwards;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+
+    .filter-section .form-select {
+        border-radius: 8px;
+        border: 2px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: scale(1.02);
+    }
+
+    .filter-section .btn-primary {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .portal-card:nth-child(1) { animation-delay: 0.1s; }
+    .portal-card:nth-child(2) { animation-delay: 0.2s; }
+    .portal-card:nth-child(3) { animation-delay: 0.3s; }
+    .portal-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .portal-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .portal-card:hover::before {
+        opacity: 1;
+        animation: rotate 20s linear infinite;
+    }
+
+    .portal-card:hover {
+        transform: translateY(-12px) scale(1.04);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.25) !important;
+    }
+
+    .portal-card i {
+        transition: all 0.4s ease;
+        display: inline-block;
+    }
+
+    .portal-card:hover i {
+        transform: scale(1.3) rotate(-10deg);
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    .portal-card h4 {
+        font-weight: 700;
+        font-size: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .portal-card:hover h4 {
+        transform: scale(1.1);
+    }
+
+    .leave-history-card {
+        animation: fadeInUp 0.8s ease-out 0.5s backwards;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffe5a0 100%) !important;
+        border-bottom: 3px solid #ffc107;
+        padding: 1.25rem;
+    }
+
+    .table-responsive {
+        animation: fadeInUp 0.6s ease-out 0.6s backwards;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.5s ease-out backwards;
+    }
+
+    .table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+    .table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+    .table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+    .table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+
+    .table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(255, 193, 7, 0.08), transparent) !important;
+        transform: translateX(5px) scale(1.01);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .badge {
+        transition: all 0.3s ease;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 8px;
+        position: relative;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%) !important;
+    }
+
+    tr:hover .badge {
+        transform: scale(1.15);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    .badge.bg-warning:hover {
+        animation: badgeGlow 1.5s ease-in-out infinite;
+    }
+
+    .badge i {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .divider-line {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #ffc107, transparent);
+        margin: 2rem 0;
+        animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        border: none;
+    }
+
+    .empty-state {
+        animation: scaleIn 0.6s ease-out;
+        padding: 3rem 2rem;
+    }
+
+    .empty-state::before {
+        content: '📝';
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .table-dark {
+        background: linear-gradient(135deg, #343a40 0%, #23272b 100%) !important;
+    }
+
+    .text-uppercase {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    .stat-circle {
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        opacity: 0.08;
+        transition: all 0.4s ease;
+    }
+
+    .border-secondary .stat-circle {
+        background: #6c757d;
+    }
+
+    .border-warning .stat-circle {
+        background: #ffc107;
+    }
+
+    .border-success .stat-circle {
+        background: #28a745;
+    }
+
+    .border-danger .stat-circle {
+        background: #dc3545;
+    }
+
+    .portal-card:hover .stat-circle {
+        transform: scale(1.8) rotate(45deg);
+        opacity: 0.15;
+    }
+
+    .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+        .portal-card h4 {
+            font-size: 1.5rem;
+        }
+
+        .page-header {
+            padding: 1rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.6rem;
+        }
+    }
+
+    .card-header h5 {
+        animation: fadeInDown 0.6s ease-out 0.7s backwards;
+        color: #856404;
+    }
+
+    .table thead th {
+        position: relative;
+        color: white;
+    }
+
+    .table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #ffc107;
+        transition: width 0.3s ease;
+    }
+
+    .table thead th:hover::after {
+        width: 100%;
+    }
+
+    .table tbody td {
+        position: relative;
+    }
+
+    .table tbody tr:hover td:first-child::before {
+        content: '→';
+        position: absolute;
+        left: 5px;
+        color: #ffc107;
+        font-weight: bold;
+        animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    .reason-cell {
+        transition: all 0.3s ease;
+    }
+
+    tr:hover .reason-cell {
+        font-weight: 500;
+        color: #856404;
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h2 class="mb-2"><i class="bi bi-file-earmark-text me-2"></i> Leave Application Statement</h2>
+                <p>Review the status of your leave requests for the current period.</p>
+            </div>
+        </div>
+    </div>
+
+        <!-- Filter section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold"><i class="bi bi-funnel-fill me-2"></i>Select Term:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            {% for term in term_choices %}
+                                <option value="{{ term }}" {% if term == current_term %}selected{% endif %}>{{ term }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5 text-center">
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-secondary portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-secondary fs-3 mb-2"><i class="bi bi-list-columns"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Total Applications</p>
+                    <h4 class="mb-0 text-secondary">{{ total_leaves|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-warning portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-warning fs-3 mb-2"><i class="bi bi-clock-history"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Pending Review</p>
+                    <h4 class="mb-0 text-warning">{{ pending_leaves|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-success portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-success fs-3 mb-2"><i class="bi bi-check-circle-fill"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Approved Leaves</p>
+                    <h4 class="mb-0 text-success">{{ approved_leaves|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow border-danger portal-card">
+                <span class="stat-circle"></span>
+                <div class="card-body">
+                    <div class="text-danger fs-3 mb-2"><i class="bi bi-x-octagon-fill"></i></div>
+                    <p class="text-uppercase text-muted mb-0">Rejected Leaves</p>
+                    <h4 class="mb-0 text-danger">{{ rejected_leaves|default:"0"|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="divider-line">
+    <!-- Leave application modal -->
+    <div class="modal fade" id="leaveApplicationModal" tabindex="-1" aria-labelledby="leaveApplicationModalLabel" aria-hidden="true" style="top: 50px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="leaveApplicationModalLabel"><i class="bi bi-file-earmark-medical-fill me-2"></i> New Leave Application</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- <div class="modal-body">
+                    <form method="post" action="{% url 'student_leave_application' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="date_of_leave" class="form-label">Start Date of Leave</label>
+                            <input type="date" class="form-control" id="date_of_leave" name="date_of_leave" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="return_date" class="form-label">Return Date</label>
+                            <input type="date" class="form-control" id="return_date" name="return_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Leave</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-100">Submit Application</button>
+                            <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div> -->
+                <!-- comming soon -->
+                <div class="modal-body text-center p-5">
+                    <i class="bi bi-hourglass-split fs-1 text-warning mb-3"></i>
+                    <h5 class="mb-3">Feature Coming Soon!</h5>
+                    <p class="text-muted">The leave application feature is under development and will be available shortly. Thank you for your patience!</p>
+                    <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave button -->
+    <div class="row mb-4">
+        <div class="col d-flex justify-content-end">
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#leaveApplicationModal">
+                <i class="bi bi-plus-circle me-2"></i> Apply for Leave
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow leave-history-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i> Detailed Leave History</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if leave_records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Date Filed</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">End Date</th>
+                                    <th scope="col">Reason</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Reviewer Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in leave_records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ record.date_filed|date:"M j, Y" }}</td>
+                                    <td>{{ record.date_of_leave|date:"M j, Y" }}</td>
+                                    <td>{{ record.return_date|date:"M j, Y" }}</td>
+                                    <td class="reason-cell">{{ record.other_reason|truncatechars:50 }}</td>
+                                    <td>
+                                        {% if record.status == 'Approved' %}
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Approved</span>
+                                        {% elif record.status == 'Rejected' %}
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rejected</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.reviewer_notes|default:"-"|truncatechars:30 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center text-muted">
+                        <p>You have no leave application records.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+<!-- leave application function -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var leaveApplicationModal = document.getElementById('leaveApplicationModal');
+        leaveApplicationModal.addEventListener('shown.bs.modal', function () {
+            document.getElementById('date_of_leave').focus();
+        });
+    });
+</script>

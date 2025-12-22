@@ -1,0 +1,50 @@
+{% if not report_data and average_level == "N/A" %}
+<div class="alert alert-info text-center">
+    <i class="bi bi-info-circle me-2"></i>
+    No performance data has been recorded for this sub-strand yet.
+</div>
+
+{% else %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Summary Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-light">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Overall Average Level</h6>
+                    <p class="card-text display-4 fw-bold text-primary">{{ average_level }}</p>
+                    <small class="text-muted">Based on all recorded entries for this sub-strand.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Distribution -->
+        <div class="col-md-8 mb-4">
+            <div class="card h-100 shadow-sm border-light">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-distribute-vertical me-2"></i> Level Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for item in report_data %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {% with level_name=level_names|slice:":1"|join:""|add:item.level|stringformat:"s" %}
+                                    <span class="fw-medium">Level {{ item.level }}</span>
+                                {% endwith %}
+                                <span class="badge bg-primary rounded-pill fs-6">{{ item.pupil_count }} Student(s)</span>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No distribution data available.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col d-flex justify-content-end mb-3">
+        <button class="btn btn-success">Generate Report
+            <i class="bi"></i>
+        </button>
+    </div>
+</div>
+{% endif %}

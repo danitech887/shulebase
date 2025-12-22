@@ -1,0 +1,70 @@
+
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        --secondary-gradient: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+        --progress-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --card-shadow: 0 4px 20px rgba(13, 148, 136, 0.15);
+        --card-hover-shadow: 0 20px 40px rgba(13, 148, 136, 0.25);
+    }
+
+    body { background-color: #f8fafc; }
+
+    .hero-section {
+        background: var(--primary-gradient);
+        border-radius: 24px; padding: 3rem; margin-bottom: 2.5rem; color: white;
+    }
+
+    .resource-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none; border-radius: 20px; background: white;
+        box-shadow: var(--card-shadow); height: 100%; position: relative;
+    }
+    .resource-card:hover { transform: translateY(-12px); box-shadow: var(--card-hover-shadow); }
+
+    /* Optimized Badge Styling for Visibility */
+.status-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 100; /* Ensures it sits on top of the image */
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 800; /* Extra bold for visibility */
+    font-size: 0.75rem;
+    color: #131111 !important; /* Force white font */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    /* Adding a text shadow so white text is visible even if the background fails */
+    text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Explicit fallback colors if gradients fail */
+.badge-completed { 
+    background: #059669 !important; /* Solid Green Fallback */
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; 
+}
+
+.badge-progress { 
+    background: #d97706 !important; /* Solid Orange Fallback */
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; 
+}
+    .media-preview { height: 180px; background: #f1f5f9; position: relative; cursor: pointer; overflow: hidden; }
+    .play-overlay {
+        position: absolute; width: 60px; height: 60px; background: rgba(255,255,255,0.9);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: #0d9488; font-size: 1.5rem;
+    }
+
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
+    .video-container div, .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    .filter-btn { border-radius: 50px !important; padding: 0.6rem 1.5rem; font-weight: 600; border: 2px solid #0d9488 !important; color: #0d9488 !important; }
+    .filter-btn.active { color: white !important; background: var(--primary-gradient) !important; border-color: transparent !important; }
+    
+    .btn-watch { background: var(--primary-gradient); border: none; border-radius: 50px; color: white; padding: 0.7rem; font-weight: 600; width: 100%; }
+    .btn-download { border: 2px solid #dc3545; border-radius: 50px; color: #dc3545; padding: 0.7rem; font-weight: 600; text-align: center; text-decoration: none; display: block; }

@@ -1,0 +1,73 @@
+{
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 1,
+    "storeVersion": 4,
+    "recordVersions": {
+      "asset": { "version": 1, "subType": "Key" },
+      "camera": { "version": 1, "subType": "Key" },
+      "document": { "version": 2, "subType": "Key" },
+      "instance": { "version": 22, "subType": "Key" },
+      "instance_page_state": { "version": 5, "subType": "Key" },
+      "page": { "version": 1, "subType": "Key" },
+      "shape": { "version": 3, "subType": "Key" },
+      "instance_presence": { "version": 5, "subType": "Key" },
+      "pointer": { "version": 1, "subType": "Key" }
+    }
+  },
+  "records": [
+    { "id": "document:document", "typeName": "document", "x": 0, "y": 0, "rotation": 0, "opacity": 1, "meta": {}, "props": { "title": "ShuleBase DB" } },
+    { "id": "page:page", "typeName": "page", "name": "Page 1", "index": "a1", "meta": {} },
+    
+    { "id": "shape:school", "typeName": "shape", "type": "geo", "x": 0, "y": 0, "props": { "w": 250, "h": 180, "geo": "rectangle", "color": "blue", "text": "MasterSchool\n--\nPK: id\nschool_name\nemail_address\nstatus\nlogo_path", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a1" },
+    
+    { "id": "shape:users", "typeName": "shape", "type": "geo", "x": 0, "y": 250, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "grey", "text": "Users (Auth)\n--\nPK: id\nFK: school\nusername\nrole\nregistration_no", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a2" },
+    
+    { "id": "shape:announcement", "typeName": "shape", "type": "geo", "x": 0, "y": 450, "props": { "w": 250, "h": 120, "geo": "rectangle", "color": "grey", "text": "Announcement\n--\nFK: school\ntitle\ntarget_audience", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a3" },
+
+    { "id": "shape:teacher", "typeName": "shape", "type": "geo", "x": 300, "y": 0, "props": { "w": 250, "h": 200, "geo": "rectangle", "color": "green", "text": "TeacherInfo\n--\nPK: registration_no\nFK: school\nfirst_name\nsurname\nphone\nemail", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a4" },
+
+    { "id": "shape:teacher_role", "typeName": "shape", "type": "geo", "x": 300, "y": 250, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "green", "text": "TeachersRole\n--\nFK: registration_no\nFK: school\ntype_of_teacher\ngrade\nstream\nsubject", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a5" },
+
+    { "id": "shape:teacher_att", "typeName": "shape", "type": "geo", "x": 300, "y": 450, "props": { "w": 250, "h": 120, "geo": "rectangle", "color": "green", "text": "TeacherAttendance\n--\nFK: registration_no\nstatus\ndate_of_attendance", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a6" },
+
+    { "id": "shape:teaching_prog", "typeName": "shape", "type": "geo", "x": 300, "y": 600, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "green", "text": "TeachingProgress\n--\nFK: registration_no\ngrade\nstream\ntopic\nstatus", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a7" },
+
+    { "id": "shape:student", "typeName": "shape", "type": "geo", "x": 600, "y": 0, "props": { "w": 250, "h": 220, "geo": "rectangle", "color": "light-blue", "text": "StudentInfo\n--\nPK: registration_no\nFK: school\nfirst_name\nsurname\ngrade\nstream\nparent_name", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a8" },
+
+    { "id": "shape:fee", "typeName": "shape", "type": "geo", "x": 600, "y": 250, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "light-blue", "text": "Fee\n--\nFK: registration_no\namount\nmode_of_payment\nterm\nyear", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a9" },
+
+    { "id": "shape:student_att", "typeName": "shape", "type": "geo", "x": 600, "y": 450, "props": { "w": 250, "h": 120, "geo": "rectangle", "color": "light-blue", "text": "StudentAttendance\n--\nFK: registration_no\nstatus\ndate_of_attendance", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a10" },
+
+    { "id": "shape:marks", "typeName": "shape", "type": "geo", "x": 600, "y": 600, "props": { "w": 250, "h": 200, "geo": "rectangle", "color": "light-blue", "text": "Marks (8-4-4)\n--\nFK: registration_no\nmathematics\nenglish\nkiswahili\n...\ntotal_marks", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a11" },
+
+    { "id": "shape:strand", "typeName": "shape", "type": "geo", "x": 900, "y": 0, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "yellow", "text": "Strand (CBC)\n--\nFK: school\nsubject\nname\ngrade\nstream", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a12" },
+
+    { "id": "shape:substrand", "typeName": "shape", "type": "geo", "x": 900, "y": 200, "props": { "w": 250, "h": 120, "geo": "rectangle", "color": "yellow", "text": "SubStrand\n--\nFK: strand\nname\ndescription", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a13" },
+
+    { "id": "shape:substrand_mark", "typeName": "shape", "type": "geo", "x": 900, "y": 350, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "yellow", "text": "SubStrandMark\n--\nFK: student\nFK: sub_strand\nscore\nlevel\nremark", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a14" },
+
+    { "id": "shape:competency", "typeName": "shape", "type": "geo", "x": 900, "y": 550, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "yellow", "text": "LearnerCompetency\n--\nFK: student\ncompetency\nlevel\ncomment", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a15" },
+
+    { "id": "shape:assessment", "typeName": "shape", "type": "geo", "x": 900, "y": 750, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "yellow", "text": "AssessmentEvent\n--\nFK: school\nFK: strand\nactivity\nmethod\ndate", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a16" },
+
+    { "id": "shape:observation", "typeName": "shape", "type": "geo", "x": 900, "y": 950, "props": { "w": 250, "h": 150, "geo": "rectangle", "color": "yellow", "text": "Observation\n--\nFK: student\nFK: event\nlevel\ncomment", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a17" },
+
+    { "id": "shape:resource", "typeName": "shape", "type": "geo", "x": 1200, "y": 0, "props": { "w": 250, "h": 180, "geo": "rectangle", "color": "red", "text": "Resource\n--\nFK: school\ntitle\nresource_type\nurl_or_file\ngrade\nstream", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a18" },
+
+    { "id": "shape:learning_log", "typeName": "shape", "type": "geo", "x": 1200, "y": 250, "props": { "w": 250, "h": 120, "geo": "rectangle", "color": "red", "text": "LearningLog\n--\nFK: student\nFK: resource\nprogress\ncompleted", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a19" },
+
+    { "id": "shape:student_note", "typeName": "shape", "type": "geo", "x": 1200, "y": 400, "props": { "w": 250, "h": 120, "geo": "rectangle", "color": "red", "text": "StudentNote\n--\nFK: student\nFK: resource\ncontent", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a20" },
+
+    { "id": "shape:grade", "typeName": "shape", "type": "geo", "x": 1200, "y": 600, "props": { "w": 250, "h": 100, "geo": "rectangle", "color": "grey", "text": "Grade\n--\nFK: school\nname\nexpected_fee", "font": "mono", "align": "start" }, "parentId": "page:page", "index": "a21" },
+
+    { "id": "arrow:1", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:users", "normalizedAnchor": { "x": 0.5, "y": 0 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:school", "normalizedAnchor": { "x": 0.5, "y": 1 }, "isExact": false } }, "parentId": "page:page", "index": "a22" },
+    { "id": "arrow:2", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:teacher", "normalizedAnchor": { "x": 0, "y": 0.5 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:school", "normalizedAnchor": { "x": 1, "y": 0.5 }, "isExact": false } }, "parentId": "page:page", "index": "a23" },
+    { "id": "arrow:3", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:student", "normalizedAnchor": { "x": 0, "y": 0.5 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:school", "normalizedAnchor": { "x": 1, "y": 0.5 }, "isExact": false } }, "parentId": "page:page", "index": "a24" },
+    { "id": "arrow:4", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:teacher_role", "normalizedAnchor": { "x": 0.5, "y": 0 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:teacher", "normalizedAnchor": { "x": 0.5, "y": 1 }, "isExact": false } }, "parentId": "page:page", "index": "a25" },
+    { "id": "arrow:5", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:fee", "normalizedAnchor": { "x": 0.5, "y": 0 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:student", "normalizedAnchor": { "x": 0.5, "y": 1 }, "isExact": false } }, "parentId": "page:page", "index": "a26" },
+    { "id": "arrow:6", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:substrand", "normalizedAnchor": { "x": 0.5, "y": 0 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:strand", "normalizedAnchor": { "x": 0.5, "y": 1 }, "isExact": false } }, "parentId": "page:page", "index": "a27" },
+    { "id": "arrow:7", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:substrand_mark", "normalizedAnchor": { "x": 0.5, "y": 0 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:substrand", "normalizedAnchor": { "x": 0.5, "y": 1 }, "isExact": false } }, "parentId": "page:page", "index": "a28" },
+    { "id": "arrow:8", "typeName": "shape", "type": "arrow", "props": { "start": { "type": "binding", "boundShapeId": "shape:learning_log", "normalizedAnchor": { "x": 0.5, "y": 0 }, "isExact": false }, "end": { "type": "binding", "boundShapeId": "shape:resource", "normalizedAnchor": { "x": 0.5, "y": 1 }, "isExact": false } }, "parentId": "page:page", "index": "a29" }
+  ]
+}

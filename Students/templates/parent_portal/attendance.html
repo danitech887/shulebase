@@ -1,0 +1,593 @@
+{% extends 'base.html' %}
+{% block title %}Children Attendance{% endblock %}
+{% load static %}
+{% load humanize %} 
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --secondary-gradient: linear-gradient(135deg, #a8b3c1 0%, #6c757d 100%);
+    }
+
+    body {
+        background: #f8f9fe;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: var(--success-gradient);
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header p {
+        margin: 0;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Student Switcher */
+    .student-switcher {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .selection-label {
+        color: #6c757d;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        text-transform: uppercase;
+    }
+
+    .selection-label i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+
+    .student-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        margin: 5px 8px 5px 0;
+        border-radius: 50px;
+        border: 2px solid transparent;
+        background: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .student-pill i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .student-pill.active {
+        background: var(--success-gradient);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .student-pill:hover:not(.active) {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Attendance Stat Cards */
+    .attendance-stat-card {
+        border-radius: 16px;
+        border: none;
+        background: white;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .attendance-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        transition: height 0.3s ease;
+    }
+
+    .attendance-stat-card.card-secondary::before { background: var(--secondary-gradient); }
+    .attendance-stat-card.card-success::before { background: var(--success-gradient); }
+    .attendance-stat-card.card-danger::before { background: var(--danger-gradient); }
+    .attendance-stat-card.card-primary::before { background: var(--primary-gradient); }
+
+    .attendance-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .attendance-stat-card:hover::before {
+        height: 100%;
+        opacity: 0.05;
+    }
+
+    .attendance-stat-card .card-body {
+        padding: 1.75rem;
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .stat-icon-wrapper {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+    }
+
+    .stat-icon-wrapper.secondary-icon {
+        background: linear-gradient(135deg, rgba(168, 179, 193, 0.1) 0%, rgba(108, 117, 125, 0.1) 100%);
+        color: #6c757d;
+    }
+
+    .stat-icon-wrapper.success-icon {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        color: #11998e;
+    }
+
+    .stat-icon-wrapper.danger-icon {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%);
+        color: #fa709a;
+    }
+
+    .stat-icon-wrapper.primary-icon {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .stat-value.text-secondary { color: #6c757d; }
+    .stat-value.text-success { color: #11998e; }
+    .stat-value.text-danger { color: #fa709a; }
+    .stat-value.text-primary { color: #667eea; }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-section .form-select {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-section .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Section Divider */
+    .section-divider {
+        margin: 3rem 0;
+        position: relative;
+        text-align: center;
+    }
+
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+    }
+
+    /* Attendance Records Card */
+    .attendance-records-card {
+        border-radius: 16px;
+        border: none;
+        background: white;
+        overflow: hidden;
+    }
+
+    .attendance-records-card .card-header {
+        background: var(--success-gradient);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+
+    .attendance-records-card .card-header h5 {
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .attendance-records-card .badge {
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* Table Styling */
+    .table-responsive {
+        border-radius: 0 0 16px 16px;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+    .table thead th {
+        background: #2d3748;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border: none;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: #f8f9fe;
+        transform: scale(1.01);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .status-badge i {
+        margin-right: 0.5rem;
+    }
+
+    .status-badge.badge-success {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.15) 0%, rgba(56, 239, 125, 0.15) 100%);
+        color: #11998e;
+        border: 2px solid #11998e;
+    }
+
+    .status-badge.badge-danger {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.15) 0%, rgba(254, 225, 64, 0.15) 100%);
+        color: #fa709a;
+        border: 2px solid #fa709a;
+    }
+
+    .status-badge.badge-warning {
+        background: linear-gradient(135deg, rgba(240, 147, 251, 0.15) 0%, rgba(245, 87, 108, 0.15) 100%);
+        color: #f5576c;
+        border: 2px solid #f5576c;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        color: #718096;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header shadow-lg">
+                <h2><i class="bi bi-calendar-check me-2"></i> Attendance Overview</h2>
+                <p>Viewing attendance records for: <strong>{{ student.first_name }} {{ student.last_name }}</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- term filter -->
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <input type="hidden" name="student_id" value="{{ student.registration_no }}">
+                    
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold">
+                            <i class="bi bi-funnel-fill me-2"></i>Select Term:
+                        </label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            <option value="Term 1" {% if current_term == "Term 1" %}selected{% endif %}>Term 1</option>
+                            <option value="Term 2" {% if current_term == "Term 2" %}selected{% endif %}>Term 2</option>
+                            <option value="Term 3" {% if current_term == "Term 3" %}selected{% endif %}>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i> Apply Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Switcher -->
+    {% if students.count > 1 %}
+    <div class="row">
+        <div class="col-12">
+            <div class="student-switcher">
+                <div class="selection-label">
+                    <i class="bi bi-people-fill"></i>
+                    Switch Student
+                </div>
+                <div class="d-flex flex-wrap">
+                    {% for s in students %}
+                        <a href="?student_id={{ s.registration_no }}" 
+                           class="student-pill {% if s.registration_no == student.registration_no %}active{% endif %}">
+                            <i class="bi bi-person-circle"></i>
+                            {{ s.first_name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Attendance Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card attendance-stat-card card-secondary shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon-wrapper secondary-icon">
+                        <i class="bi bi-calendar-range"></i>
+                    </div>
+                    <div class="stat-label">Total Marked Days</div>
+                    <div class="stat-value text-secondary">{{ total_days|default:"0"|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card attendance-stat-card card-success shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon-wrapper success-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="stat-label">Present Days</div>
+                    <div class="stat-value text-success">{{ present_days|default:"0"|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card attendance-stat-card card-danger shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon-wrapper danger-icon">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <div class="stat-label">Absent Days</div>
+                    <div class="stat-value text-danger">{{ absent_days|default:"0"|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card attendance-stat-card card-primary shadow-sm">
+                <div class="card-body">
+                    <div class="stat-icon-wrapper primary-icon">
+                        <i class="bi bi-award"></i>
+                    </div>
+                    <div class="stat-label">Attendance Rate</div>
+                    <div class="stat-value text-primary">{{ attendance_percentage|floatformat:1 }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Daily Records Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card attendance-records-card shadow-lg">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                    <h5><i class="bi bi-list-ul me-2"></i> Daily Records for {{ student.first_name }}</h5>
+                    <span class="badge bg-white text-dark mt-2 mt-md-0">
+                        <i class="bi bi-graph-up me-1"></i>{{ attendance_percentage|floatformat:0 }}% Overall Rate
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    {% if attendance_records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Day of Week</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Recorded By</th>
+                                    <th scope="col">Notes/Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance_records %}
+                                <tr>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
+                                    <td>
+                                        <i class="bi bi-calendar3 me-2 text-muted"></i>
+                                        {{ record.date_of_attendance|date:"F j, Y" }}
+                                    </td>
+                                    <td class="text-muted">{{ record.date_of_attendance|date:"l" }}</td>
+                                    <td>
+                                        {% if record.status == 'Present' %}
+                                            <span class="status-badge badge-success">
+                                                <i class="bi bi-check-circle-fill"></i> Present
+                                            </span>
+                                        {% elif record.status == 'Absent' %}
+                                            <span class="status-badge badge-danger">
+                                                <i class="bi bi-x-circle-fill"></i> Absent
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge badge-warning">
+                                                <i class="bi bi-question-circle-fill"></i> {{ record.status }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-person me-2 text-muted"></i>
+                                        {{ record.recorded_by|default:"System" }}
+                                    </td>
+                                    <td class="text-muted">{{ record.notes|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center">
+                        <i class="bi bi-calendar-x"></i>
+                        <p class="fw-bold mb-2">No Attendance Records Found</p>
+                        <p class="text-muted small">Attendance records for <strong>{{ student.first_name }}</strong> will appear here once they are marked.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

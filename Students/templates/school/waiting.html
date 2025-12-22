@@ -1,0 +1,591 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Approval | My App</title>
+    <style>
+        /* Modern Blue Gradient Background with animated particles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Floating particles background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+            animation: floatParticles 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes floatParticles {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            margin-bottom: 20px;
+            animation: slideUpFade 0.8s ease-out forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo Placeholder */
+        .logo-container {
+            margin-bottom: 25px;
+        }
+        .logo-container img {
+            width: 80px;
+            height: auto;
+            filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.2));
+            animation: gentleRotate 3s ease-in-out infinite;
+        }
+
+        @keyframes gentleRotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .status-icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+            display: block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        h2 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        p {
+            color: #e0e6ed;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* Button Styling */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-login {
+            background: #00c853;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-login:hover {
+            background: #00e676;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
+        }
+
+        .btn-home {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-home:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Progress Bar Section */
+        .progress-card {
+            animation-delay: 0.2s;
+            padding: 35px 30px;
+        }
+
+        .progress-title {
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00c853, #00e676);
+            border-radius: 10px;
+            width: 33%;
+            animation: progressAnimation 2s ease-out;
+            box-shadow: 0 0 10px rgba(0, 200, 83, 0.5);
+        }
+
+        @keyframes progressAnimation {
+            from { width: 0%; }
+            to { width: 33%; }
+        }
+
+        .progress-text {
+            color: #c7d3e0;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        /* Features Preview Section */
+        .features-card {
+            animation-delay: 0.3s;
+            padding: 35px 30px;
+        }
+
+        .features-title {
+            color: #ffffff;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .feature-name {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .feature-desc {
+            color: #c7d3e0;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        /* Tips Section */
+        .tips-card {
+            animation-delay: 0.4s;
+            padding: 35px 30px;
+            text-align: left;
+        }
+
+        .tips-title {
+            color: #ffffff;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .tip-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .tip-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(5px);
+        }
+
+        .tip-icon {
+            font-size: 24px;
+            min-width: 30px;
+        }
+
+        .tip-content h4 {
+            color: #ffffff;
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+
+        .tip-content p {
+            color: #c7d3e0;
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Stats Section */
+        .stats-card {
+            animation-delay: 0.5s;
+            padding: 35px 30px;
+        }
+
+        .stats-title {
+            color: #ffffff;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-number {
+            color: #00e676;
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #c7d3e0;
+            font-size: 12px;
+        }
+
+        /* Newsletter Section */
+        .newsletter-card {
+            animation-delay: 0.6s;
+            padding: 35px 30px;
+        }
+
+        .newsletter-title {
+            color: #ffffff;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .newsletter-subtitle {
+            color: #c7d3e0;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .newsletter-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00e676;
+        }
+
+        .newsletter-btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            background: #00c853;
+            color: white;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-btn:hover {
+            background: #00e676;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 40px 25px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+            }
+
+            .newsletter-input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Main Success Card -->
+        <div class="glass-card">
+            <div class="logo-container">
+                <img src="{% static 'images/logo.png' %}" alt="Company Logo">
+            </div>
+
+            <span class="status-icon">⏳</span>
+            
+            <h2>Success!</h2>
+            <p>Your school has been successfully registered. Our administrators are currently reviewing your account.</p>
+            
+            <div class="button-group">
+                <a href="{% url 'login' %}" class="btn btn-login"><span>Go to Login</span></a>
+                <a href="{% url 'home' %}" class="btn btn-home"><span>Home</span></a>
+            </div>
+        </div>
+
+        <!-- Features Preview Card -->
+        <div class="glass-card features-card">
+            <div class="features-title">What You'll Get Access To</div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <div class="feature-name">Dashboard</div>
+                    <p class="feature-desc">Comprehensive analytics and insights</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">👥</span>
+                    <div class="feature-name">Student Management</div>
+                    <p class="feature-desc">Manage students effortlessly</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📚</span>
+                    <div class="feature-name">Course Tools</div>
+                    <p class="feature-desc">Create and manage courses</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">💬</span>
+                    <div class="feature-name">Communication</div>
+                    <p class="feature-desc">Stay connected with everyone</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="glass-card tips-card">
+            <div class="tips-title">While You Wait...</div>
+            
+            <div class="tip-item">
+                <div class="tip-icon">📧</div>
+                <div class="tip-content">
+                    <h4>Check Your Email</h4>
+                    <p>Make sure to check your spam folder for our approval notification</p>
+                </div>
+            </div>
+
+            <div class="tip-item">
+                <div class="tip-icon">📋</div>
+                <div class="tip-content">
+                    <h4>Prepare Your Data</h4>
+                    <p>Gather student lists and course materials for a smooth start</p>
+                </div>
+            </div>
+
+            <div class="tip-item">
+                <div class="tip-icon">🎓</div>
+                <div class="tip-content">
+                    <h4>Explore Resources</h4>
+                    <p>Browse our documentation to learn about all features</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="glass-card stats-card">
+            <div class="stats-title">Join Our Growing Community</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">{{ schools }}+</span>
+                    <span class="stat-label">Schools</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ students }}+</span>
+                    <span class="stat-label">Students</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Satisfaction</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Newsletter Card -->
+        <div class="glass-card newsletter-card">
+            <div class="newsletter-title">Stay Updated</div>
+            <p class="newsletter-subtitle">Get notified about new features and updates</p>
+            <form class="newsletter-form" onsubmit="return false;">
+                <input type="email" class="newsletter-input" placeholder="Enter your email" required>
+                <button type="submit" class="newsletter-btn">Subscribe</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,941 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Learning Hub | Shulebase{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        --secondary-gradient: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    body { 
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Floating particles background */
+    body::before,
+    body::after {
+        content: '';
+        position: fixed;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(13, 148, 136, 0.1) 0%, transparent 70%);
+        animation: float-orb 20s ease-in-out infinite;
+        z-index: 0;
+    }
+
+    body::before {
+        width: 600px;
+        height: 600px;
+        top: -300px;
+        right: -200px;
+    }
+
+    body::after {
+        width: 800px;
+        height: 800px;
+        bottom: -400px;
+        left: -300px;
+        animation-delay: 5s;
+        animation-duration: 25s;
+    }
+
+    @keyframes float-orb {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(50px, -50px) rotate(180deg); }
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background: var(--primary-gradient);
+        border-radius: 35px;
+        padding: 3.5rem;
+        margin-bottom: 3rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 25px 70px rgba(13, 148, 136, 0.4);
+        animation: hero-entrance 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1;
+    }
+
+    @keyframes hero-entrance {
+        from { transform: translateY(-80px) scale(0.95); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 700px;
+        height: 700px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        animation: hero-orb-float 12s ease-in-out infinite;
+    }
+
+    @keyframes hero-orb-float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(40px, -40px) scale(1.1); }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon {
+        width: 90px;
+        height: 90px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        animation: icon-pulse 3s ease-in-out infinite;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    @keyframes icon-pulse {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.08) rotate(5deg); }
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        animation: slide-in-left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    }
+
+    @keyframes slide-in-left {
+        from { transform: translateX(-100px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .hero-section p {
+        font-size: 1.2rem;
+        animation: slide-in-right 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+    }
+
+    @keyframes slide-in-right {
+        from { transform: translateX(100px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Filter Buttons */
+    .filter-container {
+        animation: fade-scale-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s both;
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes fade-scale-in {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .filter-btn {
+        border-radius: 50px !important;
+        padding: 0.8rem 2rem;
+        font-weight: 700;
+        border: 3px solid #0d9488 !important;
+        color: #0d9488 !important;
+        background: white !important;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(13, 148, 136, 0.2);
+    }
+
+    .filter-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--primary-gradient);
+        transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: -1;
+    }
+
+    .filter-btn:hover::before,
+    .filter-btn.active::before {
+        left: 0;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        color: white !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 30px rgba(13, 148, 136, 0.5);
+        transform: translateY(-3px);
+    }
+
+    .filter-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .filter-btn:hover i,
+    .filter-btn.active i {
+        transform: rotate(360deg) scale(1.2);
+    }
+
+    /* Resource Cards */
+    .resource-card {
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: none;
+        border-radius: 25px;
+        background: white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+    }
+
+    .resource-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.6), transparent);
+        transform: rotate(45deg);
+        transition: all 0.6s ease;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .resource-card:hover {
+        transform: translateY(-20px) rotateX(5deg) scale(1.03);
+        box-shadow: 0 25px 60px rgba(13, 148, 136, 0.25);
+    }
+
+    .resource-card:hover::before {
+        left: 150%;
+    }
+
+    .resource-item {
+        animation: card-fade-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes card-fade-in {
+        from { transform: translateY(50px) scale(0.9); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* Status Badges */
+    .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 10;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        color: white !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        animation: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes badge-pop {
+        from { transform: scale(0) rotate(180deg); opacity: 0; }
+        to { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    .badge-completed {
+        background: var(--success-gradient) !important;
+        animation: glow-green 2s ease-in-out infinite;
+    }
+
+    @keyframes glow-green {
+        0%, 100% { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+        50% { box-shadow: 0 6px 30px rgba(16, 185, 129, 0.8), 0 0 20px rgba(16, 185, 129, 0.5); }
+    }
+
+    .badge-progress {
+        background: var(--warning-gradient) !important;
+        animation: glow-orange 2s ease-in-out infinite;
+    }
+
+    @keyframes glow-orange {
+        0%, 100% { box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); }
+        50% { box-shadow: 0 6px 30px rgba(245, 158, 11, 0.8), 0 0 20px rgba(245, 158, 11, 0.5); }
+    }
+
+    /* Media Preview */
+    .media-preview {
+        height: 220px;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 25px 25px 0 0;
+    }
+
+    .media-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .resource-card:hover .media-preview img {
+        transform: scale(1.15) rotate(2deg);
+        filter: brightness(1.1);
+    }
+
+    .play-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 75px;
+        height: 75px;
+        background: rgba(255,255,255,0.95);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d9488;
+        font-size: 2rem;
+        z-index: 5;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+        animation: play-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes play-pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    .resource-card:hover .play-overlay {
+        transform: translate(-50%, -50%) scale(1.3) rotate(90deg);
+        background: #0d9488;
+        color: white;
+        box-shadow: 0 15px 50px rgba(13, 148, 136, 0.6);
+    }
+
+    /* PDF Icon */
+    .pdf-icon-container {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        border-radius: 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        animation: pdf-float 3s ease-in-out infinite;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+    }
+
+    @keyframes pdf-float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(5deg); }
+    }
+
+    .resource-card:hover .pdf-icon-container {
+        animation: pdf-bounce 0.6s ease;
+    }
+
+    @keyframes pdf-bounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2) rotate(10deg); }
+    }
+
+    /* Buttons */
+    .btn-watch {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 50px;
+        color: white;
+        padding: 0.85rem;
+        font-weight: 700;
+        width: 100%;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(13, 148, 136, 0.3);
+    }
+
+    .btn-watch::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-watch:hover::after {
+        width: 400px;
+        height: 400px;
+    }
+
+    .btn-watch:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 35px rgba(13, 148, 136, 0.5);
+        color: white;
+    }
+
+    .btn-download {
+        border: 3px solid #ef4444;
+        border-radius: 50px;
+        color: #ef4444;
+        padding: 0.85rem;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        background: white;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-download::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--danger-gradient);
+        transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: -1;
+    }
+
+    .btn-download:hover::before {
+        left: 0;
+    }
+
+    .btn-download:hover {
+        color: white;
+        border-color: transparent;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 35px rgba(239, 68, 68, 0.5);
+    }
+
+    /* Modal */
+    .modal-content {
+        border-radius: 30px;
+        border: none;
+        overflow: hidden;
+        box-shadow: 0 30px 90px rgba(0,0,0,0.3);
+        animation: modal-entrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modal-entrance {
+        from { transform: scale(0.8) translateY(50px); opacity: 0; }
+        to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+        border: none;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .btn-close {
+        transition: all 0.3s ease;
+    }
+
+    .btn-close:hover {
+        transform: rotate(90deg) scale(1.2);
+    }
+
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        background: #000;
+    }
+
+    /* Notes Modal Styling */
+    .note-card {
+        border-left: 5px solid #0d9488;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .note-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    }
+    .note-content {
+        white-space: pre-wrap;
+        color: #374151;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .notes-filter-bar {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e2e8f0;
+    }
+    .empty-notes {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94a3b8;
+    }
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+    .hover-scale:hover {
+        transform: translateY(-3px);
+    }
+
+    .video-container div,
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* Card Body */
+    .card-body {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 2.5rem 2rem;
+            border-radius: 25px;
+        }
+
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+
+        .hero-icon {
+            width: 70px;
+            height: 70px;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .play-overlay {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="hero-section animate__animated animate__fadeIn">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="bi bi-mortarboard-fill text-white" style="font-size: 3rem;"></i>
+            </div>
+            <h1 class="fw-bold">Learning Hub</h1>
+            <p class="opacity-90 mb-0">Assigned materials for <strong>{{ grade }}</strong></p>
+            <div class="mt-4">
+                <button onclick="openNotesModal()" class="btn btn-light text-primary fw-bold rounded-pill px-4 shadow-sm hover-scale">
+                    <i class="bi bi-journal-text me-2"></i>View My Notes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mb-5 filter-container">
+        <div class="btn-group" role="group">
+            <button class="btn filter-btn active" data-filter="all">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>All Resources
+            </button>
+            <button class="btn filter-btn" data-filter="video">
+                <i class="bi bi-play-circle-fill me-2"></i>Videos
+            </button>
+            <button class="btn filter-btn" data-filter="book">
+                <i class="bi bi-file-earmark-pdf-fill me-2"></i>E-Books
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4" id="resource-grid">
+        {% for item in resources %}
+        <div class="col-xl-3 col-lg-4 col-md-6 resource-item" data-type="{{ item.resource_type }}" style="animation-delay: calc({{ forloop.counter0 }} * 0.1s);">
+            <div class="card h-100 resource-card">
+                
+                {% with log=item.user_log.0 %}
+                <span id="badge-{{ item.id }}" class="badge status-badge 
+                    {% if item.resource_type == 'E-Book' and item.id in viewed_resource_ids %}badge-completed d-block 
+                    {% elif log.progress >= 95 %}badge-completed d-block 
+                    {% elif log.progress > 0 %}badge-progress d-block 
+                    {% else %}d-none{% endif %}">
+                    {% if item.resource_type == 'E-Book' %}<i class="bi bi-check-circle-fill"></i> Completed
+                    {% elif log.progress >= 95 %}<i class="bi bi-check-circle-fill"></i> Completed
+                    {% else %}<i class="bi bi-clock-fill"></i> {{ log.progress }}% Watched{% endif %}
+                </span>
+                {% endwith %}
+
+                <div class="media-preview" onclick="{% if item.resource_type == 'video' %}openVideo('{{ item.url_or_file }}', '{{ item.id }}', '{{ item.title|escapejs }}'){% else %}initiateDownload('{{ item.id }}'){% endif %}">
+                    {% if item.resource_type == 'video' %}
+                        <img src="https://img.youtube.com/vi/{{ item.url_or_file }}/mqdefault.jpg" alt="{{ item.title }}">
+                        <div class="play-overlay">
+                            <i class="bi bi-play-fill"></i>
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <!-- thumnail display -->
+                            {% if item.thumbnail %}
+                                <img src="{{ item.thumbnail.url }}" alt="pdf">
+                            {% endif %}
+                            
+                            <div class="pdf-icon-container">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger" style="font-size: 3rem;"></i>
+                                <small class="fw-bold text-danger mt-2">PDF</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <h6 class="fw-bold mb-3" style="min-height: 3em; line-height: 1.5;">{{ item.title|truncatechars:50 }}</h6>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-calendar3 me-1"></i>Posted {{ item.created_at|timesince }} ago
+                    </p>
+                    
+                    <div class="mt-auto">
+                        {% if item.resource_type == 'video' %}
+                            <button onclick="openVideo('{{ item.url_or_file }}', '{{ item.id }}', '{{ item.title|escapejs }}')" class="btn btn-watch">
+                                <i class="bi bi-play-fill me-2"></i>Watch Lesson
+                            </button>
+                        {% else %}
+                            <a href="{% url 'track_resource' item.id %}" onclick="updateBadge('{{ item.id }}')" class="btn btn-download">
+                                <i class="bi bi-download me-2"></i>Download PDF
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div style="animation: float-orb 3s ease-in-out infinite;">
+                <i class="bi bi-inbox text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+            </div>
+            <h5 class="text-muted mt-4">No resources available yet</h5>
+            <p class="text-muted">Check back soon for new learning materials!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="videoModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            
+            <div class="modal-header border-0 bg-white p-3">
+                <h5 class="modal-title fw-bold mb-0 text-primary" id="videoTitle">
+                    <i class="bi bi-play-circle-fill me-2"></i>Video Lesson
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopVideo()"></button>
+            </div>
+            
+            <div class="modal-body p-0">
+                <div class="video-container bg-black">
+                    <div id="youtubePlayer"></div>
+                </div>
+                
+                <div class="p-4 bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="fw-bold small text-muted text-uppercase">Study Notes</label>
+                        <div id="saveStatus" class="small fw-bold"></div>
+                    </div>
+                    
+                    <textarea id="studentNotesArea" class="form-control border-2 rounded-3 shadow-sm" 
+                              style="height: 100px; resize: none;" 
+                              placeholder="Type your notes here..."></textarea>
+                    
+                    <div class="d-grid mt-3">
+                        <button onclick="saveNote()" id="btnSaveNote" class="btn btn-primary rounded-pill fw-bold">
+                            <i class="bi bi-save2 me-2"></i>Save My Notes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Notes Modal -->
+<div class="modal fade" id="allNotesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i class="bi bi-journal-richtext me-2 text-primary"></i>My Study Notes
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Filters -->
+                <div class="notes-filter-bar">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                                <input type="text" id="notesSearchInput" class="form-control border-start-0 ps-0" placeholder="Search notes content...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <select id="notesResourceFilter" class="form-select">
+                                <option value="">All Resources</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes List -->
+                <div id="notesListContainer" class="d-flex flex-column gap-3">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Loading notes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    var player, progressTimer, activeResourceId;
+
+    function openVideo(youtubeId, resourceId, title) {
+        activeResourceId = resourceId;
+        document.getElementById('videoTitle').innerHTML = '<i class="bi bi-play-circle me-2"></i>' + title;
+        if (!player) {
+            player = new YT.Player('youtubePlayer', {
+                videoId: youtubeId,
+                playerVars: { 'autoplay': 1, 'rel': 0 },
+                events: { 
+                    'onStateChange': (e) => {
+                        if (e.data == YT.PlayerState.PLAYING) {
+                            progressTimer = setInterval(reportProgress, 5000);
+                        } else {
+                            clearInterval(progressTimer);
+                        }
+                    }
+                }
+            });
+        } else {
+            player.loadVideoById(youtubeId);
+        }
+        new bootstrap.Modal(document.getElementById('videoModal')).show();
+    }
+    function saveNote() {
+        const content = document.getElementById('studentNotesArea').value;
+        const btn = document.getElementById('btnSaveNote');
+        const status = document.getElementById('saveStatus');
+        
+        btn.disabled = true;
+        if(status) status.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+        fetch(`/api/save-note/${activeResourceId}/`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `note_content=${encodeURIComponent(content)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(status) status.innerHTML = '<i class="bi bi-check-lg text-success"></i> Saved Successfully';
+            btn.disabled = false;
+            // Clear status after 3 seconds
+            setTimeout(() => { if(status) status.innerText = ''; }, 3000);
+        })
+        .catch(error => {
+            if(status) status.innerHTML = '<i class="bi bi-exclamation-triangle text-danger"></i> Error Saving';
+            btn.disabled = false;
+        });
+    }
+
+    function reportProgress() {
+        let p = Math.round((player.getCurrentTime() / player.getDuration()) * 100);
+        if (p > 0) {
+            fetch(`/update-video-progress/${activeResourceId}/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `progress=${p}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                let badge = document.getElementById('badge-' + activeResourceId);
+                if (badge) {
+                    badge.classList.remove('d-none');
+                    if (data.current_progress >= 95) {
+                        badge.className = "badge status-badge badge-completed d-block";
+                        badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Completed';
+                    } else {
+                        badge.className = "badge status-badge badge-progress d-block";
+                        badge.innerHTML = `<i class="bi bi-clock-fill"></i> ${data.current_progress}% Watched`;
+                    }
+                }
+            });
+        }
+    }
+
+    function stopVideo() {
+        if(player) player.stopVideo();
+        clearInterval(progressTimer);
+    }
+
+    function initiateDownload(id) {
+        window.location.href = `/track-resource/${id}/`;
+    }
+
+    function updateBadge(id) {
+        let badge = document.getElementById('badge-' + id);
+        if (badge) {
+            badge.classList.remove('d-none');
+            badge.className = "badge status-badge badge-completed d-block";
+            badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Completed';
+        }
+    }
+
+    // Filter Logic
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            let filter = this.dataset.filter;
+            document.querySelectorAll('.resource-item').forEach((item, index) => {
+                if (filter === 'all' || item.dataset.type === filter) {
+                    item.style.display = 'block';
+                    item.style.animation = `card-fade-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.1}s both`;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Notes Modal Logic
+    let allNotes = [];
+
+    function openNotesModal() {
+        const modal = new bootstrap.Modal(document.getElementById('allNotesModal'));
+        modal.show();
+        fetchNotes();
+    }
+
+    function fetchNotes() {
+        const container = document.getElementById('notesListContainer');
+        // Fetch notes from API
+        fetch('{% url "get_student_notes" %}') 
+            .then(res => {
+                if(!res.ok) throw new Error('Failed to fetch');
+                return res.json();
+            })
+            .then(data => {
+                allNotes = data.notes || []; 
+                populateResourceFilter();
+                renderNotes(allNotes);
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = `<div class="empty-notes"><i class="bi bi-journal-x mb-3" style="font-size: 3rem;"></i><p>Could not load notes. Please try again later.</p></div>`;
+            });
+    }
+
+    function renderNotes(notes) {
+        const container = document.getElementById('notesListContainer');
+        if (notes.length === 0) {
+            container.innerHTML = `<div class="empty-notes"><i class="bi bi-journal mb-3" style="font-size: 3rem;"></i><p>You haven't saved any notes yet.</p></div>`;
+            return;
+        }
+        
+        container.innerHTML = notes.map(note => `
+            <div class="card note-card shadow-sm border-0 bg-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-play-circle-fill me-2 text-primary"></i>${note.resource_title}</h6>
+                        <span class="badge bg-light text-secondary border">${new Date(note.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <p class="note-content mb-0">${note.content}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function populateResourceFilter() {
+        const filter = document.getElementById('notesResourceFilter');
+        const resources = [...new Set(allNotes.map(n => n.resource_title))];
+        filter.innerHTML = '<option value="">All Resources</option>' + 
+            resources.map(r => `<option value="${r}">${r}</option>`).join('');
+    }
+
+    // Filter Event Listeners
+    function filterNotes() {
+        const search = document.getElementById('notesSearchInput').value.toLowerCase();
+        const resFilter = document.getElementById('notesResourceFilter').value;
+        
+        const filtered = allNotes.filter(n => {
+            const matchesSearch = n.content.toLowerCase().includes(search) || n.resource_title.toLowerCase().includes(search);
+            const matchesRes = resFilter === '' || n.resource_title === resFilter;
+            return matchesSearch && matchesRes;
+        });
+        renderNotes(filtered);
+    }
+
+    document.getElementById('notesSearchInput').addEventListener('keyup', filterNotes);
+    document.getElementById('notesResourceFilter').addEventListener('change', filterNotes);
+</script>
+{% endblock %}
