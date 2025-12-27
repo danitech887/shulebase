@@ -536,6 +536,8 @@ class Resource(models.Model):
     subject = models.CharField(max_length=100)
     grade = models.CharField(max_length=10)  # e.g., 7 for Grade 7
     stream = models.CharField(max_length=19,default='A')
+    term = models.CharField(max_length=10,choices=[('Term 1','Term 1'),('Term 2','Term 2'),('Term 3','Term 3')],default='Term 3')
+    year = models.IntegerField(default=timezone.now().year)
     resource_type = models.CharField(max_length=10, choices=TYPES)
     url_or_file = models.CharField(max_length=500, help_text="YouTube ID or File URL")
     thumbnail = models.ImageField(upload_to='thumbs/', null=True, blank=True)

@@ -332,7 +332,7 @@ def student_portal_academics(request):
         "link": report_url,
         "date": datetime.now().strftime("%B %d, %Y")
     }
-    resources = Resource.objects.filter(grade = student.grade, stream = student.stream)
+    resources = Resource.objects.filter(grade = student.grade, stream = student.stream,term = term_filter)
     
     term_choices = list(SubStrandMark.objects.filter(student=student).values_list('term', flat=True).distinct())
 

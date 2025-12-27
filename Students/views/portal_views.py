@@ -1260,7 +1260,8 @@ def manage_resources(request):
         'streams': streams,
         'subjects': subject_choices,
         'resources': resources,
-        'title': 'Upload Resource'
+        'title': 'Upload Resource',
+        'term_choices': ['Term 1','Term 2','Term 3']
     }
     return render(request, 'teacher_portal/learning_resources.html', context)
 

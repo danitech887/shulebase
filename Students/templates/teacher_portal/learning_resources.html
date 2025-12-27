@@ -464,6 +464,16 @@
                         <label class="form-label"><i class="bi bi-image text-primary me-2"></i>Thumbnail</label>
                         <input type="file" name="thumbnail" class="form-control">
                     </div>
+                    <!-- term choices -->
+                    <div class="col-6 mb-3">
+                            <label class="form-label"><i class="bi bi-diagram-3 text-primary me-2"></i>Term</label>
+                            <select name="term" class="form-select">
+                                <option value="">Select Term</option>
+                                {% for t in term_choices %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    
+                    
                     <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-3">
                         <i class="bi bi-save me-2"></i>Save Material
                     </button>

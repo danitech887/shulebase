@@ -201,6 +201,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     # Local apps
+
     'Students',
 ]
 

@@ -255,11 +255,12 @@ class SubstrandReportForm(forms.Form):
 class ResourceForm(forms.ModelForm):
     class Meta:
         model = Resource
-        fields = ['title', 'subject', 'grade', 'resource_type', 'url_or_file', 'thumbnail']
+        fields = ['title', 'subject', 'grade','stream','term', 'resource_type', 'url_or_file', 'thumbnail']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'subject': forms.TextInput(attrs={'class': 'form-control'}),
             'grade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Grade 1'}),
+            'term': forms.Select(attrs={'class': 'form-control'}), 
             'resource_type': forms.Select(attrs={'class': 'form-select'}),
             'url_or_file': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'YouTube ID or External URL'}),
         }
