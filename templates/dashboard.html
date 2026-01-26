@@ -1,0 +1,526 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+        --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-header {
+        background: var(--primary-gradient);
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(180deg); }
+    }
+
+    .filter-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 1rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px); 
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--primary-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+        height: 100%;
+        opacity: 0.1;
+    }
+
+    .stat-card.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-card.primary::before { background: var(--primary-gradient); }
+    .stat-card.success::before { background: var(--success-gradient); }
+    .stat-card.warning::before { background: var(--warning-gradient); }
+    .stat-card.danger::before { background: var(--danger-gradient); }
+    .stat-card.info::before { background: var(--info-gradient); }
+    .stat-card.dark::before { background: var(--dark-gradient); }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-icon::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+        transform: rotate(45deg);
+        animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .card-icon.primary { background: var(--primary-gradient); }
+    .card-icon.success { background: var(--success-gradient); }
+    .card-icon.warning { background: var(--warning-gradient); }
+    .card-icon.danger { background: var(--danger-gradient); }
+    .card-icon.info { background: var(--info-gradient); }
+    .card-icon.dark { background: var(--dark-gradient); }
+
+    .count-up {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .card-title-text {
+        color: #666;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+
+    .filter-form {
+        background: white;
+        padding: 0.75rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .form-select, .btn {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .year-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .floating-elements::before,
+    .floating-elements::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .floating-elements::before {
+        width: 100px;
+        height: 100px;
+        top: 20%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-elements::after {
+        width: 150px;
+        height: 150px;
+        bottom: 20%;
+        left: 10%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .count-up {
+            font-size: 2rem;
+        }
+        
+        .filter-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Enhanced Header -->
+    <div class="dashboard-header position-relative">
+        <div class="floating-elements"></div>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 fw-bold mb-0">
+                    <i class="bi bi-speedometer2 me-3"></i>
+                    School Dashboard
+                </h1>
+                <p class="lead mb-0 opacity-75">Real-time insights and analytics</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="year-badge">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    Academic Year {{ year }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Filter Card -->
+    <div class="filter-card">
+        <form class="filter-form d-flex flex-column flex-md-row align-items-center gap-3" action="{% url 'dashboard' %}" method="get">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <label for="term" class="form-label fw-semibold mb-0 text-nowrap">
+                    <i class="bi bi-funnel me-2"></i>Filter by Term:
+                </label>
+                <select name="term" id="term" class="form-select">
+                    <option value="">-- Select Term --</option>
+                    {% for t in term_choices %}
+                        <option value="{{ t }}" {% if t == selected_term %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search me-2"></i>Apply Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Enhanced Stats Grid -->
+    <div class="row g-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card dark" data-delay="0">
+                <div class="p-4">
+                    <div class="card-icon dark">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ pupils }}">0</div>
+                    <p class="card-title-text">Total Students</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: 100%; background: var(--dark-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card success" data-delay="150">
+                <div class="p-4">
+                    <div class="card-icon success">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ present_pupils }}">0</div>
+                    <p class="card-title-text">Present Students</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: {{ present_pupils|default:0 }}%; background: var(--success-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card warning" data-delay="300">
+                <div class="p-4">
+                    <div class="card-icon warning">
+                        <i class="bi bi-person-dash-fill"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ leave_data }}">0</div>
+                    <p class="card-title-text">Students on Leave</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: {{ leave_data|default:0 }}%; background: var(--warning-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card primary" data-delay="450">
+                <div class="p-4">
+                    <div class="card-icon primary">
+                        <i class="bi bi-person-badge-fill"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ teachers }}">0</div>
+                    <p class="card-title-text">Total Teachers</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: 100%; background: var(--primary-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card danger" data-delay="600">
+                <div class="p-4">
+                    <div class="card-icon danger">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ present_teachers }}">0</div>
+                    <p class="card-title-text">Present Teachers</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: {{ present_teachers|default:0 }}%; background: var(--danger-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card success" data-delay="750">
+                <div class="p-4">
+                    <div class="card-icon success">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ fee_paid }}">0</div>
+                    <p class="card-title-text">Fees Collected</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: 85%; background: var(--success-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card info" data-delay="900">
+                <div class="p-4">
+                    <div class="card-icon info">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div class="count-up" data-target="{{ fee_balance }}">0</div>
+                    <p class="card-title-text">Pending Fees</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: {{ fee_balance|default:0 }}%; background: var(--info-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card primary" data-delay="1050">
+                <div class="p-4">
+                    <div class="card-icon primary">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <!-- animated counter target -->
+                    <div class="count-up" data-target="{{ attendance_pecentage|default:0 }}">0</div>
+                    <p class="card-title-text">Attendance Rate (%)</p>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" style="width: {{ attendance_pecentage|default:0 }}%; background: var(--primary-gradient);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Enhanced card reveal with staggered animation
+    const cards = document.querySelectorAll(".stat-card");
+    
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const delay = entry.target.getAttribute('data-delay') || 0;
+                setTimeout(() => {
+                    entry.target.classList.add("show");
+                }, delay);
+            }
+        });
+    }, observerOptions);
+
+    cards.forEach(card => observer.observe(card));
+
+    // Enhanced count-up animation with easing
+    const counters = document.querySelectorAll(".count-up");
+    
+    const animateCounter = (counter) => {
+        const target = parseInt(counter.getAttribute("data-target"));
+        const duration = 2000;
+        const start = performance.now();
+        
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+        
+        const updateCount = (currentTime) => {
+            const elapsed = currentTime - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeOutCubic(progress);
+            
+            const currentCount = Math.floor(easedProgress * target);
+            counter.textContent = currentCount.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCount);
+            } else {
+                counter.textContent = target.toLocaleString();
+                // Add pulse animation when complete
+                counter.classList.add('pulse');
+                setTimeout(() => counter.classList.remove('pulse'), 2000);
+            }
+        };
+        
+        requestAnimationFrame(updateCount);
+    };
+
+    // Start counter animations when cards are visible
+    const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counter = entry.target.querySelector('.count-up');
+                if (counter && !counter.classList.contains('animated')) {
+                    counter.classList.add('animated');
+                    setTimeout(() => animateCounter(counter), 500);
+                }
+            }
+        });
+    }, { threshold: 0.5 });
+
+    cards.forEach(card => counterObserver.observe(card));
+
+    // Enhanced hover effects
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Add loading state to filter form
+    const filterForm = document.querySelector('.filter-form');
+    const filterBtn = document.querySelector('.btn-primary');
+    
+    filterForm.addEventListener('submit', function() {
+        filterBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Loading...';
+        filterBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}

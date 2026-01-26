@@ -566,6 +566,43 @@
         {% endfor %}
     </div>
 
+    <!-- Detailed Table -->
+    <h5 class="mb-3 text-secondary"><i class="bi bi-list-check me-2"></i>Detailed Breakdown</h5>
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Learning Area</th>
+                            <th>Competency</th>
+                            <th>Level</th>
+                            <th>Rating</th>
+                            <th>Remark</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in detailed_competencies %}
+                        <tr>
+                            <td class="fw-bold">{{ item.subject }}</td>
+                            <td>{{ item.competency }}</td>
+                            <td><span class="badge bg-secondary">{{ item.level }}</span></td>
+                            <td><span class="badge bg-{{ item.color }}">{{ item.rating }}</span></td>
+                            <td><small>{{ item.remark }}</small></td>
+                            <td><small class="text-muted">{{ item.comment|default:"-" }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No competency records found for this term.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Section Divider -->
     <div class="section-divider"></div>
 
@@ -723,6 +760,15 @@ document.querySelectorAll('.view-learning-area-btn').forEach(function(button) {
                 modalBody.innerHTML = `<div class="alert alert-danger">Error loading data for ${subjectName}. Please try again later.</div>`;
             });
     });
+});
+
+// Automatic filtering
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.querySelector('.filter-section form');
+    if (filterForm) {
+        const select = filterForm.querySelector('select');
+        if (select) select.addEventListener('change', () => filterForm.submit());
+    }
 });
 </script>
 

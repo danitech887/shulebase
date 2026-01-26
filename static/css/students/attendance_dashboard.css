@@ -222,16 +222,30 @@ body::before {
 }
 
 .form-block {
-    display: grid;
-    grid-template-columns: auto 1fr auto 1fr auto;
-    gap: 1rem;
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+    justify-content: flex-start;
 }
 
 .form-block label {
     font-weight: 600;
     color: var(--text-dark);
-    font-size: 1rem;
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-block > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-block select,
+.form-block input[type="date"] {
+    min-width: 180px;
 }
 
 .form-control {

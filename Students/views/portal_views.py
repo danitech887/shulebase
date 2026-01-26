@@ -1,12 +1,14 @@
 import logging
+import re
 from datetime import datetime
 from decimal import Decimal
 from collections import defaultdict
+import csv
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Avg, Count
 from django.http import JsonResponse,HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -502,6 +504,62 @@ def competency(request):
 
     return redirect("strand_list")
 
+@login_required
+def edit_competency(request, pk):
+    school_id = request.session.get('school_id')
+    comp = get_object_or_404(LearnerCompetency, pk=pk, school_id=school_id)
+    
+    if request.method == "POST":
+        subject = request.POST.get("subject", "").strip()
+        comment = request.POST.get("comment", "").strip()
+        competency = request.POST.get("competency", "").strip()
+        term = request.POST.get("term", "").strip()
+        level = int(request.POST.get("level", 1))
+        
+        comp.subject = subject
+        comp.comment = comment
+        comp.competency = competency
+        comp.term = term
+        comp.level = level
+        comp.save()
+        
+        messages.success(request, "Competency updated successfully.")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+             return HttpResponse('success')
+        return redirect("strand_list")
+
+    teacher_registration_no = request.session.get('registration_no')
+    roles = TeachersRole.objects.filter(school_id=school_id, registration_no=teacher_registration_no)
+    subjects = set()
+    for role in roles:
+        if role.subject:
+            for subj in role.subject.split(","):
+                subj = subj.strip()
+                if subj:
+                    subjects.add(subj)
+    
+    competencies = [
+        'Communication Skills', 'Critical Thinking', 'Creativity', 'Collaboration',
+        'Digital Literacy', 'Learning to Learn', 'Citizenship', 'Self-Efficacy',
+    ]
+
+    context = {
+        'comp': comp,
+        'subjects': subjects,
+        'competencies': competencies,
+    }
+    return render(request, 'teacher_portal/competency_edit.html', context)
+
+@login_required
+def delete_competency(request, pk):
+    school_id = request.session.get('school_id')
+    comp = get_object_or_404(LearnerCompetency, pk=pk, school_id=school_id)
+    
+    if request.method == "POST":
+        comp.delete()
+        messages.success(request, "Competency deleted successfully.")
+    return redirect("strand_list")
+
 
 @login_required
 def strand_list(request):
@@ -516,18 +574,34 @@ def strand_list(request):
     selected_grade = request.GET.get("grade", "")
     selected_stream = request.GET.get("stream", "")
 
+    # Competency Filters
+    comp_grade = request.GET.get("comp_grade", "")
+    comp_stream = request.GET.get("comp_stream", "")
+    comp_subject = request.GET.get("comp_subject", "")
+    comp_term = request.GET.get("comp_term", "")
+
+    competencies_qs = LearnerCompetency.objects.filter(school_id=school_id,grade = comp_grade,stream = comp_stream)
+    if comp_grade:
+        competencies_qs = competencies_qs.filter(grade=comp_grade) 
+    if comp_stream:
+        competencies_qs = competencies_qs.filter(stream=comp_stream)
+    if comp_subject:
+        competencies_qs = competencies_qs.filter(subject__icontains=comp_subject)
+    if comp_term:
+        competencies_qs = competencies_qs.filter(term=comp_term)
+
     # Strand objects
     strands = Strand.objects.filter(school_id=school_id, created_by=request.user).order_by("subject", "name")
 
     # Teacher roles
     roles = TeachersRole.objects.filter(school_id=school_id, registration_no=teacher_registration_no)
-    grades = []
-    streams = []
+    grades = set()
+    streams = set()
     subjects = set()
     for role in roles:
         if role.subject:
-            grades.append(role.grade)
-            streams.append(role.stream)
+            grades.add(role.grade)
+            streams.add(role.stream)
             for subj in role.subject.split(","):
                 subj = subj.strip()
                 if subj:
@@ -543,6 +617,58 @@ def strand_list(request):
     else:
         students = StudentInfo.objects.filter(school=school_instance)
 
+    # --- Aggregated SubStrandMark Logic ---
+    agg_grade = request.GET.get("agg_grade", "")
+    agg_stream = request.GET.get("agg_stream", "")
+    agg_term = request.GET.get("agg_term", "")
+    agg_subject = request.GET.get("agg_subject", "")
+
+    aggregated_marks = []
+    student_performance = []
+    if agg_grade and agg_stream and agg_term:
+        marks_qs = SubStrandMark.objects.filter(
+            student__school_id=school_id,
+            student__grade=agg_grade,
+            student__stream=agg_stream,
+            term=agg_term
+        )
+        
+        if agg_subject:
+            marks_qs = marks_qs.filter(sub_strand__strand__subject=agg_subject)
+        
+        aggregated_data = marks_qs.values('sub_strand__strand__subject').annotate(
+            avg_score=Avg('score'),
+            avg_level=Avg('level'),
+            student_count=Count('student', distinct=True)
+        ).order_by('sub_strand__strand__subject')
+
+        for item in aggregated_data:
+            aggregated_marks.append({
+                'subject': item['sub_strand__strand__subject'],
+                'avg_score': round(item['avg_score'], 2) if item['avg_score'] else 0,
+                'avg_level': round(item['avg_level'], 2) if item['avg_level'] else 0,
+                'student_count': item['student_count']
+            })
+        
+        # --- Student Performance Breakdown ---
+        student_data = marks_qs.values(
+            'student__registration_no', 
+            'student__first_name', 
+            'student__surname'
+        ).annotate(
+            avg_score=Avg('score'),
+            avg_level=Avg('level'),
+            subjects_count=Count('sub_strand__strand__subject', distinct=True)
+        ).order_by('student__registration_no')
+
+        for item in student_data:
+            student_performance.append({
+                'reg_no': item['student__registration_no'],
+                'name': f"{item['student__first_name']} {item['student__surname']}",
+                'avg_score': round(item['avg_score'], 2) if item['avg_score'] else 0,
+                'avg_level': round(item['avg_level'], 2) if item['avg_level'] else 0,
+                'subjects_count': item['subjects_count']
+            })
    
 
     # Core competencies
@@ -563,16 +689,75 @@ def strand_list(request):
         "strands": strands,
         "form": form,
         "subjects": subjects,
-        "grades": grades,
-        "streams": streams,
+        "grades": sorted(list(grades)),
+        "streams": sorted(list(streams)),
         "selected_grade": selected_grade,
         "selected_stream": selected_stream,
         "students": students,
         "competencies": competencies,
+        "competencies_list": competencies_qs.order_by('-recorded_at'),
+        "comp_grade": comp_grade,
+        "comp_stream": comp_stream,
+        "comp_subject": comp_subject,
+        "comp_term": comp_term,
+        "agg_grade": agg_grade,
+        "agg_stream": agg_stream,
+        "agg_term": agg_term,
+        "agg_subject": agg_subject,
+        "aggregated_marks": aggregated_marks,
+        "student_performance": student_performance,
+        "term_choices": ['Term 1', 'Term 2', 'Term 3'],
     }
 
     return render(request, "teacher_portal/strands_list.html", context)
 
+
+@login_required 
+def export_strand_marks_csv(request):
+    school_id = request.session.get('school_id')
+    grade = request.GET.get("agg_grade")
+    stream = request.GET.get("agg_stream")
+    term = request.GET.get("agg_term")
+    subject = request.GET.get("agg_subject")
+
+    response = HttpResponse(content_type='text/csv')
+    filename_subject = f"_{subject}" if subject else ""
+    response['Content-Disposition'] = f'attachment; filename="student_performance_{grade}_{stream}_{term}{filename_subject}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Registration No', 'Name', 'Average Score', 'Average Level', 'Subjects Assessed'])
+
+    if grade and stream and term:
+        marks_qs = SubStrandMark.objects.filter(
+            student__school_id=school_id,
+            student__grade=grade,
+            student__stream=stream,
+            term=term
+        )
+        
+        if subject:
+            marks_qs = marks_qs.filter(sub_strand__strand__subject=subject)
+            
+        student_data = marks_qs.values(
+            'student__registration_no', 
+            'student__first_name', 
+            'student__surname'
+        ).annotate(
+            avg_score=Avg('score'),
+            avg_level=Avg('level'),
+            subjects_count=Count('sub_strand__strand__subject', distinct=True)
+        ).order_by('student__registration_no')
+
+        for item in student_data:
+            writer.writerow([
+                item['student__registration_no'],
+                f"{item['student__first_name']} {item['student__surname']}",
+                round(item['avg_score'], 2) if item['avg_score'] else 0,
+                round(item['avg_level'], 2) if item['avg_level'] else 0,
+                item['subjects_count']
+            ])
+
+    return response
 
 @login_required 
 def strand_add(request):
@@ -756,13 +941,12 @@ def record_substrand_scores(request, sub_strand_id,grade,stream):
     school_id = request.session.get('school_id')
     sub_strand = get_object_or_404(SubStrand, pk=sub_strand_id)
     strand = sub_strand.strand
-    print("Grade: ",grade)
-    print("Stream: ",stream)
+    
     
     students = StudentInfo.objects.filter(school_id=school_id,grade = grade,stream = stream).order_by('registration_no')
 
     term_choices = ['Term 1', 'Term 2', 'Term 3']
-    levels = ['Level 1', 'Level 2', 'Level 3']
+    levels = ['Level 1', 'Level 2', 'Level 3','Level 4']
     ASSESSMENT_TYPES = [
         'SBA-Project', 
         'SBA-Practical', 
@@ -787,19 +971,22 @@ def record_substrand_scores(request, sub_strand_id,grade,stream):
         errors = []
         for student in students:
             raw_value = request.POST.get(f'score_{student.registration_no}')
+            raw_score = request.POST.get(f'raw_score_{student.registration_no}')
             remark = request.POST.get(f'remark_{student.registration_no}')
             level = request.POST.get(f'level_{student.registration_no}')
 
-            if raw_value in (None, ""):
+            if raw_value in (None, "") and raw_score in (None ,""):
                 continue
             try:
                 score_value = float(raw_value)
+                raw_score_value = float(raw_score) 
                 SubStrandMark.objects.update_or_create(
                     student=student,
                     sub_strand=sub_strand,
                     term=term,
                     year=current_year,
                     defaults={
+                        'raw_score': raw_score_value,
                         'score': score_value,
                         'remark': remark,
                         'level': level,
@@ -832,8 +1019,9 @@ def record_substrand_scores(request, sub_strand_id,grade,stream):
     if selected_term:
         existing_qs = existing_qs.filter(term=selected_term)
 
-    existing_scores = existing_qs.values('student__registration_no', 'score', 'remark','level')
+    existing_scores = existing_qs.values('student__registration_no', 'score','raw_score', 'remark','level')
     score_map = {row['student__registration_no']: row['score'] for row in existing_scores}
+    raw_score_map = {row['student__registration_no']: row['raw_score'] for row in existing_scores}
     remark_map = {row['student__registration_no']: row['remark'] for row in existing_scores}
     level_map = {row['student__registration_no']: row['level'] for row in existing_scores}
 
@@ -843,6 +1031,7 @@ def record_substrand_scores(request, sub_strand_id,grade,stream):
         'students': students,
         'term_choices': term_choices,
         'scores': score_map,
+        'raw_scores': raw_score_map, 
         'remark': remark_map,
         'level_map': level_map,
         'levels': levels,
@@ -871,22 +1060,19 @@ def substrand_report_view(request: HttpRequest, substrand_id):
     
     # 3. Calculate the average level/score
     average_level = mark_query.aggregate(Avg('level'))['level__avg']
-    all_records = mark_query
-
-    students = {'student__registration_no': m.student.registration_no for m in all_records.select_related('student')}
-
-
+    # Fetch detailed records for the table
+    all_records = mark_query.select_related('student').order_by('student__registration_no')
 
     # 4. Define context for the template
     context = {
-        'all_records': students, 
+        'all_records': all_records, 
         'selected_substrand': selected_substrand,
         'report_data': report_data,
         # Format the average to 2 decimal places if it's not None
         'average_level': f"{average_level:.2f}" if average_level is not None else "N/A", 
         # Define level names here or use a helper function/model
         # NOTE: This assumes 'level' is 1, 2, or 3
-        'level_names': ['Level 1 (Poor)', 'Level 2 (Good)', 'Level 3 (Excellent)'], 
+        'level_names': ['Level 1 (Improve)', 'Level 2 (Good)', 'Level 3 (Very Good)', 'Level 4 (Excellent)'], 
     }
     
     # 5. Check if the request is AJAX 
@@ -1186,12 +1372,14 @@ def get_resource_progress(request, resource_id):
 @login_required
 def resource_progress(request, resource_id):
     resource = get_object_or_404(Resource, id=resource_id)
+    school_id = request.session.get('school_id')
     
     # Fetch all students in the resource's assigned grade and stream
     # select_related('admin') optimizes the query if you are accessing User fields
     students = StudentInfo.objects.filter(
         grade=resource.grade, 
-        stream=resource.stream
+        stream=resource.stream,
+        school_id = school_id,
     ).select_related('school')
     
     data = []
@@ -1243,6 +1431,14 @@ def manage_resources(request):
         form = ResourceForm(request.POST, request.FILES)
         if form.is_valid(): 
             resource = form.save(commit=False)
+            resource.school_id = school_id
+            
+            # Extract YouTube ID if it's a video
+            if resource.resource_type == 'video' and resource.url_or_file:
+                regex = r'(?:v=|\/|embed\/|youtu\.be\/)([0-9A-Za-z_-]{11})'
+                match = re.search(regex, resource.url_or_file)
+                if match:
+                    resource.url_or_file = match.group(1)
         
             resource.recorded_by = request.user
             
@@ -1276,7 +1472,16 @@ def update_resource(request, resource_id):
         # Pass instance=resource to update the existing record
         form = ResourceForm(request.POST, request.FILES, instance=resource)
         if form.is_valid():
-            form.save()
+            resource = form.save(commit=False)
+            
+            # Extract YouTube ID if it's a video
+            if resource.resource_type == 'video' and resource.url_or_file:
+                regex = r'(?:v=|\/|embed\/|youtu\.be\/)([0-9A-Za-z_-]{11})'
+                match = re.search(regex, resource.url_or_file)
+                if match:
+                    resource.url_or_file = match.group(1)
+            
+            resource.save()
             messages.success(request, f'"{resource.title}" updated successfully!')
             return redirect('manage_resources') 
     else:
@@ -1318,4 +1523,3 @@ def delete_resource(request, resource_id):
         messages.success(request, f'Resource "{title}" has been deleted.')
     
     return redirect('manage_resources')
-

@@ -1,40 +1,28 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Login</title>
-    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    <title>Login - Select Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.25);
-        }
-
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 1rem;
+            padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
@@ -42,545 +30,441 @@
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.15) 0%, transparent 50%);
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100px); }
         }
 
         .login-container {
-            max-width: 480px;
+            max-width: 1100px;
             width: 100%;
-            min-width: 320px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: var(--shadow-heavy);
-            animation: fadeInUp 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-            opacity: 0;
-            transform: translateY(30px);
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.8s ease-out;
             position: relative;
-            overflow: hidden;
-            padding: 2.5rem;
-        }
-
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.8s ease;
-        }
-
-        .login-container:hover::before {
-            left: 100%;
+            backdrop-filter: blur(10px);
         }
 
         @keyframes fadeInUp {
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
             }
         }
 
         .logo-container {
             text-align: center;
-            margin-bottom: 2rem;
-            position: relative;
+            margin-bottom: 20px;
+            animation: bounceIn 1s ease-out;
         }
 
-        .logo {
-            
-            
-            transition: all 0.3s ease;
-            
-            object-fit: cover;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .login-title {
-            color: #2c3e50;
-            font-weight: 800;
-            font-size: 2rem;
             text-align: center;
-            margin-bottom: 0.5rem;
-            background: var(--primary-gradient);
+            margin-bottom: 10px;
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: -1px;
         }
 
-        .login-subtitle {
+        .subtitle {
             text-align: center;
-            color: #6c757d;
-            font-size: 1rem;
-            margin-bottom: 2rem;
-            font-weight: 500;
+            margin-bottom: 50px;
+            color: #666;
+            font-size: 18px;
+            font-weight: 300;
         }
 
-        .form-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 0.6rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-control {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 1rem 1.2rem;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            width: 100%;
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25), 0 4px 20px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
+        .portal-card {
             background: white;
-            outline: none;
-        }
-
-        .form-control:hover {
-            border-color: rgba(102, 126, 234, 0.5);
-        }
-
-        .btn-login {
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 12px;
-            padding: 1rem 2rem;
-            font-weight: 600;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: white;
-            width: 100%;
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border-radius: 25px;
+            padding: 40px 25px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            height: 100%;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-login::before {
+        .portal-card::before {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.6s ease;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
         }
 
-        .btn-login:hover::before {
-            left: 100%;
+        .portal-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
         }
 
-        .btn-login:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-            background: var(--primary-gradient);
+        .portal-card.admin::before {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         }
 
-        .btn-login:active {
-            transform: translateY(-1px);
+        .portal-card.teacher::before {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
 
-        .forgot-password {
-            text-align: center;
-            margin-top: 1.5rem;
+        .portal-card.parent::before {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .forgot-password a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+        .portal-card.student::before {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
 
-        .forgot-password a:hover {
-            color: #5a6fd8;
-            background: rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
+        .portal-card:hover::before {
+            opacity: 1;
         }
 
-        .alert {
-            border-radius: 12px;
-            border: none;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+        .portal-card:hover .card-content {
+            color: white;
         }
 
-        .alert-danger {
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
-            color: #721c24;
-            border: 1px solid rgba(255, 107, 107, 0.2);
+        .card-content {
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
         }
 
-        .input-icon {
+        .icon-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .icon-circle::after {
+            content: '';
             position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-size: 1.1rem;
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            opacity: 0.2;
+            transition: all 0.4s ease;
         }
 
-        .form-control:focus + .input-icon {
-            color: #667eea;
+        .portal-card:hover .icon-circle {
+            background: white !important;
+            transform: rotate(360deg) scale(1.1);
         }
 
-        .password-toggle {
-            background: none;
-            border: none;
-            color: #6c757d;
-            cursor: pointer;
-            padding: 0;
+        .portal-card:hover .icon-circle::after {
+            transform: scale(1.3);
+            opacity: 0;
         }
 
-        .password-toggle:hover {
-            color: #667eea;
+        .icon-circle i {
+            font-size: 3rem;
+            transition: all 0.4s ease;
         }
 
-        .loading-spinner {
-            display: none;
-            margin-right: 0.5rem;
+        .admin .icon-circle {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         }
 
-        .btn-login.loading .loading-spinner {
+        .admin .icon-circle::after {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        .teacher .icon-circle {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .teacher .icon-circle::after {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .parent .icon-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .parent .icon-circle::after {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .student .icon-circle {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .student .icon-circle::after {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .portal-card:hover .icon-circle i {
+            color: #333 !important;
+        }
+
+        .portal-card h4 {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #333;
+            transition: all 0.4s ease;
+            font-size: 24px;
+        }
+
+        .portal-card p {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 0;
+            transition: all 0.4s ease;
+            font-weight: 400;
+        }
+
+        .portal-card:hover h4,
+        .portal-card:hover p {
+            color: white !important;
+        }
+
+        .badge-wrapper {
+            margin-top: 15px;
+        }
+
+        .portal-badge {
             display: inline-block;
-            animation: spin 1s linear infinite;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.4s ease;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .admin .portal-badge {
+            background: rgba(30, 60, 114, 0.1);
+            color: #1e3c72;
         }
 
-        /* Mobile Specific Improvements */
+        .teacher .portal-badge {
+            background: rgba(17, 153, 142, 0.1);
+            color: #11998e;
+        }
+
+        .parent .portal-badge {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .student .portal-badge {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .portal-card:hover .portal-badge {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .footer-text p {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .footer-text i {
+            color: #667eea;
+            margin-right: 8px;
+        }
+
         @media (max-width: 768px) {
-            body {
-                padding: 0.5rem;
-                min-height: 100vh;
-                align-items: flex-start;
-                padding-top: 2rem;
-            }
-
             .login-container {
-                padding: 2rem 1.5rem;
-                max-width: 100%;
-                min-width: 300px;
-                margin: 0 auto;
-                border-radius: 20px;
+                padding: 40px 25px;
             }
-
-            .logo {
-                transition: var(--transition);
-                animation: pulse 2s ease-in-out infinite;
-            }
-
+            
             .login-title {
-                font-size: 1.6rem;
-                margin-bottom: 0.5rem;
+                font-size: 32px;
             }
 
-            .login-subtitle {
-                font-size: 0.9rem;
-                margin-bottom: 1.5rem;
+            .subtitle {
+                font-size: 16px;
             }
 
-            .form-control {
-                padding: 1rem;
-                font-size: 1rem;
-                border-radius: 10px;
+            .portal-card {
+                padding: 35px 20px;
             }
 
-            .form-label {
-                font-size: 0.85rem;
-                margin-bottom: 0.5rem;
+            .icon-circle {
+                width: 80px;
+                height: 80px;
             }
 
-            .btn-login {
-                padding: 1rem 1.5rem;
-                font-size: 0.95rem;
-                border-radius: 10px;
-            }
-
-            .form-group {
-                margin-bottom: 1.25rem;
+            .icon-circle i {
+                font-size: 2.5rem;
             }
         }
 
-        /* Extra small screens */
-        @media (max-width: 480px) {
-            body {
-                padding: 0.25rem;
-                padding-top: 1rem;
-            }
-
-            .login-container {
-                padding: 1.5rem 1rem;
-                border-radius: 16px;
-                min-width: 280px;
-            }
-
-            .logo {
-                transition: var(--transition);
-                animation: pulse 2s ease-in-out infinite;
-            }
-
-            .login-title {
-                font-size: 1.4rem;
-            }
-
-            .form-control {
-                padding: 0.9rem;
-                font-size: 0.95rem;
-            }
-
-            .btn-login {
-                padding: 0.9rem 1.2rem;
-                font-size: 0.9rem;
-            }
+        .row {
+            animation: staggerIn 0.8s ease-out;
         }
 
-        /* Landscape mobile orientation */
-        @media (max-height: 600px) and (orientation: landscape) {
-            body {
-                padding-top: 1rem;
-                align-items: center;
-            }
-
-            .login-container {
-                padding: 1.5rem;
-            }
-
-            .logo {
-                transition: var(--transition);
-                animation: pulse 2s ease-in-out infinite;
-            }
-
-            .login-title {
-                font-size: 1.3rem;
-                margin-bottom: 0.3rem;
-            }
-
-            .login-subtitle {
-                font-size: 0.8rem;
-                margin-bottom: 1rem;
-            }
-
-            .form-group {
-                margin-bottom: 1rem;
-            }
+        @keyframes staggerIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
+
+        .col-md-6:nth-child(1) .portal-card { animation-delay: 0.1s; }
+        .col-md-6:nth-child(2) .portal-card { animation-delay: 0.2s; }
+        .col-md-6:nth-child(3) .portal-card { animation-delay: 0.3s; }
+        .col-md-6:nth-child(4) .portal-card { animation-delay: 0.4s; }
     </style>
 </head>
+
 <body>
-
-{% if messages %}
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                
-                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
-            </div>
-            <p class="text-muted small mb-4">
-                {% for msg in messages %}
-                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
-                {% endfor %}
-            </p> 
-                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
-                    .Ok
-                </button>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var modalEl = document.getElementById('messageModal');
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    });
-</script>
-{% endif %}
-
     <div class="login-container">
-
         <div class="logo-container">
-            <img src="{% static 'images/logo.png' %}" alt="School Logo" class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" height="80" class="mb-3">
         </div>
         
-        <h2 class="login-title">Welcome Back</h2>
-        <p class="login-subtitle">Please sign in to your account</p>
+        <h2 class="login-title">Choose Your Portal</h2>
+        <p class="subtitle">Select your role to access the system</p>
 
-       
-
-        <form method="post" id="loginForm">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="username" class="form-label">
-                    <i class="bi bi-person"></i>
-                    Username
-                </label>
-                <input type="text" class="form-control" id="username" name="username" required autofocus autocomplete="username">
-                <i class="bi bi-person input-icon"></i>
-            </div>
-
-            <div class="form-group">
-                <label for="password" class="form-label">
-                    <i class="bi bi-lock"></i>
-                    Password
-                </label>
-                <div style="position: relative;">
-                    <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
-                    <button type="button" class="input-icon password-toggle" onclick="togglePassword()">
-                        <i class="bi bi-eye" id="passwordIcon"></i>
-                    </button>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-login" id="loginBtn">
-                <span class="loading-spinner">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </span>
-                <i class="bi bi-box-arrow-in-right me-2"></i>
-                Sign In
-            </button>
-
-            <div class="forgot-password">
-                <a href="{% url 'reset_password' %}">
-                    <i class="bi bi-question-circle me-1"></i>
-                    Forgot your password?
+        <div class="row g-4">
+            <!-- Admin Card -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'admin_login' %}" class="portal-card admin">
+                    <div class="card-content">
+                        <div class="icon-circle">
+                            <i class="bi bi-shield-lock-fill text-white"></i>
+                        </div>
+                        <h4>Admin</h4>
+                        <p>System Management</p>
+                        <div class="badge-wrapper">
+                            <span class="portal-badge">Full Access</span>
+                        </div>
+                    </div>
                 </a>
-                <a href="{% url 'school_registration' %}"><i class="bi bi-person"></i> Sign Up</a>
             </div>
-        </form>
+
+            <!-- Teacher Card -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'teacher_login' %}" class="portal-card teacher">
+                    <div class="card-content">
+                        <div class="icon-circle">
+                            <i class="bi bi-person-workspace text-white"></i>
+                        </div>
+                        <h4>Teacher</h4>
+                        <p>Teaching Resources</p>
+                        <div class="badge-wrapper">
+                            <span class="portal-badge">Educator</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Parent Card -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'parent_login' %}" class="portal-card parent">
+                    <div class="card-content">
+                        <div class="icon-circle">
+                            <i class="bi bi-person-hearts text-white"></i>
+                        </div>
+                        <h4>Parent</h4>
+                        <p>Child Progress</p>
+                        <div class="badge-wrapper">
+                            <span class="portal-badge">Guardian</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Student Card -->
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'student_login' %}" class="portal-card student">
+                    <div class="card-content">
+                        <div class="icon-circle">
+                            <i class="bi bi-backpack-fill text-white"></i>
+                        </div>
+                        <h4>Student</h4>
+                        <p>Learning Portal</p>
+                        <div class="badge-wrapper">
+                            <span class="portal-badge">Learner</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-text">
+            <p>
+                <i class="bi bi-shield-check"></i>
+                Secure access · Encrypted connection · Protected data
+            </p>
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% if messages %}
+    <div class="modal fade" id="messageModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content p-4 text-center rounded-4 border-0">
+                <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                    <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+                </div>
+                <p class="text-muted small mb-4">
+                    {% for msg in messages %}
+                    <strong id="res_name" class="text-dark">{{ msg }}</strong>
+                    {% endfor %}
+                </p> 
+                <button type="button" class="btn btn-primary rounded-pill py-2 px-4" data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Password visibility toggle
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const passwordIcon = document.getElementById('passwordIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordIcon.className = 'bi bi-eye-slash';
-            } else {
-                passwordInput.type = 'password';
-                passwordIcon.className = 'bi bi-eye';
-            }
-        }
-
-        // Form submission with loading state
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const loginBtn = document.getElementById('loginBtn');
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            if (!username || !password) {
-                e.preventDefault();
-                alert('Please fill in all fields');
-                return false;
-            }
-            
-            loginBtn.classList.add('loading');
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = `
-                <span class="loading-spinner">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </span>
-                Signing in...
-            `;
-            
-            // Re-enable button after 10 seconds as fallback
-            setTimeout(() => {
-                loginBtn.classList.remove('loading');
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = `
-                    <i class="bi bi-box-arrow-in-right me-2"></i>
-                    Sign In
-                `;
-            }, 10000);
+        document.addEventListener("DOMContentLoaded", function () {
+            var modalEl = document.getElementById('messageModal');
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
         });
-
-        // Enhanced form validation
-        const inputs = document.querySelectorAll('.form-control');
-        inputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                if (this.hasAttribute('required') && !this.value.trim()) {
-                    this.style.borderColor = '#ff6b6b';
-                    this.style.boxShadow = '0 0 0 0.2rem rgba(255, 107, 107, 0.25)';
-                } else {
-                    this.style.borderColor = '';
-                    this.style.boxShadow = '';
-                }
-            });
-            
-            input.addEventListener('input', function() {
-                if (this.value.trim()) {
-                    this.style.borderColor = '#4facfe';
-                    this.style.boxShadow = '0 0 0 0.2rem rgba(79, 172, 254, 0.15)';
-                }
-            });
-        });
-
-        // Prevent zoom on mobile input focus
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            document.addEventListener('touchstart', function() {}, true);
-        }
-
-        // Auto-hide error messages after 5 seconds
-        const alertError = document.querySelector('.alert-danger');
-        if (alertError) {
-            setTimeout(() => {
-                alertError.style.opacity = '0';
-                alertError.style.transform = 'translateY(-10px)';
-                setTimeout(() => {
-                    alertError.remove();
-                }, 300);
-            }, 5000);
-        }
     </script>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -34,6 +34,9 @@ urlpatterns = [
     path('manage/',manage_details,name = 'manage_details'),
     path('students/',pupil_list,name = 'pupil_list'),
     path('promote-students/',promote_students,name = 'promote_students'),
+
+    path('grade-stream-delete/<int:id>/',delete_grade_stream,name = 'delete_grade_stream'),
+    path('grade-stream-edit/<int:id>/',edit_grade_stream,name = 'edit_grade_stream'),
  
     path('update/<str:reg_no>/',update_pupil,name = 'update_pupil'),
     path('delete/<str:reg_no>/',delete_pupil,name = 'delete_pupil'),
@@ -81,6 +84,7 @@ urlpatterns = [
     
     path('teacher-portal/', teacher_portal, name='teacher_portal'),
     path('student-attendance/', attendance, name='attendance'),
+    path('student-grade-stream-attendance-sheet',print_grade_stream_attendance_sheet,name = 'grade_stream_attendance'),
     path('record-marks/', record_marks, name='record_marks'),
     path('manage-strands',strand_list,name = "strand_list"),
     path('get-subjects<str:grade>/<str:stream>/', get_subjects, name='get_subjects'),
@@ -94,7 +98,11 @@ urlpatterns = [
     path('delete_substrand/<int:sub_strand_id>/', delete_substrand, name='delete_substrand'),
     path('reports/substrand/<int:substrand_id>',substrand_report_view, name='substrand_report'),
     path("student-competency/",competency,name = "competency"),
+    path('competency/edit/<int:pk>/', edit_competency, name='edit_competency'),
+    path('competency/delete/<int:pk>/', delete_competency, name='delete_competency'),
     path('ajax/get-students/', get_students, name='get_students'),
+    path('export-strand-marks-pdf/', export_strand_marks_pdf, name='export_strand_marks_pdf'),
+    path('export-strand-marks-csv/', export_strand_marks_csv, name='export_strand_marks_csv'),
 
 
     path('resource/update/<int:resource_id>/', update_resource, name='update_resource'),
@@ -161,9 +169,17 @@ urlpatterns = [
  
 
     path('login/', unified_login, name='login'),
+    path('login/student/', student_login, name='student_login'),
+    path('login/teacher/', teacher_login, name='teacher_login'),
+    path('login/parent/', parent_login, name='parent_login'),
+    path('login/admin/', admin_login, name='admin_login'),
     path('reset-password/',reset_password,name = 'reset_password'),
     path('change-password/', change_user_password, name='change_password'),
-    path('logout/', logout_view, name='logout'),
+    path('change_username/',change_username,name = 'change_username'),
+    path('logout/student/', student_logout_view, name='student_logout'),
+    path('logout/teacher/', teacher_logout_view, name='teacher_logout'),
+    path('logout/parent/', parent_logout_view, name='parent_logout'),
+    path('logout/admin/', admin_logout_view, name='admin_logout'),
 
     path('school-registration/', school_registration, name='school_registration'),
     path('update-details/', update_school, name='update_school'),

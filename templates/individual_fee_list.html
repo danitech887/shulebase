@@ -1,0 +1,814 @@
+{% extends 'base.html' %}
+{% block title %}Fee Statement{% endblock %}
+{% block content %}
+<style>
+    .page-container {
+        background: linear-gradient(135deg, #f5f7ff 0%, #e8f2ff 100%);
+        min-height: 100vh;
+        padding: 1.5rem 0;
+        position: relative;
+    }
+    
+    .page-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="hexagons" width="28" height="24" patternUnits="userSpaceOnUse"><path d="M14,7 L21,12 L21,20 L14,25 L7,20 L7,12 Z" fill="none" stroke="rgba(102, 126, 234, 0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23hexagons)"/></svg>');
+        pointer-events: none;
+    }
+    
+    .student-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .student-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .student-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .student-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+    
+    .info-card-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-card-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-card-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #374151;
+        margin: 0;
+    }
+    
+    .balance-positive {
+        color: #059669;
+    }
+    
+    .balance-negative {
+        color: #dc2626;
+    }
+    
+    .search-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.3s ease;
+    }
+    
+    .search-section:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .search-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .search-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+    }
+    
+    .search-input-group {
+        position: relative;
+        max-width: 400px;
+    }
+    
+    .search-input {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+        transition: all 0.3s ease;
+        background: #fafafa;
+        width: 100%;
+        font-size: 1rem;
+    }
+    
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+        background: white;
+        transform: translateY(-1px);
+    }
+    
+    .search-button {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .search-button:hover {
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .payments-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .payments-section:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .payments-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    
+    .payments-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #374151;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .payments-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+    
+    .table-container {
+        max-height: 500px;
+        overflow-y: auto;
+        border-radius: 0 0 16px 16px;
+    }
+    
+    .table {
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+        color: white;
+        border: none; padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.025em;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+        transform: translateX(8px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        font-weight: 500;
+        color: #374151;
+        border: none;
+        vertical-align: middle;
+    }
+    
+    .term-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        min-width: 80px;
+    }
+    
+    .amount-display {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #059669;
+    }
+    
+    .payment-mode {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    .mode-cash {
+        background: linear-gradient(135deg, #34d399, #10b981);
+        color: white;
+    }
+    
+    .mode-mpesa {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+    }
+    
+    .transaction-code {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: #6b7280;
+        background: #f9fafb;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .date-display {
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    .receipt-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .receipt-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        color: #9ca3af;
+    }
+    
+    .no-data-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .no-data-text {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-data-subtitle {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+    
+    .back-button {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+    
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    @media (max-width: 768px) {
+        .page-container {
+            padding: 1rem 0;
+        }
+        
+        .student-header {
+            padding: 2rem 1.5rem;
+        }
+        
+        .student-title {
+            font-size: 1.8rem;
+        }
+        
+        .info-cards {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .info-card {
+            padding: 1.5rem;
+        }
+        
+        .search-section, .payments-section {
+            margin: 1rem;
+        }
+        
+        .payments-header {
+            padding: 1.5rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .table thead th,
+        .table tbody td {
+            padding: 1rem 0.75rem;
+        }
+        
+        .search-input-group {
+            max-width: 100%;
+        }
+    }
+    
+    .fade-in {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Enhanced Scrollbar */
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 10px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    }
+    
+    .summary-stats {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+    
+    .total-payments {
+        font-weight: 700;
+        color: #374151;
+    }
+</style>
+
+<div class="page-container">
+    <div class="container fade-in">
+        <!-- Back Button -->
+        <a href="javascript:history.back()" class="back-button">
+            <i class="bi bi-arrow-left"></i>
+            Back to Payments
+        </a>
+        
+        <!-- Student Header -->
+        <div class="student-header">
+            <h1 class="student-title">
+                <i class="bi bi-person-circle me-3"></i>
+                {{ student.first_name }} {{ student.second_name }} {{ student.surname }}
+            </h1>
+            <p class="student-subtitle">Fee Payment Statement & Transaction History</p>
+        </div>
+        
+        <!-- Student Info Cards -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="info-card-label">Registration Number</div>
+                <div class="info-card-value">{{ student.registration_no }}</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="bi bi-bookmark"></i>
+                </div>
+                <div class="info-card-label">Grade & Stream</div>
+                <div class="info-card-value">{{ student.grade }} - {{ student.stream }}</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="info-card-label">Expected Fee</div>
+                <div class="info-card-value">KES {{ expected_fee|floatformat:2 }}</div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="bi bi-calculator"></i>
+                </div>
+                <div class="info-card-label">Balance</div>
+                <div class="info-card-value {% if balance > 0 %}balance-negative{% else %}balance-positive{% endif %}">
+                    KES {{ balance|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-title">
+                <div class="search-icon">🔍</div>
+                Filter by Term
+            </div>
+            <form method="GET">
+                <div class="search-input-group">
+                    <input type="text" 
+                           class="search-input" 
+                           placeholder="Search by Term (e.g., Term 1, Term 2, Term 3)" 
+                           name="search" 
+                           value="{{ request.GET.search }}">
+                    <button type="submit" class="search-button">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Payments Table Section -->
+        <div class="payments-section">
+            <div class="payments-header">
+                <h2 class="payments-title">
+                    <div class="payments-icon">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                    Payment Transaction History
+                </h2>
+            </div>
+            
+            <div class="table-container">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-calendar3 me-2"></i>Term</th>
+                            <th><i class="bi bi-cash-coin me-2"></i>Amount Paid</th>
+                            <th><i class="bi bi-credit-card me-2"></i>Payment Mode</th>
+                            <th><i class="bi bi-hash me-2"></i>Transaction Code</th>
+                            <th><i class="bi bi-calendar-date me-2"></i>Payment Date</th>
+                            <th><i class="bi bi-receipt me-2"></i>Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if fees %}
+                            {% for fee in fees %}
+                            <tr>
+                                <td>
+                                    <span class="term-badge">{{ fee.term }}</span>
+                                </td>
+                                <td>
+                                    <span class="amount-display">KES {{ fee.amount|floatformat:2 }}</span>
+                                </td>
+                                <td>
+                                    <span class="payment-mode {% if fee.mode_of_payment == 'Cash' %}mode-cash{% else %}mode-mpesa{% endif %}">
+                                        {% if fee.mode_of_payment == 'Cash' %}
+                                            <i class="bi bi-cash me-1"></i>
+                                        {% else %}
+                                            <i class="bi bi-phone me-1"></i>
+                                        {% endif %}
+                                        {{ fee.mode_of_payment }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="transaction-code">{{ fee.transaction_code|default:"-" }}</span>
+                                </td>
+                                <td>
+                                    <span class="date-display">{{ fee.date_of_payment|date:"M d, Y" }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'generate_receipt' fee.id %}" class="receipt-btn">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                        View Receipt
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="no-data">
+                                    <div class="no-data-icon">📋</div>
+                                    <div class="no-data-text">No Payment Records Found</div>
+                                    <div class="no-data-subtitle">
+                                        {% if request.GET.search %}
+                                            No payments found for "{{ request.GET.search }}". Try a different search term.
+                                        {% else %}
+                                            This student hasn't made any fee payments yet.
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if fees %}
+            <div class="summary-stats">
+                <span class="total-payments">
+                    Total Transactions: {{ fees|length }}
+                </span>
+                <span>
+                    Last Updated: {{ fees.0.date_of_payment|date:"M d, Y" }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation delays for staggered appearance
+        const cards = document.querySelectorAll('.info-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in');
+        });
+        
+        // Enhanced table row interactions
+        const tableRows = document.querySelectorAll('tbody tr:not(:has(.no-data))');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(12px)';
+                this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.15)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+        
+        // Auto-focus search input
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput && !searchInput.value) {
+            setTimeout(() => searchInput.focus(), 500);
+        }
+        
+        // Add smooth scrolling to table
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            tableContainer.addEventListener('scroll', function() {
+                const scrollPercentage = this.scrollTop / (this.scrollHeight - this.clientHeight);
+                const header = this.querySelector('thead');
+                if (header) {
+                    header.style.boxShadow = scrollPercentage > 0 ? '0 4px 8px rgba(0,0,0,0.1)' : 'none';
+                }
+            });
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F to focus search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                searchInput?.focus();
+            }
+            
+            // ESC to clear search
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.form.submit();
+            }
+        });
+        
+        // Highlight search terms
+        const searchTerm = "{{ request.GET.search }}";
+        if (searchTerm) {
+            const termCells = document.querySelectorAll('.term-badge');
+            termCells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    cell.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.3)';
+                    cell.style.transform = 'scale(1.05)';
+                }
+            });
+        }
+        
+        // Add loading state to buttons
+        const buttons = document.querySelectorAll('.receipt-btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Loading...';
+                this.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.pointerEvents = 'auto';
+                }, 2000);
+            });
+        });
+        
+        // Add tooltips for better UX
+        const tooltipElements = document.querySelectorAll('[title]');
+        tooltipElements.forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                // Simple tooltip implementation
+                const tooltip = document.createElement('div');
+                tooltip.textContent = this.getAttribute('title');
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: #374151;
+                    color: white;
+                    padding: 0.5rem;
+                    border-radius: 6px;
+                    font-size: 0.875rem;
+                    z-index: 1000;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(tooltip);
+                
+                const updatePosition = (e) => {
+                    tooltip.style.left = e.pageX + 10 + 'px';
+                    tooltip.style.top = e.pageY - 30 + 'px';
+                };
+                
+                this.addEventListener('mousemove', updatePosition);
+                this.addEventListener('mouseleave', () => {
+                    tooltip.remove();
+                    this.removeEventListener('mousemove', updatePosition);
+                }, { once: true });
+                
+                updatePosition({ pageX: 0, pageY: 0 });
+            });
+        });
+    });
+    
+    // Add CSS for spinning animation
+    const style = document.createElement('style');
+    style.textContent = `
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+{% endblock %}

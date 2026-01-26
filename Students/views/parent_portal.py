@@ -93,29 +93,59 @@ def parent_student_portal_fee_payment(request):
     request.session['registration_no'] = student.registration_no
 
     # 2. Handle M-Pesa Payment Submission (POST)
-    if request.method == "POST" and 'submit_mpesa' in request.POST:
-        trans_code = request.POST.get('transaction_code').strip().upper()
-        amount = request.POST.get('amount')
-        date_paid = request.POST.get('date_of_payment')
-        term = request.POST.get('term')
+    if request.method == "POST":
+        if 'submit_mpesa' in request.POST:
+            trans_code = request.POST.get('transaction_code').strip().upper()
+            amount = request.POST.get('amount')
+            date_paid = request.POST.get('date_of_payment')
+            term = request.POST.get('term')
 
-        # Check if this transaction code already exists (Prevent duplicates)
-        if Fee.objects.filter(transaction_code=trans_code, school_id=school_id).exists():
-            messages.error(request, f"Transaction code {trans_code} has already been reported.")
-        else:
-            Fee.objects.create(
-                registration_no=student,
-                school_id=school_id,
-                mode_of_payment="Mpesa",
-                transaction_code=trans_code,
-                amount=amount,
-                date_of_payment=date_paid,
-                term=term,
-                year=datetime.now().year,
-                status='Pending' # Parent submissions start as Pending
-            )
-            messages.success(request, "Payment reported successfully! Awaiting admin confirmation.")
-        return redirect('parent_student_portal_fee_payment')
+            # Check if this transaction code already exists (Prevent duplicates)
+            if Fee.objects.filter(transaction_code=trans_code, school_id=school_id).exists():
+                messages.error(request, f"Transaction code {trans_code} has already been reported.")
+            else:
+                Fee.objects.create(
+                    registration_no=student,
+                    school_id=school_id,
+                    mode_of_payment="Mpesa",
+                    transaction_code=trans_code,
+                    amount=amount,
+                    date_of_payment=date_paid,
+                    term=term,
+                    year=datetime.now().year,
+                    status='Pending' # Parent submissions start as Pending
+                )
+                messages.success(request, "Payment reported successfully! Awaiting admin confirmation.")
+            return redirect('parent_student_portal_fee_payment')
+        
+        elif 'edit_fee' in request.POST:
+            fee_id = request.POST.get('fee_id')
+            fee = get_object_or_404(Fee, id=fee_id, school_id=school_id, registration_no=student, status__in=['Pending', 'Rejected'])
+            
+            trans_code = request.POST.get('transaction_code').strip().upper()
+            amount = request.POST.get('amount')
+            date_paid = request.POST.get('date_of_payment')
+            term = request.POST.get('term')
+
+            # Check for duplicates excluding this fee
+            if Fee.objects.filter(transaction_code=trans_code, school_id=school_id).exclude(id=fee_id).exists():
+                messages.error(request, f"Transaction code {trans_code} already exists.")
+            else:
+                fee.transaction_code = trans_code
+                fee.amount = amount
+                fee.date_of_payment = date_paid
+                fee.term = term
+                fee.status = 'Pending' # Reset to Pending on edit
+                fee.save()
+                messages.success(request, "Payment details updated successfully.")
+            return redirect('parent_student_portal_fee_payment')
+
+        elif 'delete_fee' in request.POST:
+            fee_id = request.POST.get('fee_id')
+            fee = get_object_or_404(Fee, id=fee_id, school_id=school_id, registration_no=student, status='Pending')
+            fee.delete()
+            messages.success(request, "Pending payment deleted.")
+            return redirect('parent_student_portal_fee_payment')
 
     # 3. Fetch Data for Display
     current_year = str(datetime.now().year)
@@ -126,7 +156,9 @@ def parent_student_portal_fee_payment(request):
     # Only 'Confirmed' payments count toward the paid balance
     all_fee_records = Fee.objects.filter(registration_no=student, school_id=school_id).order_by('-date_of_payment')
     confirmed_payments = all_fee_records.filter(status='Confirmed')
-    pending_payments = all_fee_records.filter(status='Pending')
+    from django.db.models import Q
+
+    pending_payments = all_fee_records.filter(Q(status='Pending') | Q(status='Rejected'))
 
     total_fees_paid = confirmed_payments.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
     expected_fee = grade_obj.expected_fee
@@ -337,11 +369,11 @@ def get_cbc_level_and_remark(avg_level):
     """Determines the CBC level and remark based on a numeric average level (e.g., 1.0-3.0)."""
     if avg_level is None:
         return {'level': 'N/A', 'remark': 'No Data'}
-    if avg_level >= 2.5:
+    if avg_level >= 3.5:
         return {'level': 'EE', 'remark': 'Exceeding Expectations'}
-    if avg_level >= 1.5:
+    if avg_level >= 2.5:
         return {'level': 'ME', 'remark': 'Meeting Expectations'}
-    if avg_level >= 0.5:
+    if avg_level >= 1.5: 
         return {'level': 'AE', 'remark': 'Approaching Expectations'}
     return {'level': 'BE', 'remark': 'Below Expectations'}
 
@@ -419,27 +451,48 @@ def parent_student_portal_academics(request):
         student=student,
         term=term_filter,
         year=year_filter
-    )
+    ).order_by('subject', 'competency')
 
-    competency_map = {
-        c.competency: get_cbc_level_and_remark(c.level or None)['level']
-        for c in competency_qs
-    }
-    
-    # Fetch distinct competencies for this specific student
-    CORE_COMPETENCIES = list(LearnerCompetency.objects.filter(
-        school_id=school_id,
-        student=student
-    ).values_list('competency', flat=True).distinct())
-
-    competency_ratings = []
-    for competency_name in CORE_COMPETENCIES:
-        rating = competency_map.get(competency_name, 'N/A')
-        # Assign Color
-        color_map = {'EE': 'success', 'ME': 'info', 'AE': 'warning', 'BE': 'danger'}
-        color = color_map.get(rating, 'secondary')
+    # A. Detailed List (for Table)
+    detailed_competencies = []
+    for comp in competency_qs:
+        details = get_cbc_level_and_remark(comp.level)
+        rating = details['level']
         
-        competency_ratings.append({"competency": competency_name, "rating": rating, "color": color})
+        color = 'secondary'
+        if rating == 'EE': color = 'success'
+        elif rating == 'ME': color = 'info'
+        elif rating == 'AE': color = 'warning'
+        elif rating == 'BE': color = 'danger'
+
+        detailed_competencies.append({
+            "subject": comp.subject,
+            "competency": comp.competency,
+            "level": comp.level,
+            "rating": rating,
+            "remark": details['remark'],
+            "comment": comp.comment,
+            "color": color
+        })
+
+    # B. Aggregated Averages (for Cards)
+    competency_ratings = []
+    agg_qs = LearnerCompetency.objects.filter(
+        student=student,
+        term=term_filter,
+        year=year_filter
+    ).values('competency').annotate(avg_level=Avg('level')).order_by('competency')
+
+    for item in agg_qs:
+        details = get_cbc_level_and_remark(item['avg_level'])
+        rating = details['level']
+        color = 'secondary'
+        if rating == 'EE': color = 'success'
+        elif rating == 'ME': color = 'info'
+        elif rating == 'AE': color = 'warning'
+        elif rating == 'BE': color = 'danger'
+        
+        competency_ratings.append({"competency": item['competency'], "rating": rating, "color": color})
     
     # 6. --- Placeholder / Links ---
     report_url = reverse("report_card") + f"?registration_no={registration_no}&term={term_filter}"
@@ -458,6 +511,7 @@ def parent_student_portal_academics(request):
         "overall_mean": overall_mean,
         "subject_summaries": subject_summaries,
         "competency_ratings": competency_ratings,
+        "detailed_competencies": detailed_competencies,
         "latest_report": latest_report,
         "upcoming_assignments": [],
         "year_choices": SubStrandMark.objects.filter(student=student).values_list('year', flat=True).distinct().order_by('-year'),

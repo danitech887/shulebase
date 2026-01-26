@@ -150,7 +150,7 @@
         <div class="table-header">
             <div class="table-title">
                 <div class="table-title-icon">📊</div>
-                Subject Competency Summary
+                Learning Area Competency Summary
             </div>
         </div>
         <div class="table-container">
@@ -160,7 +160,7 @@
                         <tr>
                             <th style="width: 30%;">Learning Area (Subject)</th>
                             <th style="width: 20%;" class="text-center">Avg. Score (%)</th>
-                            <th style="width: 20%;" class="text-center">Avg. Level (0-3)</th>
+                            <th style="width: 20%;" class="text-center">Avg. Level (0-4)</th>
                             <th style="width: 20%;" class="text-center">Competency Level</th>
                             <th style="width: 10%;" class="text-center">Total Tasks</th>
                         </tr>
@@ -168,7 +168,7 @@
                     <tbody>
                         {% for data in subject_breakdown_data %}
                         <tr>
-                            <td class="text-start">{{ data.subject_name }}</td>
+                            <td class="text-start">{{ data.strand_name }} ({{ data.subject_name }})</td>
                             
                             <td class="score-cell text-center">
                                 {% if data.avg_score is not None %}

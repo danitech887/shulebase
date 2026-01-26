@@ -1,0 +1,1340 @@
+{% extends 'base.html' %}
+{% block title %}Leave Management{% endblock %}
+{% block content %}
+<style>
+  /* --- PAGE STRUCTURE AND BACKGROUND --- */
+  .page-container {
+    background: linear-gradient(135deg, #f5f7ff 0%, #e8f2ff 100%);
+    min-height: 100vh;
+    padding: 1.5rem 0;
+    position: relative;
+  }
+
+  .page-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="leaves" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M20,10 Q30,15 20,20 Q10,15 20,10" fill="none" stroke="rgba(102, 126, 234, 0.03)" stroke-width="2"/></pattern></defs><rect width="100" height="100" fill="url(%23leaves)"/></svg>');
+    pointer-events: none;
+  }
+
+  /* --- HEADER STYLES --- */
+  .main-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-header::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 0.3;
+    }
+
+    50% {
+      transform: scale(1.2) rotate(180deg);
+      opacity: 0.1;
+    }
+  }
+
+  .main-header h3 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+  }
+
+  .main-header i {
+    font-size: 2rem;
+    margin-right: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  /* --- ACTION SECTION & BUTTONS --- */
+  .action-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s ease;
+  }
+
+  .action-section:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .new-approval-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 12px; padding: 0.75rem 1.5rem;
+    margin: 5px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .new-approval-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .new-approval-btn:hover::before {
+    left: 100%;
+  }
+
+  .new-approval-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    color: white;
+  }
+
+  /* --- SEARCH & FILTER SECTION --- */
+  .search-filter-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s ease;
+  }
+
+  .search-filter-section:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .search-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0;
+    align-items: flex-end;
+  }
+
+  .search-filter-bar .form-group {
+    flex: 1 1 200px;
+    min-width: 200px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .form-control,
+  .form-select {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px; padding: 0.6rem 0.8rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    font-size: 0.75rem;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+    background: white;
+    transform: translateY(-2px);
+  }
+
+  .form-control:hover,
+  .form-select:hover {
+    border-color: #cbd5e0;
+    background: white;
+  }
+
+  .btn-search {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 0.875rem 1.75rem;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    min-width: 140px;
+  }
+
+  .btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+
+  /* --- TABLE STYLES --- */
+  .table-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .table-section:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .table-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .table thead th {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.025em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.03));
+    transform: translateX(8px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .table tbody td {
+    padding: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+    border: none;
+    vertical-align: middle;
+  }
+
+  .reg-number {
+    font-weight: 700;
+    color: #667eea;
+    font-size: 1.0rem;
+  }
+
+  .term-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .reason-text {
+    font-style: italic;
+    color: #6b7280;
+    background: #f9fafb;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border-left: 3px solid #fbbf24;
+  }
+
+  .date-display {
+    color: #4b5563;
+    font-weight: 600;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .btn-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-primary.btn-sm {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+  }
+
+  .btn-secondary.btn-sm {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+  }
+
+  .btn-warning.btn-sm {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #9ca3af;
+  }
+
+  .no-data-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .no-data-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .no-data-subtitle {
+    font-size: 1rem;
+    opacity: 0.8;
+  }
+
+  /* --- CUSTOM OVERLAY (NON-BOOTSTRAP MODAL) STYLES --- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    animation: overlayFadeIn 0.3s ease-out;
+  }
+
+  @keyframes overlayFadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .overlay.show {
+    display: flex;
+  }
+
+  .overlay .card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 700px;
+    animation: cardSlideIn 0.4s ease-out;
+    position: relative;
+    overflow-y: auto;
+    max-height: 85vh;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  @keyframes cardSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .overlay .card h2 {
+    color: #374151;
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .close-btn {
+    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    font-size: 1.8rem;
+    cursor: pointer;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .close-btn:hover {
+    background: #dc2626;
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+  }
+
+  .form-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .submit-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    width: 100%;
+    margin-top: 2rem;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  }
+
+  /* --- BOOTSTRAP MODAL STYLES --- */
+  .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-bottom: none;
+    padding: 2rem;
+  }
+
+  .modal-header .modal-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+
+  .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+
+  #leaveApprovalModal .modal-body {
+    padding: 2rem;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #ffffff, #f7f9fc);
+  }
+
+  .modal-footer {
+    border-top: 1px solid #e5e7eb;
+    padding: 1.5rem 2rem;
+    background: #f9fafb;
+  }
+
+  .modal-footer .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  /* --- RESPONSIVE STYLES --- */
+  @media (max-width: 768px) {
+    .page-container {
+      padding: 1rem 0;
+    }
+
+    .main-header {
+      padding: 1.5rem;
+    }
+
+    .main-header h3 {
+      font-size: 2rem;
+    }
+
+    .search-filter-bar {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .search-filter-bar .form-group {
+      flex: 1 1 auto;
+      min-width: auto;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn-sm {
+      width: 100%;
+    }
+
+    .overlay .card {
+      margin: 1rem;
+      padding: 2rem 1.5rem;
+    }
+
+    .table-responsive {
+      font-size: 0.875rem;
+    }
+
+    .table thead th,
+    .table tbody td {
+      padding: 1rem 0.75rem;
+    }
+  }
+
+  /* --- ANIMATIONS AND UTILITIES --- */
+  .fade-in {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .loading-state {
+    pointer-events: none;
+    opacity: 0.7;
+    position: relative;
+  }
+
+  .loading-state::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes spin {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Enhanced Scrollbar */
+  .table-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  }
+</style>
+
+<div class="page-container">
+  <div class="container fade-in">
+    <div class="main-header">
+      <h3>
+        <i class="bi bi-calendar-x"></i>
+        Leave Management System
+      </h3>
+    </div>
+
+    <div class="action-section">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <h5 class="mb-2 fw-bold text-dark">Quick Actions</h5>
+          <p class="mb-0 text-muted">Manage student leave requests and approvals</p>
+        </div>
+        <button onclick="showDialog()" class="new-approval-btn">
+          <i class="bi bi-plus-circle me-2"></i>
+          New Leave Approval Form
+        </button>
+        <button onclick="showOptionDialog()" class="new-approval-btn">
+          <i class="bi bi-plus-circle me-3"></i>
+          Bulk Approval Options
+        </button>
+
+        <a class="new-approval-btn" style="text-decoration: none;" href="#" data-bs-toggle="modal"
+          data-bs-target="#selectTermModal" data-grade-group="Report Forms">
+          Print Leave Receipts
+        </a>
+
+        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal"
+          data-bs-target="#leaveApprovalModal">
+          <i class="bi bi-check-circle me-1"></i>Approve Application
+        </button>
+
+      </div>
+    </div>
+
+    <div class="search-filter-section">
+      <div class="section-title">
+        <div class="section-icon">🔍</div>
+        Search & Filter Leave Records
+      </div>
+      <form method="GET" class="search-filter-bar">
+        <div class="form-group">
+          <label for="search" class="form-label">
+            <i class="bi bi-search me-1"></i>Search by Registration Number
+          </label>
+          <input type="text" class="form-control" name="search" id="search" placeholder="e.g. REG123"
+            value="{{ request.GET.search }}">
+        </div>
+
+        <div class="form-group">
+          <label for="grade" class="form-label">
+            <i class="bi bi-bookmark me-1"></i>Grade
+          </label>
+          <select class="form-select" id="grade" name="grade">
+            <option value="">All Grades</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="stream" class="form-label">
+            <i class="bi bi-collection me-1"></i>Stream
+          </label>
+          <select class="form-select" id="stream" name="stream">
+            <option value="">All Streams</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="term" class="form-label">
+            <i class="bi bi-calendar3 me-1"></i>Term
+          </label>
+          <select class="form-select" id="term" name="term">
+            <option value="">All Terms</option>
+            <option value="Term 1" {% if request.GET.term == "Term 1" %}selected{% endif %}>Term 1</option>
+            <option value="Term 2" {% if request.GET.term == "Term 2" %}selected{% endif %}>Term 2</option>
+            <option value="Term 3" {% if request.GET.term == "Term 3" %}selected{% endif %}>Term 3</option>
+          </select>
+        </div>
+
+        <div class="form-group d-flex align-items-end">
+          <button class="btn-search" type="submit">
+            <i class="bi bi-funnel me-2"></i>Apply Filters
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header">
+        <div class="section-title mb-0">
+          <div class="section-icon">📋</div>
+          Students Currently on Leave
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th><i class="bi bi-person-badge me-2"></i>Registration No</th>
+              <th><i class="bi bi-calendar3 me-2"></i>Term</th>
+              <th><i class="bi bi-chat-quote me-2"></i>Reason</th>
+              <th><i class="bi bi-calendar-date me-2"></i>Leave Date</th>
+              <th><i class="bi bi-gear me-2"></i>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in leave_data %}
+            <tr>
+              <td>
+                <span class="reg-number">{{ data.registration_no }}</span>
+              </td>
+
+              <td>
+                <span class="term-badge">{{ data.term }}</span>
+              </td>
+
+              <td>
+                <span class="reason-text">{{ data.reason }}</span>
+              </td>
+              <td>
+                <span class="date-display">{{ data.date_of_leave|date:"M d, Y" }}</span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <a href="{% url 'leave_reciept' data.registration_no %}" class="btn btn-primary btn-sm"
+                    title="Print Leave Certificate">
+                    <i class="bi bi-printer me-1"></i>Print
+                  </a>
+                  <a href="{% url 'update_leave' data.registration_no %}" class="btn btn-secondary btn-sm"
+                    title="Update Leave Details">
+                    <i class="bi bi-pencil me-1"></i>Update
+                  </a>
+                  <a href="{% url 'leave_statement' data.registration_no %}" class="btn btn-warning btn-sm"
+                    title="View Leave Statement">
+                    <i class="bi bi-file-text me-1"></i>Statement
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="no-data">
+                <div class="no-data-icon">📭</div>
+                <div class="no-data-text">No Leave Records Found</div>
+                <div class="no-data-subtitle">
+                  {% if request.GET.search or request.GET.grade or request.GET.stream or request.GET.term %}
+                  No students match your current search criteria.
+                  {% else %}
+                  No students are currently on leave.
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="leaveApprovalModal" tabindex="-1" aria-labelledby="leaveApprovalModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="leaveApprovalModalLabel">Leave Application Approval</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="term_select" class="form-label">Select Term:</label>
+          <select class="form-select" id="term_select" name="term_select" required>
+            <option value="">-- Select Term --</option>
+            {% for t in term_choices %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="table-responsive mt-4">
+          <table class="table table-bordered" id="approvalTable">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Reason</th>
+                <th>Date of Application</th>
+                <th>Actions</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in leave_application_data %}
+              <tr data-leave-id="{{ data.id }}">
+                <td>{{ data.registration_no_id }}</td>
+                <td>{{ data.other_reason }}</td>
+                <td>{{ data.date_of_leave|default:'N/A' }}</td>
+                <td class="action-buttons-cell">
+                  <button type="button" class="btn btn-info btn-sm action-btn" data-action="Approve"
+                    data-id="{{ data.id }}" data-url="{% url 'approve_leave_request_ajax' data.id %}">
+                    <i class="bi bi-calendar-date me-1"></i>Approve
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm action-btn" data-action="Reject"
+                    data-id="{{ data.id }}" data-url="{% url 'reject_leave_request_ajax' data.id %}">
+                    <i class="bi bi-x-circle me-1"></i>Reject
+                  </button>
+                </td>
+                <td class="status-cell">
+                  {% if data.is_approved == True %}
+                  <span class="badge bg-success">Approved</span>
+                  {% elif data.is_approved == False %}
+                  <span class="badge bg-danger">Rejected</span>
+                  {% else %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Approve Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="card">
+    <button class="close-btn" onclick="closeDialog()" aria-label="Close">&times;</button>
+    <h2 class="mb-4">Leave Approval</h2>
+
+    <form method="post" onsubmit="" id="leaveForm">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">Registration Number</label>
+          <select class="form-select" name="registration_no" id="registration_no" required>
+            <option value="">Select Registration Number</option>
+            {% for reg_no in reg_nos %}
+            <option value="{{ reg_no }}">{{ reg_no }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Term</label>
+          {{ form.term }}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Reason for Leave</label>
+          {{ form.reason }}
+        </div>
+
+        <div class="col-md-6" id="otherReasonWrapper" style="display: none;">
+          <label class="form-label">Other Reason</label>
+          {{ form.other_reason }}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Date of Leave</label>
+          {{ form.date_of_leave }}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Return Date</label>
+          {{ form.return_date }}
+        </div>
+      </div>
+
+      <button type="submit" class="new-approval-btn mt-3">
+        <i class="bi bi-plus-circle me-2"></i> Approve
+      </button>
+    </form>
+  </div>
+</div>
+
+
+<div class="overlay" id="selectOptions" tabindex="-1" aria-labelledby="selectTermModalLabel" aria-hidden="true"
+  style="top: 100px;">
+  <div class="card">
+    <div class="card-body">
+      <button type="button" onclick="closeOptionDialog();" class="close-btn" data-bs-dismiss="modal"
+        aria-label="Close">&times;</button>
+      <form id="termSelectForm" method="post" action="{% url 'bulk_leave_approval' %}">
+        {% csrf_token %}
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title" id="selectTermModalLabel">Bulk Leave Approval</h5>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal_term" class="form-label">Choose Term:</label>
+            <select class="form-select" id="modal_term" name="term" required>
+              <option value="">-- Select Term --</option>
+              {% for t in term_choices %}
+              <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="modal_grade" class="form-label">Choose Grade:</label>
+            <select class="form-select" id="grade" name="grade" required>
+              <option value="">-- Select Grade --</option>
+              {% for grade in grades %}
+              <option value="{{ grade }}">{{ grade }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <p class="text-danger">Please enter amount.. the leave approvals will be where fee balance is greater than
+              amount specified</p>
+            <label for="modal-amount" class="form-label">Enter Amount</label>
+            <input class="form-control" name="amount">
+          </div>
+          <input type="hidden" id="grade_group" name="grade_group" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if messages %}
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                
+                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <p class="text-muted small mb-4">
+                {% for msg in messages %}
+                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
+                {% endfor %}
+            </p> 
+                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+                    .Ok
+                </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modalEl = document.getElementById('messageModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    });
+</script>
+{% endif %}
+
+<div class="modal fade" id="selectTermModal" tabindex="-1" aria-labelledby="selectTermModalLabel" aria-hidden="true"
+  style="top: 100px; height: 400px;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="termSelectForm" method="get" action="{% url 'leave_reciepts' %}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="selectTermModalLabel">
+            <i class="bi bi-gear me-2"></i>Select Term, Grade, and Stream
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal_grade" class="form-label">
+              <i class="bi bi-bookmark me-1"></i>Choose Grade:
+            </label>
+            <select class="form-select" id="modal_grade" name="grade" required>
+              <option value="">-- Select Grade --</option>
+              {% for grade in grades %}
+              <option value="{{ grade }}">{{ grade }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="modal_stream" class="form-label">
+              <i class="bi bi-collection me-1"></i>Choose Stream:
+            </label>
+            <select class="form-select" id="modal_stream" name="stream" required>
+              <option value="">-- Select Stream --</option>
+            </select>
+          </div>
+          <input type="hidden" id="grade_group" name="grade_group" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle me-1"></i>Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function showDialog() { document.getElementById("overlay").classList.add("show"); }
+    function closeDialog() { document.getElementById("overlay").classList.remove("show"); }
+    function showOptionDialog() { document.getElementById("selectOptions").classList.add("show"); }
+    function closeOptionDialog() { document.getElementById("selectOptions").classList.remove("show"); }
+
+  // Function to get CSRF token (needed for Django AJAX)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+
+  // AJAX Handler Function (MODIFIED to include term_select)
+  async function sendApprovalRequest(leaveId, action, url) {
+    // Get the value from the term selection dropdown inside the modal
+    const termSelectElement = document.getElementById('term_select');
+    const selectedTerm = termSelectElement ? termSelectElement.value : '';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify({
+        'leave_id': leaveId,
+        'action': action,
+        'term_select': selectedTerm // <-- PASSING THE SELECTED TERM
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      // Throw error so it lands in the catch block
+      throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+    }
+
+    return response.json();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // 🎯 Leave Approval Action Logic
+    const approvalModal = document.getElementById('leaveApprovalModal');
+
+    if (approvalModal) {
+      approvalModal.addEventListener('click', async function (event) {
+        let button = event.target.closest('.action-btn');
+
+        if (button) {
+          const action = button.getAttribute('data-action');
+          const leaveId = button.getAttribute('data-id');
+          const url = button.getAttribute('data-url');
+
+          const actionCell = button.closest('.action-buttons-cell');
+          const statusCell = actionCell.nextElementSibling;
+
+          if (actionCell && statusCell && url) {
+
+            // 1. Set Status to "Processing" and hide actions immediately
+            actionCell.style.display = 'none';
+            statusCell.innerHTML = `<span class="badge bg-primary"><i class="bi bi-arrow-clockwise spin me-1"></i>Processing...</span>`;
+
+            try {
+              // 2. Send AJAX Request
+              const result = await sendApprovalRequest(leaveId, action, url);
+
+              // 3. Update status based on successful response
+              if (result.success) {
+                const newStatusText = (action === 'Approve' ? 'Approved' : 'Rejected');
+                const newStatusClass = (action === 'Approve' ? 'bg-success' : 'bg-danger');
+                statusCell.innerHTML = `<span class="badge ${newStatusClass}">${newStatusText}</span>`;
+              } else {
+                // Handle non-success JSON response from server (e.g., status=400, message: "Invalid term")
+                statusCell.innerHTML = `<span class="badge bg-warning text-dark">Failed: ${result.message || 'Error'}</span>`;
+                // Re-show action buttons on failure
+                actionCell.style.display = 'table-cell';
+              }
+
+            } catch (error) {
+              console.error("AJAX Error:", error);
+              // 4. Handle Network/Server Error
+              let displayError = (error.message.includes("403")) ? "CSRF Error" : "Network Error";
+              statusCell.innerHTML = `<span class="badge bg-danger">${displayError}</span>`;
+              actionCell.style.display = 'table-cell'; // Re-show buttons on error
+            }
+          }
+        }
+      });
+    }
+
+    // Custom functions to control your custom overlay dialogs
+    
+    document.getElementById("modal_grade").addEventListener("change", function () {
+      let grade = this.value;
+      let streamSelect = document.getElementById("modal_stream");
+
+      // Clear old options
+      streamSelect.innerHTML = '<option value="">-- Select Stream --</option>';
+
+      if (grade) {
+        // Assuming 'get-streams' is the correct URL for fetching streams
+        fetch(`/get-streams/?grade=${grade}`)
+          .then(response => response.json())
+          .then(data => {
+            data.streams.forEach(function (stream) {
+              let option = document.createElement("option");
+              option.value = stream;
+              option.textContent = stream;
+              streamSelect.appendChild(option);
+            });
+          })
+          .catch(error => console.error("Error fetching streams:", error));
+      }
+    });
+
+    var termSelectForm = document.getElementById('termSelectForm');
+    var gradeGroupInput = document.getElementById('grade_group');
+    document.querySelectorAll('[data-bs-target="#selectTermModal"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var group = btn.getAttribute('data-grade-group');
+        gradeGroupInput.value = group;
+        termSelectForm.action = "{% url 'leave_reciepts' %}";
+      });
+    });
+
+    // Enhanced loading state management
+    function setLoadingState(element, isLoading) {
+      if (isLoading) {
+        element.classList.add('loading-state');
+      } else {
+        element.classList.remove('loading-state');
+      }
+    }
+
+    // Enhanced grade-stream population with better UX
+    function normalizeGrade(g) { return (g || "").trim(); }
+
+    function fillStreamSelect(el, streams, selected) {
+      el.innerHTML = '<option value="">All Streams</option>';
+      streams.forEach(s => {
+        let opt = document.createElement("option");
+        opt.value = s;
+        opt.text = s;
+        if (s === selected) opt.selected = true;
+        el.appendChild(opt);
+      });
+    }
+
+    function fillGradeSelect(el, grades, selected) {
+      el.innerHTML = '<option value="">All Grades</option>';
+      grades.forEach(g => {
+        let opt = document.createElement("option");
+        opt.value = g;
+        opt.text = g;
+        if (g === selected) opt.selected = true;
+        el.appendChild(opt);
+      });
+    }
+
+
+    let gradeSel = document.getElementById("grade");
+    let streamSel = document.getElementById("stream");
+    let initGrade = normalizeGrade("{{ request.GET.grade|default_if_none:'' }}");
+    let initStream = "{{ request.GET.stream|default_if_none:'' }}";
+
+    // Set loading state
+    setLoadingState(gradeSel, true);
+
+    // Assuming get_streams provides all grades and streams data
+    fetch("{% url 'get_streams' %}")
+      .then(res => res.json())
+      .then(data => {
+        let grades = data.grades || Object.keys(data.streams_by_grade || {});
+        fillGradeSelect(gradeSel, grades, initGrade);
+        setLoadingState(gradeSel, false);
+
+        if (initGrade && data.streams_by_grade && data.streams_by_grade[initGrade]) {
+          fillStreamSelect(streamSel, data.streams_by_grade[initGrade], initStream);
+        }
+
+        gradeSel.addEventListener("change", function () {
+          let g = normalizeGrade(this.value);
+          setLoadingState(streamSel, true);
+
+          setTimeout(() => {
+            if (data.streams_by_grade && data.streams_by_grade[g]) {
+              fillStreamSelect(streamSel, data.streams_by_grade[g], null);
+            } else {
+              streamSel.innerHTML = '<option value="">All Streams</option>';
+            }
+            setLoadingState(streamSel, false);
+          }, 200);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading grades/streams:", err);
+        setLoadingState(gradeSel, false);
+        gradeSel.innerHTML = '<option value="">Error loading grades</option>';
+      });
+
+
+    // Add fade-in animations with staggered timing
+    const animatedElements = document.querySelectorAll('.action-section, .search-filter-section, .table-section');
+    animatedElements.forEach((element, index) => {
+      element.style.animationDelay = `${index * 0.15}s`;
+      element.classList.add('fade-in');
+    });
+
+    // Enhanced form validation
+    const reasonField = document.getElementById("id_reason");
+    const otherWrapper = document.getElementById("otherReasonWrapper");
+
+    function toggleOtherReason() {
+      if (reasonField && otherWrapper) {
+        if (reasonField.value === "Other Reason") {
+          otherWrapper.style.display = "block";
+        } else {
+          otherWrapper.style.display = "none";
+        }
+      }
+    }
+
+    if (reasonField) {
+      reasonField.addEventListener("change", toggleOtherReason);
+      toggleOtherReason(); // run on load
+    }
+
+    // Auto-focus search input if empty
+    const searchInput = document.getElementById('search');
+    if (searchInput && !searchInput.value) {
+      setTimeout(() => searchInput.focus(), 800);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+      // ESC key closes overlay
+      if (e.key === 'Escape') {
+        const overlay = document.getElementById('overlay');
+        const selectOptions = document.getElementById('selectOptions');
+        // Close custom overlays
+        if (overlay && overlay.classList.contains('show')) {
+          closeDialog();
+        }
+        if (selectOptions && selectOptions.classList.contains('show')) {
+          closeOptionDialog();
+        }
+      }
+
+      // Ctrl+N opens new leave approval (custom overlay)
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        showDialog();
+      }
+
+      // Ctrl+F focuses search
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        searchInput?.focus();
+      }
+    });
+  });
+</script>
+{% endblock %}

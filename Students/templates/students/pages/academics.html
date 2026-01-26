@@ -26,13 +26,10 @@
             <div class="action-card">
                 <div class="action-title">
                     <div class="action-icon">📋</div>
-                    Report Forms Generation Based on System
+                    Report Forms Generation
                 </div>
                 <div class="mt-3">
                     <a class="btn btn-action" href="#" data-bs-toggle="modal" data-bs-target="#selectTermModal" data-grade-group="Report Forms">
-                        8-4-4 Reports
-                    </a>
-                    <a class="btn btn-action" href="#" data-bs-toggle="modal" data-bs-target="#selectTermModal2" data-grade-group2="Report Forms">
                         CBC Reports
                     </a>
                 </div>
@@ -42,13 +39,11 @@
                     <div class="action-icon">📊</div>
                     Results & Configuration
                 </div>
-                <div class="mt-3 d-flex gap-2 flex-wrap">
+                <div class="mt-3">
                     <a class="btn btn-action btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#selectResultModal" data-grade-group="Results">
                         Generate Results
                     </a>
-                    <button class="btn btn-action btn-info" data-bs-toggle="modal" data-bs-target="#configSubjectModal">
-                        <i class="bi bi-gear-fill"></i> Config Subjects
-                    </button>
+                    
                 </div>
             </div>
         </div>
@@ -109,7 +104,7 @@
                         <th style="width: 10%;">Reg No</th>
                         <th style="width: 25%;">Student Name</th>
                         <th style="width: 15%;" class="text-center">Overall Avg. Score (%)</th>
-                        <th style="width: 15%;" class="text-center">Overall Avg. Level (0-3)</th>
+                        <th style="width: 15%;" class="text-center">Overall Avg. Level (0-4)</th>
                         <th style="width: 15%;" class="text-center">Subjects Counted</th>
                         <th style="width: 10%;">Actions</th>
                     </tr>
@@ -156,101 +151,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="configSubjectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered"> <div class="modal-content shadow">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold"><i class="bi bi-book me-2"></i>Configure Learning Area Combat</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="row g-2 mb-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold">Subject Name</label>
-                        <input type="text" id="temp_name" name="name" class="form-control" placeholder="e.g. Mathematics">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Level</label>
-                        <select id="temp_level" class="form-select">
-                            <option value="">-- Level --</option>
-                            {% for level in grade_levels %}
-                                <option value="{{ level }}">{{ level }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Category</label>
-                        <select id="temp_category" class="form-select">
-                            <option value="">-- Category --</option>
-                            {% for category in categories %}
-                                <option value="{{ category }}">{{ category }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-dark w-100" onclick="addToCombatList()">Add</button>
-                    </div>
-                </div>
 
-                <div class="table-responsive border rounded mb-3" style="max-height: 200px;">
-                    <table class="table table-sm table-hover mb-0" id="combatPreviewTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Subject</th>
-                                <th>Level</th>
-                                <th>Category</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="combatListBody">
-                            </tbody>
-                    </table>
-                </div>
-
-                <div id="requirementAlert" class="alert alert-warning py-2 small">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    Required: Add subjects for <strong>all levels</strong> before saving.
-                </div>
-            </div>
-
-            <form method="POST" action="{% url 'manage_learning_areas' %}" id="finalCombatForm">
-                {% csrf_token %}
-                <input type="hidden" name="combat_data" id="combat_data_input">
-                
-                <div class="modal-footer border-0">
-                    <button type="submit" id="saveCombatBtn" class="btn btn-primary w-100 rounded-pill" disabled>
-                        Save All Configurations
-                    </button>
-                </div>
-            </form>
-            <div class="table-responsive border rounded mb-3" style="max-height: 200px;">
-                    <table class="table table-sm table-hover mb-0" id="combatPreviewTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Subject</th>
-                                <th>Level</th>
-                                <th>Category</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for area in learning_areas %}
-                                <tr>
-                                    <td>{{ area.name }}</td>
-                                    <td>{{ area.grade_level }}</td>
-                                    <td>{{ area.category }}</td>
-                                    <td>
-                                        <button class="btn btn-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-        </div>
-        
-    </div>
-</div>
 
 
 
@@ -286,7 +187,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="selectTermModal2" tabindex="-1" aria-labelledby="selectTermModalLabel2" aria-hidden="true">
+<!-- <div class="modal fade" id="selectTermModal2" tabindex="-1" aria-labelledby="selectTermModalLabel2" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="termSelectForm2" method="get" action="">
@@ -316,7 +217,7 @@
             </form>
         </div>
     </div>
-</div>
+</div> -->
 
 <div class="modal fade" id="selectResultModal" tabindex="-1" aria-labelledby="selectResultModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -506,10 +407,10 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', () => { termSelectForm.action = "{% url 'report_forms' %}"; });
     });
     
-    var termSelectForm2 = document.getElementById('termSelectForm2');
-    document.querySelectorAll('[data-bs-target="#selectTermModal2"]').forEach(btn => {
-        btn.addEventListener('click', () => { termSelectForm2.action = "{% url 'report_forms_cbc' %}"; });
-    });
+    // var termSelectForm2 = document.getElementById('termSelectForm2');
+    // document.querySelectorAll('[data-bs-target="#selectTermModal2"]').forEach(btn => {
+    //     btn.addEventListener('click', () => { termSelectForm2.action = "{% url 'report_forms_cbc' %}"; });
+    // });
 
     var resultSelectForm = document.getElementById('resultSelectForm');
     document.querySelectorAll('[data-bs-target="#selectResultModal"]').forEach(btn => {

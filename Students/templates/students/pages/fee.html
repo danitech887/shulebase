@@ -821,34 +821,7 @@
     </div>
 </div>
 
-{% if messages %}
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                
-                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
-            </div>
-            <p class="text-muted small mb-4">
-                {% for msg in messages %}
-                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
-                {% endfor %}
-            </p> 
-                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
-                    .Ok
-                </button>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var modalEl = document.getElementById('messageModal');
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    });
-</script>
-{% endif %}
+{% include "includes/message_modal.html" %}
 
 <div class="modal fade" id="selectTermModal" tabindex="-1" aria-labelledby="selectTermModalLabel" aria-hidden="true" style="top: 100px;">
   <div class="modal-dialog modal-lg">

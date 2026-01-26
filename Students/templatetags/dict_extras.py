@@ -2,6 +2,11 @@ from django import template
 register = template.Library()
 from django.db.models import QuerySet
 
+from django import template
+import urllib.parse
+
+register = template.Library()
+
 @register.filter
 def get_item(dictionary, key):
     if dictionary and key in dictionary:
@@ -45,3 +50,16 @@ def divisibleby(numerator, denominator):
         return numerator / denominator
     except (ZeroDivisionError, TypeError):
         return 0
+
+
+
+# Students/templatetags/whatsapp_tags.py
+
+
+@register.filter
+def whatsapp_url(student):
+    message = f"Hi {student.parent_name}, your child's results are ready."
+    phone = student.parent_phone
+    # Simple formatting
+    clean_phone = '254' + phone[1:] if phone.startswith('0') else phone
+    return f"https://wa.me/{clean_phone}?text={urllib.parse.quote(message)}"

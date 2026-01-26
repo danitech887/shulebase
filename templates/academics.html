@@ -1,0 +1,652 @@
+{% extends 'base.html' %}
+{% block title %}Student Academics{% endblock %}
+{% load static %}
+{% load humanize %} 
+
+{% block content %}
+<style>
+    /* --- ANIMATION KEYFRAMES --- */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* --- PAGE STRUCTURE AND HEADER --- */
+    .page-header {
+        animation: fadeInDown 0.6s ease-out;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    .page-header h2, .page-header p {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+    }
+
+    /* --- FILTER SECTION --- */
+    .filter-section {
+        animation: fadeInDown 0.6s ease-out 0.2s backwards;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+
+    .filter-section .form-select {
+        border-radius: 8px;
+        border: 2px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .form-select:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: scale(1.02);
+    }
+
+    .filter-section .btn-primary {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    /* --- CARDS & WIDGETS --- */
+    .portal-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        animation: fadeInUp 0.6s ease-out backwards;
+        border-width: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .portal-card:nth-child(1) { animation-delay: 0.3s; }
+    .portal-card:nth-child(2) { animation-delay: 0.4s; }
+
+    .portal-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .portal-card:hover::before {
+        opacity: 1;
+    }
+
+    .portal-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+    }
+
+    .portal-card .bi-graph-up-arrow {
+        transition: all 0.4s ease;
+    }
+
+    .portal-card:hover .bi-graph-up-arrow {
+        transform: scale(1.2) rotate(5deg);
+        animation: float 2s ease-in-out infinite;
+    }
+
+    .display-4 {
+        transition: all 0.3s ease;
+    }
+
+    .portal-card:hover .display-4 {
+        transform: scale(1.05);
+    }
+
+    .section-title {
+        animation: fadeInUp 0.6s ease-out 0.5s backwards;
+        position: relative;
+        padding-left: 20px;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 5px;
+        height: 70%;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+    }
+
+    .competency-card {
+        transition: all 0.3s ease;
+        animation: scaleIn 0.5s ease-out backwards;
+        border-radius: 10px;
+        border-width: 2px;
+    }
+
+    .competency-card:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .subject-table-card {
+        animation: fadeInUp 0.6s ease-out 0.6s backwards;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        border-bottom: 3px solid #667eea;
+        padding: 1rem;
+    }
+
+    /* --- TABLE STYLES --- */
+    .table tbody tr {
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.5s ease-out backwards;
+    }
+
+    .table tbody tr:nth-child(odd) { animation-delay: 0.1s; }
+    .table tbody tr:nth-child(even) { animation-delay: 0.15s; }
+
+    .table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent) !important;
+        transform: translateX(5px) scale(1.01);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .badge {
+        transition: all 0.3s ease;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    tr:hover .badge {
+        transform: scale(1.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn-outline-primary {
+        transition: all 0.3s ease;
+        border-radius: 6px;
+    }
+
+    .btn-outline-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    /* --- DEADLINES CARD --- */
+    .deadlines-card {
+        animation: fadeInUp 0.6s ease-out 0.7s backwards;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .deadlines-card .card-header {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%) !important;
+        border-bottom: none;
+    }
+
+    .list-group-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .list-group-item:hover {
+        background-color: rgba(102, 126, 234, 0.05) !important;
+        border-left-color: #667eea;
+        transform: translateX(5px);
+    }
+
+    .list-group-item .badge {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* --- UTILITIES & MISC --- */
+    .divider-line {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #667eea, transparent);
+        margin: 2.5rem 0;
+        animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        border: none;
+    }
+
+    .table-dark {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    }
+
+    .empty-state {
+        animation: scaleIn 0.6s ease-out;
+        padding: 3rem 2rem;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+
+        .page-header {
+            padding: 1rem;
+        }
+    }
+
+    .table thead th {
+        position: relative;
+        color: white;
+    }
+
+    .table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #667eea;
+        transition: width 0.3s ease;
+    }
+
+    .table thead th:hover::after {
+        width: 100%;
+    }
+
+    .btn-info {
+        transition: all 0.3s ease;
+    }
+
+    .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(23, 162, 184, 0.4);
+    }
+
+    .fw-bold {
+        position: relative;
+    }
+
+    tr:hover .fw-bold::before {
+        content: '→';
+        position: absolute;
+        left: -15px;
+        color: #667eea;
+        font-weight: bold;
+    }
+    /* Add spinning class for loading indicators */
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header">
+                <h2><i class="bi bi-mortarboard-fill me-2"></i> Academic Dashboard</h2>
+                <p class="lead mb-0">Performance overview for **{{ student.first_name|default:"Learner" }}**, **{{ student.grade|default:"Current Grade" }}** ({{ current_term|default:"Term" }}).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-section">
+                <form method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="termSelect" class="col-form-label fw-bold"><i class="bi bi-funnel-fill me-2"></i>Select Term:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="termSelect" name="term" class="form-select">
+                            {% for term in term_choices %}
+                                <option value="{{ term }}" {% if term == current_term %}selected{% endif %}>{{ term }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-lg-8 col-md-12 mb-4">
+            <div class="card shadow border-primary portal-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="text-uppercase text-muted mb-1 fs-6">Overall Mean Score / Current Progress</p>
+                        <h1 class="mb-0 text-primary display-4 fw-bold">{{ overall_mean|floatformat:1 }}%</h1>
+                        <p class="text-muted mb-0">Aggregate performance across all learning areas.</p>
+                    </div>
+                    <div class="text-end">
+                        <i class="bi bi-graph-up-arrow fs-1 text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Report Generate card section -->
+        <div class="col-lg-4 col-md-12 mb-4">
+        <div class="card shadow border-success portal-card h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                
+                <div>
+                    <p class="text-uppercase text-muted mb-1 fs-6">Latest Report Card</p>
+                    <h3 class="mb-0 text-success fw-bold">Download Now</h3>
+                    <p class="text-muted mb-0">Get your detailed report for {{ latest_report.term }}.</p>
+                </div>
+                
+                <div class="ms-auto">
+                    <a href="{{ latest_report.link }}" 
+                    class="btn btn-lg btn-success" 
+                    style="position: relative; z-index: 10;" 
+                    target="_blank">
+                        <i class="bi bi-download me-1"></i> Download
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    </div>
+    <hr class="divider-line">
+    
+    <h3 class="mb-3 text-secondary section-title">🧠 Core Competency Ratings ({{ current_term }})</h3>
+    <div class="row mb-5">
+        {% for competency in competency_ratings %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow-sm border-{{ competency.color|default:'secondary' }} competency-card h-100">
+                    <div class="card-body py-3">
+                        <p class="small text-muted mb-0">{{ competency.competency }}</p>
+                        <h6 class="mb-0 fw-bold text-{{ competency.color|default:'secondary' }}">{{ competency.rating }}</h6>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12"><p class="text-center text-muted">Core competency ratings are not yet available for this term.</p></div>
+        {% endfor %}
+    </div>
+
+    <hr class="divider-line">
+
+    <h3 class="mb-3 text-secondary section-title">📚 Learning Area Performance</h3>
+    <div class="row mb-5">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow subject-table-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-book-half me-2"></i> Current Subject Averages</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if subject_summaries %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th scope="col">Subject</th>
+                                    <th scope="col">Teacher</th>
+                                    <th scope="col">Avg Score</th>
+                                    <th scope="col">CBC Level</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subject in subject_summaries %}
+                                <tr>
+                                    <td class="fw-bold">{{ subject.name }}</td>
+                                    <td>{{ subject.teacher|default:"N/A" }}</td>
+                                    <td class="text-primary fw-bold">{{ subject.score|floatformat:1 }}%</td>
+                                    <td>
+                                        {% if subject.level == 'EE' %}
+                                            <span class="badge bg-success">EE</span>
+                                        {% elif subject.level == 'ME' %}
+                                            <span class="badge bg-info">ME</span>
+                                        {% elif subject.level == 'AE' %}
+                                            <span class="badge bg-warning text-dark">AE</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">BE</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-sm btn-outline-primary view-learning-area-btn" 
+                                            data-subject-name="{{ subject.name }}"
+                                        >
+                                            <i class="bi bi-distribute-vertical"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="p-4 text-center text-muted">No subject performance data available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="learningBreakdownModal" tabindex="-1" aria-labelledby="learningBreakdownModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="learningBreakdownModalLabel">Learning Area Breakdown</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-center text-muted">Detailed breakdown coming soon...</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow h-100 deadlines-card" style="height: 100px; overflow-y: auto;">
+                <div class="card-header text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-fill me-2"></i>Available Reasources</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for resource in resources %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 text-dark">{{ resource.title }}</h6>
+                                <small class="text-muted">{{ resource.subject }}</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">{{ resource.created_at|date:"M j" }}</span>
+                        </div>
+                    {% empty %}
+                        <p class="p-3 text-center text-muted mb-0">No resources posted yet!</p>
+                    {% endfor %}
+                    <a href="{% url 'learning_hub' %}" class="list-group-item list-group-item-action bg-light text-center fw-bold">
+                        View All Resources <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.view-learning-area-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+        var subjectName = this.getAttribute('data-subject-name');
+        
+        // Ensure Bootstrap JS is available to create the modal object
+        if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+            console.error("Bootstrap JS not loaded. Cannot create modal.");
+            return;
+        }
+
+        var modal = new bootstrap.Modal(document.getElementById('learningBreakdownModal'));
+        var modalTitle = document.getElementById('learningBreakdownModalLabel');
+        var modalBody = document.querySelector('#learningBreakdownModal .modal-body');
+
+        modalTitle.textContent = 'Learning Area Breakdown: ' + subjectName;
+        modalBody.innerHTML = '<p class="text-center text-muted"><i class="bi bi-arrow-clockwise spin me-2"></i> Loading data...</p>';
+        modal.show();
+
+        // Fetch API call to load detailed data for the modal
+        // Note: The URL assumes a structure like /student-portal/learning-area-breakdown/SubjectName/
+        fetch(`/student-portal/learning-area-breakdown/${encodeURIComponent(subjectName)}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.marks.length === 0) {
+                    modalBody.innerHTML = '<p class="text-center text-muted">No detailed breakdown data available.</p>';
+                } else {
+                    // FIX: Include table headers dynamically
+                    let html = `
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm align-middle mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Sub-Strand</th>
+                                        <th scope="col">Score (%)</th>
+                                        <th scope="col">Recorded By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    data.marks.forEach(mark => {
+                        html += `<tr><td>${mark.sub_strand}</td><td>${mark.score}</td><td>${mark.recorded_by}</td></tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                    
+                    modalBody.innerHTML = html;
+                }
+            })
+            .catch(err => {
+                modalBody.innerHTML = `<p class="p-4 text-center text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to load data. Check your network and console for details.</p>`;
+                console.error("Fetch error for breakdown:", err);
+            });
+    });
+});
+</script>
+
+{% endblock content %}

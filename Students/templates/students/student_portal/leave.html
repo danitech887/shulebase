@@ -551,22 +551,28 @@
                             <thead class="table-dark sticky-top">
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Date Filed</th>
-                                    <th scope="col">Start Date</th>
+                                    
+                                    <th scope="col">Date of Leave</th>
                                     <th scope="col">End Date</th>
                                     <th scope="col">Reason</th>
                                     <th scope="col">Status</th>
-                                    <th scope="col">Reviewer Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for record in leave_records %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{ record.date_filed|date:"M j, Y" }}</td>
+                                    
                                     <td>{{ record.date_of_leave|date:"M j, Y" }}</td>
                                     <td>{{ record.return_date|date:"M j, Y" }}</td>
-                                    <td class="reason-cell">{{ record.other_reason|truncatechars:50 }}</td>
+                                    
+                                    {% if record.reason == 'School Fees' %}
+                                        <td class="reason-cell">{{ record.reason|truncatechars:50 }}</td>
+                                        
+                                    {% else %}
+                                        <td class="reason-cell">{{ record.other_reason }}</td>
+                                    {% endif %}
+                                    
                                     <td>
                                         {% if record.status == 'Approved' %}
                                             <span class="badge bg-success"><i class="bi bi-check-circle"></i> Approved</span>
@@ -576,7 +582,7 @@
                                             <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pending</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ record.reviewer_notes|default:"-"|truncatechars:30 }}</td>
+                                    
                                 </tr>
                                 {% endfor %}
                             </tbody>

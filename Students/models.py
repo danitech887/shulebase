@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 
 from .utils.manager import SchoolManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
 
 # Utility functions
 def current_time_str():
@@ -33,6 +35,65 @@ class MasterSchool(models.Model):
 
 
 # ---------------- Core Models ----------------
+
+class UserManager(BaseUserManager):
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        if not username:
+            raise ValueError("The Username field is required")
+        
+        email = self.normalize_email(email)
+        
+        # --- FIX: Convert school ID to School Instance ---
+        school_val = extra_fields.get('school')
+        if school_val and not isinstance(school_val, MasterSchool):
+            try:
+                # This converts the "1" you typed in the terminal into the actual School object
+                extra_fields['school'] = MasterSchool.objects.get(pk=school_val)
+            except MasterSchool.DoesNotExist:
+                raise ValueError(f"MasterSchool with id {school_val} does not exist.")
+        # ------------------------------------------------
+        
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        
+        # Ensure role is set for superuser
+        if "role" not in extra_fields:
+            extra_fields["role"] = "SystemOwner"
+
+        return self.create_user(username, email, password, **extra_fields)
+class Users(AbstractBaseUser, PermissionsMixin):
+    username = models.CharField(max_length=50, unique=True)
+    school = models.ForeignKey(MasterSchool, on_delete=models.CASCADE, related_name="users")
+    school_name = models.CharField(max_length=100)
+    role = models.CharField(max_length=30)
+    registration_no = models.CharField(max_length=30, default="") 
+    email = models.EmailField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    last_login = models.DateTimeField(null=True)
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email", "role", "school"]
+
+    objects = UserManager()
+
+    class Meta:
+        # Let Django manage the table name 'students_users'
+        pass
+
+    def __str__(self):
+        return f"{self.username} ({self.role})"
+
+
 class StudentInfo(models.Model):
     registration_no = models.CharField(primary_key=True, max_length=20)
     school = models.ForeignKey(MasterSchool, on_delete=models.CASCADE, related_name="students")
@@ -49,6 +110,8 @@ class StudentInfo(models.Model):
     email = models.EmailField(max_length=50, blank=True, null=True)
     address = models.CharField(max_length=20)
 
+    parent_portal_user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, blank=True)
+
     objects = SchoolManager()
 
     @property
@@ -63,6 +126,26 @@ class StudentInfo(models.Model):
         verbose_name = "Student Information"
         unique_together = ('school', 'registration_no')
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.hashers import make_password
+
+@receiver(post_save, sender=StudentInfo)
+def manage_parent_account(sender, instance, created, **kwargs):
+    if created:
+        # Step A: Find or Create the Parent User
+        parent_user, p_created = Users.objects.get_or_create(
+            username=instance.phone,
+            defaults={
+                'role': 'Parent', 
+                'password': make_password(str(instance.phone)),
+                'school': instance.school
+            }
+        )
+        
+        # Step B: Link the parent to this student
+        # We use .update() here to avoid triggering this signal again (infinite loop)
+        StudentInfo.objects.filter(registration_no=instance.registration_no).update(parent_portal_user=parent_user)
 class Fee(models.Model):
     registration_no = models.ForeignKey(StudentInfo,on_delete = models.CASCADE)
     school = models.ForeignKey(MasterSchool, on_delete=models.CASCADE, related_name="fees")
@@ -182,6 +265,7 @@ class SubStrandMark(models.Model):
     sub_strand = models.ForeignKey(SubStrand, on_delete=models.CASCADE)
     term = models.CharField(max_length=20)
     year = models.IntegerField()
+    raw_score = models.FloatField(default=0)
     score = models.FloatField()
     remark = models.CharField(max_length = 300,default="Good")
     level = models.PositiveSmallIntegerField(choices=[(1,'Level 1'),(2,'Level 2'),(3,'Level 3')],default=1) 
@@ -382,64 +466,6 @@ class LoginDetails(models.Model):
         # This model appears to be legacy and may conflict with the custom Users model.
         # Consider removing it if it's no longer in use.
         db_table = 'logindetails'
-
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-class UserManager(BaseUserManager):
-    def create_user(self, username, email=None, password=None, **extra_fields):
-        if not username:
-            raise ValueError("The Username field is required")
-        
-        email = self.normalize_email(email)
-        
-        # --- FIX: Convert school ID to School Instance ---
-        school_val = extra_fields.get('school')
-        if school_val and not isinstance(school_val, MasterSchool):
-            try:
-                # This converts the "1" you typed in the terminal into the actual School object
-                extra_fields['school'] = MasterSchool.objects.get(pk=school_val)
-            except MasterSchool.DoesNotExist:
-                raise ValueError(f"MasterSchool with id {school_val} does not exist.")
-        # ------------------------------------------------
-        
-        user = self.model(username=username, email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        
-        # Ensure role is set for superuser
-        if "role" not in extra_fields:
-            extra_fields["role"] = "SystemOwner"
-
-        return self.create_user(username, email, password, **extra_fields)
-class Users(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=50, unique=True)
-    school = models.ForeignKey(MasterSchool, on_delete=models.CASCADE, related_name="users")
-    school_name = models.CharField(max_length=100)
-    role = models.CharField(max_length=30)
-    registration_no = models.CharField(max_length=30, default="") 
-    email = models.EmailField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    last_login = models.DateTimeField(null=True)
-
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email", "role", "school"]
-
-    objects = UserManager()
-
-    class Meta:
-        # Let Django manage the table name 'students_users'
-        pass
-
-    def __str__(self):
-        return f"{self.username} ({self.role})"
 
 
 class GradeStream(models.Model):

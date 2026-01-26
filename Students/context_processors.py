@@ -11,5 +11,6 @@ def current_school(request):
         'contact': request.session.get('contact'),
         'announcements': request.session.get('announcements'),
         'parent_name': request.session.get('parent_name'),
+        'role': request.session.get('role'),
 
     }

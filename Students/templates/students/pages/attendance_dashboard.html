@@ -32,21 +32,39 @@
             Filter Attendance Data
         </div>
         <form method="get" class="form-block">
-            <label for="year">Year:</label>
-            <select name="year" id="year" class="form-control mx-2">
-                <option value="">All</option>
-                {% for y in years %}
-                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-            </select>
-            <label for="term">Term:</label>
-            <select name="term" id="term" class="form-control mx-2">
-                <option value="">All</option>
-                <option value="Term 1" {% if term == "Term 1" %}selected{% endif %}>Term 1</option>
-                <option value="Term 2" {% if term == "Term 2" %}selected{% endif %}>Term 2</option>
-                <option value="Term 3" {% if term == "Term 3" %}selected{% endif %}>Term 3</option>
-            </select>
-            <button type="submit" class="btn btn-primary">Filter</button>
+            <div>
+                <label for="year">Year:</label>
+                <select name="year" id="year" class="form-control">
+                    <option value="">All</option>
+                    {% for y in years %}
+                        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="term">Term:</label>
+                <select name="term" id="term" class="form-control">
+                    <option value="">All</option>
+                    <option value="Term 1" {% if term == "Term 1" %}selected{% endif %}>Term 1</option>
+                    <option value="Term 2" {% if term == "Term 2" %}selected{% endif %}>Term 2</option>
+                    <option value="Term 3" {% if term == "Term 3" %}selected{% endif %}>Term 3</option>
+                </select>
+            </div>
+            <div>
+                <label for="filter_type">Period:</label>
+                <select name="filter_type" id="filter_type" class="form-control">
+                    <option value="">All Time</option>
+                    <option value="today" {% if filter_type == "today" %}selected{% endif %}>Today</option>
+                    <option value="weekly" {% if filter_type == "weekly" %}selected{% endif %}>This Week</option>
+                </select>
+            </div>
+            <div>
+                <label for="date">Date:</label>
+                <input type="date" name="date" id="date" class="form-control" value="{{ request.GET.date|default_if_none:'' }}">
+            </div>
+            <div style="align-self: flex-end;">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
         </form>
     </div>
 

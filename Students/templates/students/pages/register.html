@@ -460,7 +460,7 @@ body {
 </style>
 
 <!-- Grade Stream Configuration Modal -->
-<div class="overlay2" id="overlay2">
+<div class="overlay2" id="overlay2"  style="min-height: 600px; overflow-y:auto;">
     <div class="card2 p-4 shadow-lg">
         <button class="close-btn" onclick="closeDialog2();" title="Close">&times;</button>
         <h2 style="color: var(--dark); font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
@@ -493,6 +493,44 @@ body {
                 </button>
             </div>
         </form>
+        <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="badge" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
+                Total: {{ gradestream|length }} Grades
+            </div>
+        </div>
+            <div class="table-responsive">
+                <table id="progressTable" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-mortarboard me-2"></i>Grade</th>
+                            <th><i class="bi bi-diagram-3 me-2"></i>Stream</th>
+                            <th class="text-center"><i class="bi bi-gear me-2"></i>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grade in gradestream %}
+                        <tr id="row-{{ grade.id }}">
+                            <td class="editable-cell" data-field="grade">
+                                <span class="badge bg-secondary">{{ grade.grade }}</span>
+                            </td>
+                            <td class="editable-cell" data-field="stream">
+                                <span class="badge bg-info">{{ grade.stream }}</span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-danger btn-sm" onclick="triggerDeleteGradeStream('{% url 'delete_grade_stream' grade.id %}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm edit-btn" data-save-url="{% url 'edit_grade_stream' grade.id %}" onclick="toggleEdit('{{ grade.id }}', this)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -582,6 +620,10 @@ body {
                         <label class="form-label">Address</label>
                         {{ form.address }}
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Parent Name</label>
+                        {{ form.parent_name }}
+                    </div>
                 </div>
             </div>
 
@@ -594,35 +636,7 @@ body {
     </div>
 </div>
 
-<!-- Messages Modal -->
-{% if messages %}
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                
-                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
-            </div>
-            <p class="text-muted small mb-4">
-                {% for msg in messages %}
-                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
-                {% endfor %}
-            </p> 
-                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
-                    .Ok
-                </button>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var modalEl = document.getElementById('messageModal');
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    });
-</script>
-{% endif %}
+{% include "includes/message_modal.html" %}
 
 <!-- Page Header -->
 <div class="page-header">
@@ -636,7 +650,7 @@ body {
 <div class="container mt-4">
     <!-- Action Buttons -->
     <div style="margin-bottom: 2rem;">
-        <button class="btn btn-primary mb-3 me-3" onclick="showDialog()">
+        <button class="btn btn-primary mb-3 me-3" onclick="openRegisterModal()">
             <i class="bi bi-person-plus-fill"></i>
             <span>New Student</span>
         </button>
@@ -656,9 +670,9 @@ body {
         <div class="row g-3">
             <div class="col-md-4">
                 <label for="search" class="form-label">
-                    <i class="bi bi-search me-1"></i>Search by Registration No.
+                    <i class="bi bi-search me-1"></i>Search by Name or Reg No.
                 </label>
-                <input type="text" class="form-control" placeholder="e.g. REG123" name="search" id="search"
+                <input type="text" class="form-control" placeholder="e.g. John or REG123" name="search" id="search"
                     value="{{ request.GET.search }}">
             </div>
             <div class="col-md-3">
@@ -689,9 +703,7 @@ body {
     <!-- Table -->
     <div class="table-container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0" style="color: var(--dark); font-weight: 600;">
-                <i class="bi bi-table me-2"></i>Pupil Records
-            </h5>
+            
             <div class="badge" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
                 Total: {{ pupils|length }} students
             </div>
@@ -717,9 +729,22 @@ body {
                         <td><span class="badge bg-secondary">{{ pupil.grade }}</span></td>
                         <td><span class="badge bg-info">{{ pupil.stream }}</span></td>
                         <td class="text-center">
-                            <a class="btn btn-primary btn-sm" href="{% url 'update_pupil' pupil.registration_no %}">
+                            <button class="btn btn-primary btn-sm" onclick="editStudent(this)"
+                                data-url="{% url 'update_pupil' pupil.registration_no %}"
+                                data-reg="{{ pupil.registration_no }}"
+                                data-firstname="{{ pupil.first_name }}"
+                                data-secondname="{{ pupil.second_name }}"
+                                data-surname="{{ pupil.surname }}"
+                                data-gender="{{ pupil.gender }}"
+                                data-dob="{{ pupil.date_of_birth|date:'Y-m-d' }}"
+                                data-grade="{{ pupil.grade }}"
+                                data-stream="{{ pupil.stream }}"
+                                data-doreg="{{ pupil.date_of_registration|date:'Y-m-d' }}"
+                                data-phone="{{ pupil.phone }}"
+                                data-address="{{ pupil.address }}"
+                                data-parent="{{ pupil.parent_name|default:'' }}">
                                 <i class="bi bi-pencil"></i>
-                            </a>
+                            </button>
                             <button class="btn btn-danger btn-sm" onclick="triggerDelete('{{ pupil.registration_no }}')">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -731,7 +756,7 @@ body {
                         <td colspan="5">
                             <div style="text-align: center; padding: 3rem; color: #94a3b8;">
                                 <i class="bi bi-inbox" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;"></i>
-                                <p>No pupils available</p>
+                                <p>No students available</p>
                             </div>
                         </td>
                     </tr>
@@ -768,6 +793,124 @@ body {
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+
+    function toggleEdit(id, button) {
+    const row = document.getElementById(`row-${id}`);
+    const cells = row.querySelectorAll('.editable-cell');
+    const isEditing = button.classList.contains('editing');
+    const saveUrl = button.getAttribute('data-save-url'); // Get the Django URL
+
+    if (!isEditing) {
+        cells.forEach(cell => {
+            cell.contentEditable = "true";
+            cell.classList.add('bg-white', 'border', 'rounded', 'p-1');
+        });
+        button.classList.add('editing');
+        button.innerHTML = '<i class="bi bi-check-lg"></i>';
+        button.classList.remove('btn-warning');
+        button.classList.add('btn-success');
+    } else {
+        const updatedData = {};
+        cells.forEach(cell => {
+            cell.contentEditable = "false";
+            cell.classList.remove('bg-white', 'border', 'rounded', 'p-1');
+            const fieldName = cell.getAttribute('data-field');
+            updatedData[fieldName] = cell.innerText.trim();
+        });
+
+        // Use the Django-generated URL for the fetch call
+        fetch(saveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(updatedData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'success') {
+                alert('Failed to save changes.');
+            }
+        });
+
+        button.classList.remove('editing');
+        button.innerHTML = '<i class="bi bi-pencil"></i>';
+        button.classList.remove('btn-success');
+        button.classList.add('btn-warning');
+    }
+}
+
+
+
+    function triggerDeleteGradeStream(url) {
+        if (confirm("Are you sure you want to delete this Grade & Stream configuration?")) {
+            window.location.href = url;
+        }
+    }
+
+    function openRegisterModal() {
+        resetRegistrationForm();
+        showDialog();
+    }
+
+    function editStudent(btn) {
+        const d = btn.dataset;
+        const form = document.getElementById('registrationForm');
+        form.action = d.url;
+
+        // Set Reg No
+        const regSelect = document.getElementById('id_registration_no');
+        let found = false;
+        for(let i=0; i<regSelect.options.length; i++) {
+            if(regSelect.options[i].value === d.reg) {
+                regSelect.selectedIndex = i;
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            const opt = new Option(d.reg, d.reg);
+            regSelect.add(opt);
+            regSelect.value = d.reg;
+        }
+
+        // Set other fields
+        if(document.getElementById('id_first_name')) document.getElementById('id_first_name').value = d.firstname;
+        if(document.getElementById('id_second_name')) document.getElementById('id_second_name').value = d.secondname;
+        if(document.getElementById('id_surname')) document.getElementById('id_surname').value = d.surname;
+        if(document.getElementById('id_gender')) document.getElementById('id_gender').value = d.gender;
+        if(document.getElementById('id_date_of_birth')) document.getElementById('id_date_of_birth').value = d.dob;
+        
+        // Grade & Stream
+        const gradeSelect = document.getElementById('id_grade');
+        if(gradeSelect) {
+            gradeSelect.value = d.grade;
+            $(gradeSelect).trigger('change');
+            setTimeout(() => {
+                if(document.getElementById('id_stream')) document.getElementById('id_stream').value = d.stream;
+            }, 300);
+        }
+
+        if(document.getElementById('id_date_of_registration')) document.getElementById('id_date_of_registration').value = d.doreg;
+        if(document.getElementById('id_phone')) document.getElementById('id_phone').value = d.phone;
+        if(document.getElementById('id_address')) document.getElementById('id_address').value = d.address;
+        if(document.getElementById('id_parent_name')) document.getElementById('id_parent_name').value = d.parent;
+
+        document.querySelector('#overlay h2').innerHTML = '<i class="bi bi-pencil-square me-2" style="color: var(--primary);"></i> Update Student';
+        document.querySelector('#registrationForm button[type="submit"]').innerHTML = '<i class="bi bi-check-circle me-2"></i> Update Student';
+        
+        showDialog();
+    }
+
+    function resetRegistrationForm() {
+        const form = document.getElementById('registrationForm');
+        form.reset();
+        form.action = "{% url 'manage_details' %}";
+        document.querySelector('#overlay h2').innerHTML = '<i class="bi bi-person-plus-fill me-2" style="color: var(--primary);"></i> Register New Student';
+        document.querySelector('#registrationForm button[type="submit"]').innerHTML = '<i class="bi bi-check-circle me-2"></i> Register Student';
+    }
+
     // delete student....
 function triggerDelete(id) {
        
@@ -981,8 +1124,25 @@ function addRow() {
     container.appendChild(row);
 }
 
-// Show messages modal on load
+// Automatic filtering script
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.querySelector('.search-filter-bar');
+    if (filterForm) {
+        const selects = filterForm.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('change', () => filterForm.submit());
+        });
+
+        const searchInput = filterForm.querySelector('input[name="search"]');
+        if (searchInput) {
+            let debounceTimer;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => filterForm.submit(), 600);
+            });
+        }
+    }
+});
 
 </script>
-
 {% endblock %}

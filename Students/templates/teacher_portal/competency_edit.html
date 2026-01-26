@@ -1,0 +1,48 @@
+<form method="post" action="{% url 'edit_competency' comp.id %}">
+    {% csrf_token %}
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Subject</label>
+            <select name="subject" class="form-select" required>
+                {% for sub in subjects %}
+                <option value="{{ sub }}" {% if sub == comp.subject %}selected{% endif %}>{{ sub }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Competency</label>
+            <select name="competency" class="form-select" required>
+                {% for c in competencies %}
+                <option value="{{ c }}" {% if c == comp.competency %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Term</label>
+            <select name="term" class="form-select" required>
+                <option value="Term 1" {% if comp.term == 'Term 1' %}selected{% endif %}>Term 1</option>
+                <option value="Term 2" {% if comp.term == 'Term 2' %}selected{% endif %}>Term 2</option>
+                <option value="Term 3" {% if comp.term == 'Term 3' %}selected{% endif %}>Term 3</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Level</label>
+            <select name="level" class="form-select" required>
+                <option value="1" {% if comp.level == 1 %}selected{% endif %}>Level 1</option>
+                <option value="2" {% if comp.level == 2 %}selected{% endif %}>Level 2</option>
+                <option value="3" {% if comp.level == 3 %}selected{% endif %}>Level 3</option>
+                <option value="4" {% if comp.level == 4 %}selected{% endif %}>Level 4</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Comment</label>
+            <textarea name="comment" class="form-control" rows="3" required>{{ comp.comment }}</textarea>
+        </div>
+    </div>
+    <div class="mt-4 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i> Save Changes
+        </button>
+    </div>
+</form>

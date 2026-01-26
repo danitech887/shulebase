@@ -310,6 +310,10 @@
 
     .table-dark {
         background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+        color: white;
+    }
+    .table .table-dark th {
+        color: white;
     }
 
     .empty-state {
@@ -469,7 +473,9 @@
     <hr class="divider-line">
     
     <h3 class="mb-3 text-secondary section-title">🧠 Core Competency Ratings ({{ current_term }})</h3>
-    <div class="row mb-5">
+    
+    <!-- Aggregated Cards -->
+    <div class="row mb-4">
         {% for competency in competency_ratings %}
             <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
                 <div class="card shadow-sm border-{{ competency.color|default:'secondary' }} competency-card h-100">
@@ -482,6 +488,44 @@
         {% empty %}
             <div class="col-12"><p class="text-center text-muted">Core competency ratings are not yet available for this term.</p></div>
         {% endfor %}
+    </div>
+
+    <!-- Detailed Table -->
+    <h5 class="mb-3 text-secondary"><i class="bi bi-list-check me-2"></i>Detailed Breakdown</h5>
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Learning Area</th>
+                            <th>Competency</th>
+                            <th>Level</th>
+                            <th>Rating</th>
+                            <th>Remark</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in detailed_competencies %}
+                        <tr>
+                            <td class="fw-bold">{{ item.subject }}</td>
+                            <td>{{ item.competency }}</td>
+                            <td><span class="badge bg-secondary">{{ item.level }}</span></td>
+                            <td><span class="badge bg-{{ item.color }}">{{ item.rating }}</span></td>
+                            <td><small>{{ item.remark }}</small></td>
+                            <td><small class="text-muted">{{ item.comment|default:"-" }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No competency records found for this term.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <hr class="divider-line">
@@ -617,12 +661,14 @@ document.querySelectorAll('.view-learning-area-btn').forEach(function(button) {
                 return response.json();
             })
             .then(data => {
-                if(data.marks.length === 0) {
-                    modalBody.innerHTML = '<p class="text-center text-muted">No detailed breakdown data available.</p>';
-                } else {
-                    // FIX: Include table headers dynamically
-                    let html = `
-                        <div class="table-responsive">
+                let html = '';
+                let hasContent = false;
+
+                if (data.marks.length > 0) {
+                    hasContent = true;
+                    html += `
+                        <h6 class="mb-2 fw-bold text-secondary">Sub-Strand Scores</h6>
+                        <div class="table-responsive mb-3">
                             <table class="table table-striped table-sm align-middle mb-0">
                                 <thead class="table-dark">
                                     <tr>
@@ -637,7 +683,36 @@ document.querySelectorAll('.view-learning-area-btn').forEach(function(button) {
                         html += `<tr><td>${mark.sub_strand}</td><td>${mark.score}</td><td>${mark.recorded_by}</td></tr>`;
                     });
                     html += '</tbody></table></div>';
-                    
+                }
+
+                if (data.competencies && data.competencies.length > 0) {
+                    hasContent = true;
+                    html += `
+                        <h6 class="mb-2 fw-bold text-secondary">Subject Competencies</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Competency</th>
+                                        <th scope="col">Level</th>
+                                        <th scope="col">Comment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    data.competencies.forEach(comp => {
+                        html += `<tr>
+                            <td>${comp.competency}</td>
+                            <td><span class="badge bg-info">${comp.cbc_level} (${comp.level})</span></td>
+                            <td><small class="text-muted">${comp.comment}</small></td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                }
+
+                if (!hasContent) {
+                    modalBody.innerHTML = '<p class="text-center text-muted">No detailed breakdown data available.</p>';
+                } else {
                     modalBody.innerHTML = html;
                 }
             })
@@ -646,6 +721,15 @@ document.querySelectorAll('.view-learning-area-btn').forEach(function(button) {
                 console.error("Fetch error for breakdown:", err);
             });
     });
+});
+
+// Automatic filtering
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.querySelector('.filter-section form');
+    if (filterForm) {
+        const select = filterForm.querySelector('select');
+        if (select) select.addEventListener('change', () => filterForm.submit());
+    }
 });
 </script>
 

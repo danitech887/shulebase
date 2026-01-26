@@ -226,18 +226,30 @@ from django.db.models import Sum, Q, Count, F,Case, When, Avg
 
 
 
+# Updated with 4.0 scale logic
+CBC_LEVEL_MAP = {
+    'EE': {'min_avg': 3.50, 'label': 'Exceeding Expectations', 'remark': 'Excellent Mastery'},
+    'ME': {'min_avg': 2.50, 'label': 'Meeting Expectations', 'remark': 'Good Progress'},
+    'AE': {'min_avg': 1.50, 'label': 'Approaching Expectations', 'remark': 'Needs Improvement'},
+    'BE': {'min_avg': 1.00, 'label': 'Below Expectations', 'remark': 'Critical Intervention'},
+}
+
 def get_cbc_level_and_remark(avg_level):
-    """Determines the CBC level and remark based on a numeric average level (e.g., 1.0-3.0)."""
     if avg_level is None:
         return {'level': 'N/A', 'remark': 'No Data'}
-    if avg_level >= 2.5:
-        return {'level': 'EE', 'remark': 'Exceeding Expectations'}
-    if avg_level >= 1.5:
-        return {'level': 'ME', 'remark': 'Meeting Expectations'}
-    if avg_level >= 0.5:
-        return {'level': 'AE', 'remark': 'Approaching Expectations'}
-    return {'level': 'BE', 'remark': 'Below Expectations'}
 
+    # Ensure we handle scores slightly above 4.0 or below 1.0 just in case
+    # We sort by min_avg descending to catch the highest threshold first
+    for key, data in sorted(CBC_LEVEL_MAP.items(), key=lambda x: x[1]['min_avg'], reverse=True):
+        if avg_level >= data['min_avg']:
+            return {
+                'level': key, 
+                'label': data['label'], 
+                'remark': data['remark']
+            }
+            
+    # Fallback for very low scores
+    return {'level': 'BE', 'label': 'Below Expectations', 'remark': 'Critical Intervention'}
 # --- THE MAIN DJANGO VIEW ---
 from django.urls import reverse
 @login_required
@@ -303,26 +315,51 @@ def student_portal_academics(request):
 
     # 5. --- Core Competency Ratings ---
     competency_qs = LearnerCompetency.objects.filter(
-    student=student,
-    term=term_filter,
-    year=year_filter
-)
+        student=student,
+        term=term_filter,
+        year=year_filter
+    ).order_by('subject', 'competency')
 
-# Build a map of competency -> CBC level safely
-    competency_map = {
-        c.competency: get_cbc_level_and_remark(c.level or None)['level']
-        for c in competency_qs
-    }
-    CORE_COMPETENCIES = list(LearnerCompetency.objects.filter(school_id=school_id,student_id = registration_no).values_list('competency', flat=True).distinct())
-    competency_ratings = []
-    for competency_name in CORE_COMPETENCIES:
-        rating = competency_map.get(competency_name, 'N/A')
-        color = 'secondary' # Default color for N/A
+    # A. Detailed List (for Table)
+    detailed_competencies = []
+    for comp in competency_qs:
+        details = get_cbc_level_and_remark(comp.level)
+        rating = details['level']
+        
+        color = 'secondary'
         if rating == 'EE': color = 'success'
         elif rating == 'ME': color = 'info'
         elif rating == 'AE': color = 'warning'
         elif rating == 'BE': color = 'danger'
-        competency_ratings.append({"competency": competency_name, "rating": rating, "color": color})
+
+        detailed_competencies.append({
+            "subject": comp.subject,
+            "competency": comp.competency,
+            "level": comp.level,
+            "rating": rating,
+            "remark": details['remark'],
+            "comment": comp.comment,
+            "color": color
+        })
+
+    # B. Aggregated Averages (for Cards)
+    competency_ratings = []
+    agg_qs = LearnerCompetency.objects.filter(
+        student=student,
+        term=term_filter,
+        year=year_filter
+    ).values('competency').annotate(avg_level=Avg('level')).order_by('competency')
+
+    for item in agg_qs:
+        details = get_cbc_level_and_remark(item['avg_level'])
+        rating = details['level']
+        color = 'secondary'
+        if rating == 'EE': color = 'success'
+        elif rating == 'ME': color = 'info'
+        elif rating == 'AE': color = 'warning'
+        elif rating == 'BE': color = 'danger'
+        
+        competency_ratings.append({"competency": item['competency'], "rating": rating, "color": color})
     
     # 6. --- Placeholder Data (can be developed further) ---
     report_url = reverse("report_card") + f"?registration_no={registration_no}&term={term_filter}"
@@ -344,6 +381,7 @@ def student_portal_academics(request):
         "overall_mean": overall_mean,
         "subject_summaries": subject_summaries,
         "competency_ratings": competency_ratings,
+        "detailed_competencies": detailed_competencies,
         "latest_report": latest_report,
         "resources": resources,
         "term_choices": ['Term 1', 'Term 2', 'Term 3'],
@@ -392,6 +430,22 @@ def view_learning_area_breakdown(request, subject):
 
     teacher_name = f"{teacher_role.registration_no.first_name} {teacher_role.registration_no.surname}" if teacher_role else "N/A"
 
+    # Fetch competencies for this subject
+    competencies_qs = LearnerCompetency.objects.filter(
+        student=student,
+        subject=subject,
+        term=term_filter,
+        year=year_filter
+    )
+    
+    competencies_data = []
+    for comp in competencies_qs:
+        competencies_data.append({
+            'competency': comp.competency,
+            'level': comp.level,
+            'comment': comp.comment,
+            'cbc_level': get_cbc_level_and_remark(comp.level)['level']
+        })
 
       # Debugging log 
     for mark in marks:
@@ -416,7 +470,8 @@ def view_learning_area_breakdown(request, subject):
         "subject": subject,
         "term": term_filter,
         "year": year_filter,
-        "marks": data
+        "marks": data,
+        "competencies": competencies_data
     })
 
 from ..models import Announcement

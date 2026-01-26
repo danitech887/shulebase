@@ -415,6 +415,14 @@
                     </select>
                 </div>
                 <div class="col-auto">
+                    <label for="filter_type" class="form-label fw-semibold">Payment Period:</label>
+                    <select name="filter_type" id="filter_type" class="form-select">
+                        <option value="">All Time</option>
+                        <option value="today" {% if filter_type == "today" %}selected{% endif %}>Today</option>
+                        <option value="weekly" {% if filter_type == "weekly" %}selected{% endif %}>This Week</option>
+                    </select>
+                </div>
+                <div class="col-auto">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-funnel"></i> Apply Filter
                     </button>
@@ -437,6 +445,7 @@
                             <tr>
                                 <th><i class="bi bi-bookmark"></i> Grade</th>
                                 <th><i class="bi bi-collection"></i> Stream</th>
+                                <th><i class="bi bi-collection"></i>Total Students</th>
                                 <th><i class="bi bi-cash-coin"></i> Total Paid</th>
                                 <th><i class="bi bi-credit-card-2-front"></i> Fee Balance</th>
                             </tr>
@@ -447,6 +456,7 @@
                                     <tr>
                                         <td><strong>{{ data.grade }}</strong></td>
                                         <td>{{ data.stream }}</td>
+                                        <td>{{ data.students }}</td>
                                         <td><span class="text-success fw-bold">{{ data.total_paid|floatformat:2 }}</span></td>
                                         <td><span class="text-primary fw-bold">{{ data.balance|floatformat:2 }}</span></td>
                                     </tr>
@@ -570,8 +580,8 @@
             datasets: [{
                 data: [{{ total_cash_json }}, {{ total_mpesa_json }}],
                 backgroundColor: [
-                    'linear-gradient(135deg, #4ade80, #22c55e)',
-                    'linear-gradient(135deg, #3b82f6, #1d4ed8)'
+                    '#22c55e',
+                    '#1d4ed8'
                 ],
                 borderWidth: 3,
                 borderColor: '#ffffff',

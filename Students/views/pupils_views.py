@@ -5,6 +5,7 @@ from decimal import Decimal
 import io
 import os
 import zipfile
+import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -116,6 +117,12 @@ def gradestream_config(request):
 
 from django.contrib.auth.hashers import make_password
 # --- Manage Pupil Details ---
+
+# inside models.py
+
+
+
+
 @login_required
 def manage_details(request):
     
@@ -156,15 +163,7 @@ def manage_details(request):
                         email='',
                         registration_no=registration_no,
                     )
-                    Users.objects.create(
-                        school = school_instance,
-                        username = phone,
-                        school_name = school_name,
-                        role = 'Parent',
-                        password = make_password(str(phone)),
-                        email = '',
-                        registration_no = '',
-                    )
+                    
 
 
                     messages.success(request, f"✅ {name} registered successfully.")
@@ -193,7 +192,7 @@ def manage_details(request):
 
     # Grades for dropdown
     grades = GradeStream.objects.filter(school_id=school_id).values_list('grade', flat=True).distinct().order_by('grade')
-
+    gradestream = GradeStream.objects.filter(school_id = school_id)
     # Suggested registration number
     existing_regnos = set(pupils.values_list('registration_no', flat=True))
     suggested_regno = get_next_registration_number(school_id,existing_regnos)
@@ -206,7 +205,31 @@ def manage_details(request):
         "selected_grade": grade,
         "selected_stream": stream,
         "suggested_regno": suggested_regno,
+        'gradestream': gradestream
     })
+
+@login_required
+def delete_grade_stream(request, id):
+    school_id = request.session.get('school_id')
+    gradestream = get_object_or_404(GradeStream, id=id, school_id=school_id)
+    gradestream.delete()
+    messages.success(request, "Grade configuration deleted successfully.")
+    return redirect('manage_details')
+
+@login_required 
+def edit_grade_stream(request, id):
+    school_id = request.session.get('school_id')
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            grade_obj = get_object_or_404(GradeStream, pk=id, school_id=school_id)
+            grade_obj.grade = data.get('grade')
+            grade_obj.stream = data.get('stream')
+            grade_obj.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 # --- Update Pupil ---
@@ -222,7 +245,7 @@ def update_pupil(request, reg_no):
         if form.is_valid():
             obj = form.save(commit=False)
             obj.save()
-            messages.success(request, 'Pupils details updated successfully')
+            messages.success(request, f'{pupil.first_name} details updated successfully')
             return redirect('manage_details')
     else:
         form = RegisterForm(instance=pupil)
@@ -307,9 +330,13 @@ def delete_pupil(request, reg_no):
     school_id = request.session.get('school_id')
 
     pupil = get_object_or_404(StudentInfo.objects.filter(school_id=school_id), registration_no=reg_no)
-
+    student_as_user = get_object_or_404(Users.objects.filter(school_id = school_id,registration_no = reg_no))
+    parent_phone = get_object_or_404(StudentInfo.objects.filter(school_id = school_id,registration_no = reg_no)).phone
+    parent_as_user = get_object_or_404(Users.objects.filter(school_id = school_id,username = str(parent_phone)))
     if request.method == 'POST':
         pupil.delete()
+        student_as_user.delete()
+        parent_as_user.delete()
         messages.success(request, f"{pupil.first_name} data deleted successfully")
         return redirect('manage_details')
 
@@ -323,7 +350,13 @@ import calendar
 
 
 # ----------------- Fee Summary -----------------
-def fee_summary(school_id,term,year):
+def fee_summary(school_id,term,year,filter_type):
+
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    today = timezone.localdate()
+    
     
 
     # Fetch expected fee per grade
@@ -339,11 +372,31 @@ def fee_summary(school_id,term,year):
 
     # Total paid fee per student
     paid_per_student = (
-        Fee.objects
-        .filter(school_id=school_id,term=term,year=year)
-        .values("registration_no")
-        .annotate(total_paid=Sum("amount"))
-    )
+            Fee.objects
+            .filter(school_id=school_id,status = 'Confirmed')
+            .values("registration_no")
+            .annotate(total_paid=Sum("amount"))
+        )
+    if term:
+        paid_per_student = (
+            Fee.objects
+            .filter(school_id=school_id,term=term)
+            .values("registration_no")
+            .annotate(total_paid=Sum("amount"))
+        )
+    if year:
+        paid_per_student = (
+            Fee.objects
+            .filter(school_id=school_id,year=year)
+            .values("registration_no")
+            .annotate(total_paid=Sum("amount"))
+        )
+    if filter_type == 'today':
+        paid_per_student = paid_per_student.filter(date_of_payment=today)
+    elif filter_type == 'weekly':
+        week_start = today - timedelta(days=today.weekday())
+        paid_per_student = paid_per_student.filter(date_of_payment__gte=week_start, date_of_payment__lte=today)
+    
     paid_dict = {p["registration_no"]: p["total_paid"] for p in paid_per_student}
 
     # Build fee summary
@@ -372,8 +425,8 @@ def fee_summary(school_id,term,year):
             "total_paid": paid_total,
             "balance": balance,
         })
+    
     return summary
-
 
 # ----------------- Fee Payment -----------------
 @login_required
@@ -398,8 +451,9 @@ def fee_payment(request):
             fee_record.save()
             messages.success(request, f"Payment {fee_record.transaction_code} confirmed for {fee_record.registration_no.first_name}")
         elif action == 'reject':
-            fee_record.delete()
-            messages.warning(request, "Transaction rejected and removed.")
+            fee_record.status = 'Rejected'
+            fee_record.save()
+            messages.warning(request, "Transaction rejected.")
         
         # Redirect back with a flag to re-open the modal automatically
         return redirect(f"{reverse('fee_payment')}?show_verify=true")
@@ -514,12 +568,13 @@ def verify_mpesa_payments(request):
             fee_record.save()
             messages.success(request, f"Confirmed: {fee_record.transaction_code}")
         elif action == 'reject':
-            fee_record.delete()
+
+            fee_record.status = 'Rejected' 
+            fee_record.save()
             messages.warning(request, "Transaction rejected.")
         
         # Redirect back to the same page but with a flag to keep the modal open
         return redirect(f"{reverse('fee_payment')}?show_verify=true")
-
     # --- 2. Existing Search/Filter Logic ---
     # (Assuming your existing logic for fetching 'fees' queryset is here)
     fees = Fee.objects.filter(school_id=school_id, status='Confirmed') # Main table shows confirmed
@@ -577,10 +632,23 @@ def fee_dashboard(request):
 
     term = request.GET.get('term', '').strip()
     year = request.GET.get('year', '').strip()
+    filter_type = request.GET.get('filter_type', '').strip()  # NEW: today, weekly, all
 
     years = Fee.objects.filter(school_id=school_id).values_list("year", flat=True).distinct().order_by("-year")
-    fees = Fee.objects.filter(school_id=school_id)
+    fees = Fee.objects.filter(school_id=school_id,status = 'Confirmed')
 
+    # Apply date-based filters
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    today = timezone.localdate()
+    
+    if filter_type == 'today':
+        fees = fees.filter(date_of_payment=today)
+    elif filter_type == 'weekly':
+        week_start = today - timedelta(days=today.weekday())
+        fees = fees.filter(date_of_payment__gte=week_start, date_of_payment__lte=today)
+    
     if term:
         fees = fees.filter(term=term)
     if year:
@@ -624,12 +692,13 @@ def fee_dashboard(request):
     grade_labels = sorted(grade_totals.keys())
     grade_cash = [grade_totals[g]["Cash"] for g in grade_labels]
     grade_mpesa = [grade_totals[g]["Mpesa"] for g in grade_labels]
-
+    fee_sum = fee_summary(school_id,term,year if year != '' else 0,filter_type)
+    print(fee_sum)
     context = {
         "term": term,
         "year": year,
         "years": years,
-        "fee_balances": fee_summary(school_id,term,year if year != '' else 0),
+        "fee_balances": fee_sum,
 
         "labels_json": json.dumps(labels),
         "cash_json": json.dumps(cash_data),
@@ -657,6 +726,9 @@ def attendance_dashboard(request):
 
     term = request.GET.get("term", "").strip()
     year = request.GET.get("year", "").strip()
+    date_str = (request.GET.get("date") or '').strip()
+    today_flag = (request.GET.get("today") == '1')
+    filter_type = request.GET.get("filter_type", "").strip()  # NEW: today, weekly, all
 
     # Available years for filter
     years_qs = StudentAttendance.objects.filter(school_id=school_id).dates("date_of_attendance", "year")
@@ -668,6 +740,27 @@ def attendance_dashboard(request):
         qs = qs.filter(term=term)
     if year:
         qs = qs.filter(date_of_attendance__year=year)
+
+    # Date/today/weekly filter
+    from django.utils import timezone
+    from datetime import datetime as _dt, timedelta
+    
+    today = timezone.localdate()
+    
+    if filter_type == 'today':
+        qs = qs.filter(date_of_attendance=today)
+    elif filter_type == 'weekly':
+        week_start = today - timedelta(days=today.weekday())
+        qs = qs.filter(date_of_attendance__gte=week_start, date_of_attendance__lte=today)
+    elif today_flag:
+        qs = qs.filter(date_of_attendance=today)
+    elif date_str:
+        try:
+            sel_date = _dt.strptime(date_str, '%Y-%m-%d').date()
+            qs = qs.filter(date_of_attendance=sel_date)
+        except ValueError:
+            # Ignore invalid date input
+            pass
 
     # Chart 1: Attendance by Grade-Stream
     students = {
@@ -801,6 +894,7 @@ def reject_leave_request(request, leave_id):
     return render(request, "students/pages/leave.html", {"leave": leave_instance}) 
 
 # Ajax codes.....
+from .whatsapp_view import send_whatsapp_message
 
 from django.views.decorators.http import require_POST
 @require_POST
@@ -900,16 +994,21 @@ def approve_leave(request):
             student = StudentInfo.objects.filter(school_id=school_id, registration_no=registration_no.registration_no).first()
             
             if not student:
-                messages.error(request, f"Pupil with registration no. {registration_no} does not exist.")
+                messages.error(request, f"Student with registration no. {registration_no} does not exist.")
             elif LeaveManagement.objects.filter(school_id=school_id, registration_no=registration_no, return_date__isnull=True).exists():
-                messages.error(request, f"Pupil with registration no. {registration_no} is already on leave.")
+                messages.error(request, f"Student with registration no. {registration_no} is already on leave.")
             else:
                 leave = form.save(commit=False)
                 leave.registration_no = student
                 leave.school = school_instance
+                leave.status = "Approved"
                 leave.phone = student.phone
+                reason = form.cleaned_data["reason"]
                 leave.save()
-                messages.success(request, "Leave has been approved successfully.")
+                
+                # send_whatsapp_message(str(student.phone),f"Hello parent you child has been give a leave due to: {reason}")
+                messages.success(request, f"Leave has been approved successfully. whatsapp message sent to parent. {student.parent_name}")
+
                 return redirect("leave_home")
         else:
             messages.error(request, f"Form error: {form.errors}")
@@ -1056,52 +1155,6 @@ def leave_statement(request, reg_no):
     })
 
 
-@login_required
-
-def manage_learning_areas(request):
-    school_id = request.session.get('school_id')
-    
-    if request.method == "POST":
-        
-        # We get the hidden JSON string we built in JavaScript
-        combat_data_json = request.POST.get('combat_data')
-
-        
-
-        if not combat_data_json:
-            messages.error(request, "No data received. Please add subjects to the list first.")
-            return redirect('academics_dashboard')
-
-        try:
-            # Convert JSON string back to a Python List
-            combat_data = json.loads(combat_data_json)
-            
-            with transaction.atomic():
-                for item in combat_data:
-                    # We use .get() and provide a fallback string to prevent 'NoneType' errors
-                    name = item.get('name', '').strip()
-                    grade_level = item.get('level', '').strip()
-                    category = item.get('category', 'General').strip()
-
-                    if name and grade_level:
-                        # Logic to create or update
-                        LearningArea.objects.update_or_create(
-                            school_id=school_id,
-                            name=name,
-                            grade_level=grade_level,
-                            defaults={
-                                'category': category,
-                                
-                            }
-                        )
-            
-            messages.success(request, "Learning Area Combat configured successfully!")
-            
-        except Exception as e:
-            messages.error(request, f"System Error: {str(e)}")
-        
-
-    return redirect('academic_home')
 
 
 @login_required
@@ -1167,7 +1220,7 @@ def academic_home(request):
         
         # Apply the 3.0 cap to the average level
         raw_level = summary['overall_avg_level']
-        capped_level = min(raw_level, 3.0) if raw_level is not None else None
+        capped_level = min(raw_level, 4.0) if raw_level is not None else None
         
         summary['overall_avg_level_capped'] = capped_level
         student_summary_map[reg_no] = summary
@@ -1470,10 +1523,10 @@ def academic_dashboard(request):
         'selected_stream': stream, # NEW
     })
 CBC_LEVEL_MAP = {
-    'EE': {'min_avg': 2.50, 'label': 'Exceeding Expectations', 'remark': 'Excellent Mastery'},
-    'ME': {'min_avg': 1.50, 'label': 'Meeting Expectations', 'remark': 'Good Progress'},
-    'AE': {'min_avg': 0.50, 'label': 'Approaching Expectations', 'remark': 'Needs Improvement'},
-    'BE': {'min_avg': 0.00, 'label': 'Below Expectations', 'remark': 'Critical Intervention'},
+    'EE': {'min_avg': 3.5, 'label': 'Exceeding Expectations', 'remark': 'Excellent Mastery'},
+    'ME': {'min_avg': 2.5, 'label': 'Meeting Expectations', 'remark': 'Good Progress'},
+    'AE': {'min_avg': 1.5, 'label': 'Approaching Expectations', 'remark': 'Needs Improvement'},
+    'BE': {'min_avg': 0.0, 'label': 'Below Expectations', 'remark': 'Critical Intervention'},
 }
 
 def get_cbc_level_and_remark(avg_level):
@@ -1482,7 +1535,7 @@ def get_cbc_level_and_remark(avg_level):
         return {'level': '-', 'remark': 'No Data'}
     
     # Cap the average at 3.0 before mapping
-    capped_avg = min(avg_level, 3.0) 
+    capped_avg = min(avg_level, 4.0) 
         
     for code, data in sorted(CBC_LEVEL_MAP.items(), key=lambda item: item[1]['min_avg'], reverse=True):
         if capped_avg >= data['min_avg']:
@@ -1522,7 +1575,7 @@ def other_exams(request, reg_no):
     
     # This query gives the average score and level for EACH SUBJECT the student took.
     subject_averages = SubStrandMark.objects.filter(mark_filter_args).values(
-        'sub_strand__strand__name', # Group by the subject/strand name
+        'sub_strand__strand__name','sub_strand__strand__subject',  # Group by the subject/strand name
     ).annotate(
         avg_level=Avg('level'),
         avg_score=Avg('score'),
@@ -1539,7 +1592,9 @@ def other_exams(request, reg_no):
         report_data = get_cbc_level_and_remark(avg_level)
         
         subject_breakdown_data.append({
-            'subject_name': data['sub_strand__strand__name'],
+            'strand_name': data['sub_strand__strand__name'],
+            'subject_name': data['sub_strand__strand__subject'],
+
             'avg_score': data['avg_score'],
             'avg_level': avg_level,
             'total_assessments': data['total_sub_strand_marks'],
@@ -1608,6 +1663,3 @@ def pupil_attendance_list(request):
         'selected_registration_no': registration_no,
     }
     return render(request, 'students/pages/pupil_attendance.html', context)
-
-
-

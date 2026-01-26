@@ -3,6 +3,7 @@
 {% block content %}
 {% load dict_extras %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     :root {
@@ -423,6 +424,144 @@
             </table>
         </div>
     </div>
+
+    <!-- Subject Aggregated SubStrandMark Table -->
+    <div class="marks-card slide-up mt-4">
+        <div class="card-header">
+            <h5><i class="bi bi-bar-chart-steps me-2"></i> Subject Performance Aggregation</h5>
+        </div>
+        <div class="p-4">
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-2">
+                    <label class="form-label">Grade</label>
+                    <select name="agg_grade" class="form-select">
+                        <option value="">Select Grade</option>
+                        {% for g in grades %}
+                        <option value="{{ g }}" {% if g == agg_grade %}selected{% endif %}>{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Stream</label>
+                    <select name="agg_stream" class="form-select">
+                        <option value="">Select Stream</option>
+                        {% for s in streams %}
+                        <option value="{{ s }}" {% if s == agg_stream %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Term</label>
+                    <select name="agg_term" class="form-select">
+                        <option value="">Select Term</option>
+                        {% for t in term_choices %}
+                        <option value="{{ t }}" {% if t == agg_term %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Subject</label>
+                    <select name="agg_subject" class="form-select">
+                        <option value="">All Subjects</option>
+                        {% for s in subjects %}
+                        <option value="{{ s }}" {% if s == agg_subject %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Avg Score</th>
+                            <th>Avg Level</th>
+                            <th>Student Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in aggregated_marks %}
+                        <tr>
+                            <td>{{ row.subject }}</td>
+                            <td>{{ row.avg_score }}%</td>
+                            <td>{{ row.avg_level }}</td>
+                            <td>{{ row.student_count }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                {% if agg_grade and agg_stream and agg_term %}
+                                    No data found.
+                                {% else %}
+                                    Select filters to view aggregation.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Performance Table -->
+    <div class="marks-card slide-up mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="bi bi-people me-2"></i> Student Performance Breakdown</h5>
+            {% if agg_grade and agg_stream and agg_term %}
+            <div>
+                <a href="{% url 'export_strand_marks_csv' %}?agg_grade={{ agg_grade }}&agg_stream={{ agg_stream }}&agg_term={{ agg_term }}&agg_subject={{ agg_subject }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> CSV
+                </a>
+                <a href="{% url 'export_strand_marks_pdf' %}?agg_grade={{ agg_grade }}&agg_stream={{ agg_stream }}&agg_term={{ agg_term }}&agg_subject={{ agg_subject }}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="p-4">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Reg No</th>
+                            <th>Name</th>
+                            <th>Avg Score</th>
+                            <th>Avg Level</th>
+                            <th>Subjects Assessed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in student_performance %}
+                        <tr>
+                            <td>{{ student.reg_no }}</td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.avg_score }}%</td>
+                            <td>{{ student.avg_level }}</td>
+                            <td>{{ student.subjects_count }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                {% if agg_grade and agg_stream and agg_term %}
+                                    No student data found.
+                                {% else %}
+                                    Select filters to view student performance.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Competency Section -->
@@ -527,6 +666,94 @@
             </form>
         </div>
     </div>
+
+    <!-- Competency Filter & List -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Recorded Competencies</h5>
+        </div>
+        <div class="card-body">
+            <!-- Filter Form -->
+            <form method="get" class="row g-3 mb-4 p-3 bg-light rounded border">
+                <div class="col-md-3">
+                    <label class="form-label small">Grade</label>
+                    <select name="comp_grade" class="form-select form-select-sm">
+                        <option value="">All Grades</option>
+                        {% for grade in grades %}
+                        <option value="{{ grade }}" {% if grade == comp_grade %}selected{% endif %}>{{ grade }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Stream</label>
+                    <select name="comp_stream" class="form-select form-select-sm">
+                        <option value="">All Streams</option>
+                        {% for stream in streams %}
+                        <option value="{{ stream }}" {% if stream == comp_stream %}selected{% endif %}>{{ stream }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Subject</label>
+                    <select name="comp_subject" class="form-select form-select-sm">
+                        <option value="">All Subjects</option>
+                        {% for sub in subjects %}
+                        <option value="{{ sub }}" {% if sub == comp_subject %}selected{% endif %}>{{ sub }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+
+            <!-- Competency Table -->
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Grade/Stream</th>
+                            <th>Subject</th>
+                            <th>Competency</th>
+                            <th>Level</th>
+                            <th>Comment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in competencies_list %}
+                        <tr>
+                            <td>{{ comp.student.first_name }} {{ comp.student.surname }}</td>
+                            <td>{{ comp.grade }} {{ comp.stream }}</td>
+                            <td>{{ comp.subject }}</td>
+                            <td>{{ comp.competency }}</td>
+                            <td><span class="badge bg-info">Level {{ comp.level }}</span></td>
+                            <td><small>{{ comp.comment|truncatechars:30 }}</small></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary edit-competency-btn" 
+                                        data-url="{% url 'edit_competency' comp.id %}"
+                                        data-bs-toggle="modal" data-bs-target="#editCompetencyModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <form action="{% url 'delete_competency' comp.id %}" method="post" class="d-inline" onsubmit="return confirm('Delete this competency record?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">No competency records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -549,10 +776,24 @@
   </div>
 </div>
 
+<!-- ===== Edit Competency Modal ===== -->
+<div class="modal fade" id="editCompetencyModal" tabindex="-1" aria-hidden="true" style="top: 50px">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Competency</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="editCompetencyModalBody">
+          <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <!-- ===== Manage Sub-Strands Modal ===== -->
-<div class="modal fade" id="subStrandModal" tabindex="-1" aria-hidden="true" style="top: 50px; height: 480px; overflow-y: scroll;">
-  <div class="modal-dialog modal-lg">
+<div class="modal fade" id="subStrandModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-width: 900px; height: 600px; top: 40px;">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title"><i class="bi bi-diagram-3"></i> Manage Sub-Strands - <span id="subStrandTitle"></span></h5>
@@ -620,34 +861,7 @@
     </div>
 </div>
 
-{% if messages %}
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                
-                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
-            </div>
-            <p class="text-muted small mb-4">
-                {% for msg in messages %}
-                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
-                {% endfor %}
-            </p> 
-                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
-                    .Ok
-                </button>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var modalEl = document.getElementById('messageModal');
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    });
-</script>
-{% endif %}
+{% include "includes/message_modal.html" %}
 
 <script>
 
@@ -858,6 +1072,7 @@ window.saveSubStrand = async function(id) {
 
 let reportAbortController = null;
 let reportModalInstance = null;
+let returnToSubStrandModal = false;
 
 document.addEventListener('DOMContentLoaded', function() {
   // ===== Edit Strand Modal =====
@@ -874,6 +1089,24 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(err => {
           console.error('Failed to load edit form:', err);
           editModalBody.innerHTML = '<div class="text-danger">Failed to load form. Please try again.</div>';
+        });
+    });
+  });
+
+  // ===== Edit Competency Modal =====
+  const editCompButtons = document.querySelectorAll('.edit-competency-btn');
+  const editCompModalBody = document.getElementById('editCompetencyModalBody');
+
+  editCompButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const url = this.dataset.url;
+      editCompModalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => { editCompModalBody.innerHTML = html; })
+        .catch(err => {
+          console.error('Failed to load competency edit form:', err);
+          editCompModalBody.innerHTML = '<div class="text-danger text-center">Failed to load form.</div>';
         });
     });
   });
@@ -1019,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const modalEl = document.getElementById('recordSubStrandModal');
           const modal = bootstrap.Modal.getInstance(modalEl);
           if (modal) modal.hide();
-          setTimeout(() => { location.reload(); }, 300);
+          // setTimeout(() => { location.reload(); }, 300);
         } else {
           alert(data.message || 'Failed to save levels.');
         }
@@ -1035,6 +1268,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Delegated submit for Numeric Record Scores (Moved from partial to ensure execution)
+  document.addEventListener('submit', async function(e) {
+      const form = e.target;
+      if (form && form.id === 'recordSubStrandScoresForm') {
+          e.preventDefault();
+          
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if(submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML = 'Saving...';
+          }
+
+          try {
+              const formData = new FormData(form);
+              const res = await fetch(form.action, {
+                  method: 'POST',
+                  body: formData,
+                  headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                  credentials: 'same-origin'
+              });
+              
+              const data = await res.json();
+              
+              if (data.status === 'success') {
+                  const modalEl = document.getElementById('recordSubStrandModal');
+                  const modal = bootstrap.Modal.getInstance(modalEl);
+                  if (modal) modal.hide();
+                  
+                  if (typeof Swal !== 'undefined') {
+                      Swal.fire({
+                          icon: 'success',
+                          title: 'Scores Saved!',
+                          text: `${data.updated} scores recorded.`,
+                          timer: 1500,
+                          showConfirmButton: false
+                      });
+                  }
+              } else {
+                  alert(data.message || 'Failed to save scores.');
+              }
+          } catch (err) {
+              console.error(err);
+              alert('Error saving scores.');
+          } finally {
+              if(submitBtn) {
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = 'Save Scores';
+              }
+          }
+      }
+  });
+
   // Delegated click for "Record Sub-Strand Marks" buttons (inside the modal body)
   const recordSubStrandModalBody = document.getElementById('recordSubStrandModalBody');
   const recordSubStrandTitle = document.getElementById('recordSubStrandTitle');
@@ -1043,6 +1328,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btn = e.target.closest('.record-substrand-btn');
     if (!btn) return;
 
+    returnToSubStrandModal = true;
     const subStrandId = btn.dataset.substrand;
     const subStrandName = btn.dataset.name;
     const grade = btn.dataset.strandGrade || btn.dataset.grade;
@@ -1091,6 +1377,19 @@ document.addEventListener('DOMContentLoaded', function() {
       loadMode(mode);
     };
   });
+
+  // Re-open SubStrand Modal when Record Modal closes if flag is set
+  const recordSubStrandModalEl = document.getElementById('recordSubStrandModal');
+  if (recordSubStrandModalEl) {
+      recordSubStrandModalEl.addEventListener('hidden.bs.modal', function () {
+          if (returnToSubStrandModal) {
+              returnToSubStrandModal = false;
+              const subStrandModalEl = document.getElementById('subStrandModal');
+              const subModal = bootstrap.Modal.getInstance(subStrandModalEl) || new bootstrap.Modal(subStrandModalEl);
+              subModal.show();
+          }
+      });
+  }
 
   // Delegated click for "Report" buttons (inside the sub-strand modal)
   // This pattern is robust for dynamically loaded content.
@@ -1145,6 +1444,70 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById("substrandNameInModal").textContent = "";
       });
   }
+});
+
+// Auto-calculate Percentage and Level based on Raw Score and Max Score
+document.addEventListener('input', function(e) {
+    // Check if the event target is the max score input or a raw score input
+    if (e.target.id === 'maxScoreInput' || e.target.classList.contains('raw-score-input')) {
+        const maxScoreInput = document.getElementById('maxScoreInput');
+        const maxScore = parseFloat(maxScoreInput.value);
+
+        // If max score changes, update all rows
+        if (e.target.id === 'maxScoreInput') {
+            document.querySelectorAll('.raw-score-input').forEach(input => {
+                updateRowCalculation(input, maxScore);
+            });
+        } else {
+            // Update only the specific row
+            updateRowCalculation(e.target, maxScore);
+        }
+    }
+});
+
+function updateRowCalculation(rawInput, maxScore) {
+    const row = rawInput.closest('tr');
+    const percentageInput = row.querySelector('input[name^="score_"]');
+    const levelSelect = row.querySelector('select[name^="level_"]');
+    const rawScore = parseFloat(rawInput.value);
+
+    if (!isNaN(maxScore) && !isNaN(rawScore) && maxScore > 0) {
+        let percentage = (rawScore / maxScore) * 100;
+        // Cap at 100 if needed, though sometimes extra credit exists. Assuming cap for now.
+        if (percentage > 100) percentage = 100;
+        
+        percentageInput.value = percentage.toFixed(2);
+
+        // Determine Level based on standard CBC ranges
+        let level = '';
+        if (percentage >= 0 && percentage < 40) level = '1';
+        else if (percentage >= 40 && percentage < 50) level = '2';
+        else if (percentage >= 50 && percentage < 80) level = '3';
+        else if (percentage >= 80) level = '4';
+
+        if (level) {
+            levelSelect.value = level;
+        }
+    }
+}
+
+// Automatic filtering for GET forms
+document.addEventListener('DOMContentLoaded', function() {
+    const getForms = document.querySelectorAll('form[method="get"]');
+    getForms.forEach(form => {
+        const selects = form.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('change', () => form.submit());
+        });
+        const inputs = form.querySelectorAll('input[type="text"], input[type="search"]');
+        inputs.forEach(input => {
+            let debounce;
+            input.addEventListener('input', () => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => form.submit(), 600);
+            });
+        });
+    });
 });
 </script>
 

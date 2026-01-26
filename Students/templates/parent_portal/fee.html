@@ -523,6 +523,7 @@
                                 <th>Amount</th>
                                 <th>Date Reported</th>
                                 <th>Status</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -531,7 +532,29 @@
                                 <td class="fw-bold">{{ p.transaction_code }}</td>
                                 <td class="text-dark">Ksh {{ p.amount|intcomma }}</td>
                                 <td>{{ p.date_of_payment|date:"M j, Y" }}</td>
+                                {% if p.status == 'Rejected' %}
+                                <td><span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Rejected</span></td>
+                                {% else %}
                                 <td><span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Under Review</span></td>
+                                {% endif %}
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary edit-fee-btn" 
+                                            data-id="{{ p.id }}" 
+                                            data-code="{{ p.transaction_code }}" 
+                                            data-amount="{{ p.amount }}" 
+                                            data-term="{{ p.term }}" 
+                                            data-date="{{ p.date_of_payment|date:'Y-m-d' }}"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editMpesaModal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this pending payment?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="fee_id" value="{{ p.id }}">
+                                        <input type="hidden" name="delete_fee" value="true">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -661,33 +684,81 @@
     </div>
 </div>
 
-{% if messages %}
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-            <div class="mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                
-                <i class="bi bi-info-circle text-white" style="font-size: 2.5rem;"></i>
+<!-- Edit M-Pesa Modal -->
+<div class="modal fade" id="editMpesaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header shadow-sm">
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i> Edit Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <p class="text-muted small mb-4">
-                {% for msg in messages %}
-                 <strong id="res_name" class="text-dark">{{ msg }}</strong>
-                {% endfor %}
-            </p> 
-                <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
-                    .Ok
-                </button>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="fee_id" id="edit_fee_id">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">M-Pesa Transaction Code</label>
+                        <input type="text" name="transaction_code" id="edit_transaction_code" class="form-control" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Amount (Ksh)</label>
+                                <input type="number" name="amount" id="edit_amount" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">For Term</label>
+                                <select name="term" id="edit_term" class="form-select" required>
+                                    <option value="Term 1">Term 1</option>
+                                    <option value="Term 2">Term 2</option>
+                                    <option value="Term 3">Term 3</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Date of Payment</label>
+                        <input type="date" name="date_of_payment" id="edit_date_of_payment" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" name="edit_fee" class="btn btn-primary w-100 py-3 shadow">
+                        <i class="bi bi-save me-2"></i> Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
+{% include "includes/message_modal.html" %}
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var modalEl = document.getElementById('messageModal');
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
+    document.addEventListener('DOMContentLoaded', function() {
+        const editButtons = document.querySelectorAll('.edit-fee-btn');
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('edit_fee_id').value = this.dataset.id;
+                document.getElementById('edit_transaction_code').value = this.dataset.code;
+                document.getElementById('edit_amount').value = this.dataset.amount;
+                document.getElementById('edit_term').value = this.dataset.term;
+                document.getElementById('edit_date_of_payment').value = this.dataset.date;
+            });
+        });
+    });
+
+    // Automatic filtering
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.querySelector('.filter-section form');
+        if (filterForm) {
+            const select = filterForm.querySelector('select');
+            if (select) select.addEventListener('change', () => filterForm.submit());
+        }
     });
 </script>
-{% endif %}
 
 {% endblock content %}

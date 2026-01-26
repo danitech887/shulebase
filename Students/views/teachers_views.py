@@ -6,7 +6,7 @@ from ..forms import RegisterTeacherForm
 from ..models import TeacherInfo,Users,GradeStream
 from django.db import models
 from fpdf import FPDF
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from django.utils.timezone import now
 from datetime import datetime
@@ -371,7 +371,83 @@ STREAMS = ['Stream 1', 'Stream 2', 'Stream 3', 'Stream 4']
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 
-import ast
+import json 
+@login_required
+
+def manage_learning_areas(request):
+    school_id = request.session.get('school_id')
+    
+    if request.method == "POST":
+        action = request.POST.get('action')
+        combat_data_json = request.POST.get('combat_data')
+
+        # --- Handle Edit ---
+        if action == 'edit':
+            area_id = request.POST.get('id')
+            name = request.POST.get('name')
+            grade_level = request.POST.get('grade_level')
+            category = request.POST.get('category')
+            
+            if not (area_id and name and grade_level):
+                return JsonResponse({'success': False, 'message': 'Missing fields'}, status=400)
+
+            try:
+                area = get_object_or_404(LearningArea, id=area_id, school_id=school_id)
+                area.name = name
+                area.grade_level = grade_level
+                area.category = category
+                area.save()
+                return JsonResponse({'success': True})
+            except Exception as e:
+                return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+        # --- Handle Delete ---
+        elif action == 'delete':
+            area_id = request.POST.get('id')
+            if not area_id:
+                return JsonResponse({'success': False, 'message': 'Missing ID'}, status=400)
+            
+            try:
+                area = get_object_or_404(LearningArea, id=area_id, school_id=school_id)
+                area.delete()
+                return JsonResponse({'success': True})
+            except Exception as e:
+                return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        
+        # --- Handle Bulk Add ---
+        elif combat_data_json:
+            try:
+                # Convert JSON string back to a Python List
+                combat_data = json.loads(combat_data_json)
+                
+                with transaction.atomic():
+                    for item in combat_data:
+                        # We use .get() and provide a fallback string to prevent 'NoneType' errors
+                        name = item.get('name', '').strip()
+                        grade_level = item.get('level', '').strip()
+                        category = item.get('category', 'General').strip()
+
+                        if name and grade_level:
+                            # Logic to create or update
+                            LearningArea.objects.update_or_create(
+                                school_id=school_id,
+                                name=name,
+                                grade_level=grade_level,
+                                defaults={
+                                    'category': category,
+                                    
+                                }
+                            )
+                
+                messages.success(request, "Learning Area Combat configured successfully!")
+                
+            except Exception as e:
+                messages.error(request, f"System Error: {str(e)}")
+        else:
+             messages.error(request, "No data received. Please add subjects to the list first.")
+
+    return redirect('role_management')
+
 
 @login_required
 def role_management(request):
@@ -380,7 +456,28 @@ def role_management(request):
     for _ in messages.get_messages(request):
         pass
     alias = get_school_db_alias_from_session(request)
-    approved_roles = TeachersRole.objects.filter(school_id = school_id).select_related('registration_no').all().order_by('grade', 'stream')
+    
+    # --- Filter Logic ---
+    approved_roles_qs = TeachersRole.objects.filter(school_id=school_id).select_related('registration_no')
+
+    t_name = request.GET.get('teacher_name', '').strip()
+    grade_filter = request.GET.get('grade', '').strip()
+    stream_filter = request.GET.get('stream', '').strip()
+    subj_filter = request.GET.get('subject', '').strip()
+
+    if t_name:
+        approved_roles_qs = approved_roles_qs.filter(
+            Q(registration_no__first_name__icontains=t_name) | 
+            Q(registration_no__surname__icontains=t_name)
+        )
+    if grade_filter:
+        approved_roles_qs = approved_roles_qs.filter(grade=grade_filter)
+    if stream_filter:
+        approved_roles_qs = approved_roles_qs.filter(stream=stream_filter)
+    if subj_filter:
+        approved_roles_qs = approved_roles_qs.filter(subject__icontains=subj_filter)
+
+    approved_roles = approved_roles_qs.order_by('grade', 'stream')
     teachers = TeacherInfo.objects.filter(school_id = school_id).all()
 
     # Prepare roles with subjects as a list
@@ -393,7 +490,7 @@ def role_management(request):
             'grade': role.grade,
             'stream': role.stream,
             'type_of_teacher': role.type_of_teacher,
-            'subjects': role.subject.split(", ")
+            'subjects': role.subject.split(", ") if role.subject else []
         })
 
     try:
@@ -401,9 +498,13 @@ def role_management(request):
     except Exception:
         grades = []
 
-    LOWER_SUBJECTS = list(LearningArea.objects.filter(grade_level = 'Lower Primary').values_list('name',flat=True).distinct())
-    UPPER_SUBJECTS = list(LearningArea.objects.filter(grade_level = 'Upper Primary').values_list('name',flat=True).distinct())
-    JUNIOR_SUBJECTS = list(LearningArea.objects.filter(grade_level = 'Junior Secondary').values_list('name',flat=True).distinct())
+    LOWER_SUBJECTS = list(LearningArea.objects.filter(school_id = school_id,grade_level = 'Lower Primary').values_list('name',flat=True).distinct())
+    UPPER_SUBJECTS = list(LearningArea.objects.filter(school_id = school_id,grade_level = 'Upper Primary').values_list('name',flat=True).distinct())
+    JUNIOR_SUBJECTS = list(LearningArea.objects.filter(school_id = school_id,grade_level = 'Junior Secondary').values_list('name',flat=True).distinct())
+    CATEGORY_CHOICES = ['Languages','Sciences','Humanities','Technical / Applied','Creative Arts & Sports',
+    ]
+    REQUIRED_LEVELS = ['Lower Primary', 'Upper Primary', 'Junior Secondary']
+    learning_areas = LearningArea.objects.filter(school_id = school_id)
 
 
 
@@ -417,7 +518,10 @@ def role_management(request):
         'lower_grades': LOWER_GRADES,
         'upper_grades': UPPER_GRADES,
         'junior_grades': JUNIOR_GRADES,
-        'streams': STREAMS,
+        'streams': STREAMS, 
+        'categories': CATEGORY_CHOICES,
+        'grade_levels': REQUIRED_LEVELS,
+        'learning_areas': learning_areas,
     }
     return render(request, 'teacher/role_management.html', context)
 
@@ -434,6 +538,7 @@ def approve_role(request):
     alias = get_school_db_alias_from_session(request)
     school_instance = MasterSchool.objects.get(id = school_id)
 
+    role_id = request.POST.get("role_id")
     reg_no = request.POST.get("registration_no")
     grade = request.POST.get("grade")
     stream = request.POST.get("stream")
@@ -454,14 +559,18 @@ def approve_role(request):
     try:
         with transaction.atomic():
             # Restrict: Only one class teacher per grade+stream
+            ct_query = TeachersRole.objects.filter(
+                school=school_instance,
+                grade=grade,
+                stream=stream,
+                type_of_teacher="Class Teacher",
+            )
+            if role_id:
+                ct_query = ct_query.exclude(id=role_id)
+
             if (
                 type_of_teacher == "Class Teacher"
-                and TeachersRole.objects.filter(
-                    school=school_instance,
-                    grade=grade,
-                    stream=stream,
-                    type_of_teacher="Class Teacher",
-                ).exists()
+                and ct_query.exists()
             ):
                 return JsonResponse(
                     {
@@ -473,14 +582,17 @@ def approve_role(request):
 
             # Restrict: Only one teacher per subject per grade+stream+type
             for subject in subjects:
-                
-                if TeachersRole.objects.filter(
+                st_query = TeachersRole.objects.filter(
                     school=school_id,
                     grade=grade,
                     stream=stream,
                     subject=subject,
                     type_of_teacher=type_of_teacher,
-                ).exists():
+                )
+                if role_id:
+                    st_query = st_query.exclude(id=role_id)
+
+                if st_query.exists():
                     return JsonResponse(
                         {
                             "success": False,
@@ -489,18 +601,30 @@ def approve_role(request):
                         status=409,
                     )
 
-            # Save role
-            TeachersRole.objects.create(
-                school=school_instance,
-                registration_no_id=reg_no,
-                grade=grade,
-                stream=stream,
-                type_of_teacher=type_of_teacher,
-                subject=",".join(subjects) if subjects else None,
-            )
+            if role_id:
+                # Update existing role
+                role = get_object_or_404(TeachersRole, id=role_id, school=school_instance)
+                role.registration_no_id = reg_no
+                role.grade = grade
+                role.stream = stream
+                role.type_of_teacher = type_of_teacher
+                role.subject = ",".join(subjects) if subjects else None
+                role.save()
+                message = "✅ Role updated successfully!"
+            else:
+                # Create new role
+                TeachersRole.objects.create(
+                    school=school_instance,
+                    registration_no_id=reg_no,
+                    grade=grade,
+                    stream=stream,
+                    type_of_teacher=type_of_teacher,
+                    subject=",".join(subjects) if subjects else None,
+                )
+                message = "✅ Role approved successfully!"
 
         return JsonResponse(
-            {"success": True, "message": "✅ Role approved successfully!"}
+            {"success": True, "message": message}
         )
 
     except Exception as e:
@@ -525,4 +649,3 @@ def remove_role(request):
         return JsonResponse({'success': True, 'message': 'Role removed successfully.'})
     except TeachersRole.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Role not found.'})
-

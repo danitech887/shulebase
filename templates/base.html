@@ -254,14 +254,14 @@
 
                 .content {
                     flex: 1;
-                    padding: 20px;
+                    padding: 15px;
                     margin-top: var(--header-height);
                     transition: margin-left 0.25s ease, margin-top 0.2s ease;
                 }
                 
                 /* Mobile Overrides */
                 @media (max-width: 768px) {
-                    :root { --header-height: 54px; --sidebar-width: 220px; }
+                    :root { --header-height: 54px; --sidebar-width: 220px; } .content { padding: 10px; }
                     .base_header { padding: 0 10px; }
                     .base_header .school-title { font-size: 1rem; }
                     .base_header .logo-img { width: 60px; height: 60px; }
@@ -333,9 +333,9 @@
             </div>
             <div class="header-right">
                 <img src="{% static 'images/teacher.png' %}" alt="avatar" class="user-avatar">
-                {% if user.role == 'Admin' or user.role == 'teacher' %}
+                {% if user.role == 'Admin' or user.role == 'Teacher' %}
                     <span class="user-name d-none d-md-inline">{{ user.username }}</span>
-                {% elif user.role == 'parent' %}
+                {% elif user.role == 'Parent' %}
                     <span class="user-name d-none d-md-inline">{{ parent_name }}</span>
                 {% else %}
                     <span class="user-name d-none d-md-inline">{{ student_name }}</span>
@@ -408,7 +408,7 @@
                         </a>
                     </li>
                     <div class="px-3 mt-3">
-                        <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                        <a class="btn btn-outline-light w-100" href="{% url 'admin_logout' %}">Logout</a>
                     </div>               
                 
                 </ul>
@@ -424,12 +424,12 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'record_marks' %}active{% endif %}"
                             href="{% url 'record_marks' %}">
                             <i class="bi bi-journal-check"></i> Academics
                         </a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'strand_list' %}active{% endif %}"
                             href="{% url 'strand_list' %}">
@@ -480,10 +480,11 @@
                             <i class="bi bi-person-gear"></i> Account
                         </a>
                     </li>
+                    <div class="px-3 mt-3">
+                        <a class="btn btn-outline-light w-100" href="{% url 'teacher_logout' %}">Logout</a>
+                    </div>
                 </ul>
-                <div class="px-3 mt-3">
-                    <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
-                </div>
+                
             </div>
         {% elif user.role == 'student' %}
             <div id="sidebar" class="sidebar">
@@ -534,9 +535,15 @@
                             <i class="bi bi-grid-fill"></i> Reviews 
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'change_password' %}active{% endif %}" 
+                            href="{% url 'change_password' %}">
+                            <i class="bi bi-lock-fill"></i> Security
+                        </a>
+                    </li>
 
                     <div class="px-3 mt-3">
-                        <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                        <a class="btn btn-outline-light w-100" href="{% url 'student_logout' %}">Logout</a>
                     </div>
 
                 </ul>
@@ -590,19 +597,21 @@
                             Announcements
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'change_password' %}active{% endif %}" 
+                            href="{% url 'change_password' %}">
+                            <i class="bi bi-lock-fill"></i> Security
+                        </a>
+                    </li>
 
                     <div class="px-3 mt-3">
-                        <a class="btn btn-outline-light w-100" href="{% url 'logout' %}">Logout</a>
+                        <a class="btn btn-outline-light w-100" href="{% url 'parent_logout' %}">Logout</a>
                     </div>
                 </ul>
             </div>
 
         {% endif %}
         
-        
-
-
-
 
         <div class="content">
             <div class="container-fluid">
@@ -612,7 +621,7 @@
         
         <div id="sidebar-backdrop" class="sidebar-backdrop d-lg-none" onclick="toggleSidebar()"></div>
 
-        <footer class="bg-dark text-white py-5 mt-5">
+        <footer class="bg-dark text-white py-4 mt-4">
             <!-- <div class="container"> -->
               <!-- <div class="row g-4">
                 <div class="col-md-4">

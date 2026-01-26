@@ -38,16 +38,17 @@ class RegisterForm(forms.ModelForm):
     stream = forms.ChoiceField(choices=[('', 'Select Stream')], widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_stream'}))
 
     class Meta:
-        model = StudentInfo
+        model = StudentInfo 
         fields = [
             'registration_no', 'first_name', 'second_name', 'surname',
             'gender', 'date_of_birth', 'grade', 'stream',
-            'date_of_registration', 'phone', 'address'
+            'date_of_registration','parent_name', 'phone', 'address'
         ]
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'second_name': forms.TextInput(attrs={'class': 'form-control'}),
             'surname': forms.TextInput(attrs={'class': 'form-control'}),
+            'parent_name': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
         }

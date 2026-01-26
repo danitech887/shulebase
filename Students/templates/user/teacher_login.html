@@ -1,0 +1,124 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block title %}Teacher Login{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100">
+    <div class="row h-100">
+        <!-- Image Side -->
+        <div class="col-md-6 d-none d-md-block p-0 position-relative overflow-hidden">
+            <div class="h-100 w-100" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="position-absolute top-50 start-50 translate-middle text-center text-white p-4">
+                    <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=400&fit=crop" 
+                         alt="Teacher" 
+                         class="rounded-circle mb-4 shadow-lg" 
+                         style="width: 200px; height: 200px; object-fit: cover; border: 5px solid rgba(255,255,255,0.3);">
+                    <h2 class="fw-bold mb-3">Welcome, Educator!</h2>
+                    <p class="lead mb-0">Empowering minds, shaping futures</p>
+                </div>
+                <div class="position-absolute bottom-0 start-0 w-100 p-4">
+                    <div class="d-flex justify-content-around text-white">
+                        <div class="text-center">
+                            <i class="bi bi-journal-text fs-2 mb-2"></i>
+                            <p class="small mb-0">Lesson Plans</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="bi bi-clipboard-check fs-2 mb-2"></i>
+                            <p class="small mb-0">Grading</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="bi bi-person-lines-fill fs-2 mb-2"></i>
+                            <p class="small mb-0">Student Records</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Side -->
+        <div class="col-md-6 d-flex align-items-center justify-content-center" style="background: #f8f9fa;">
+            <div class="login-form-container p-5 rounded-4 bg-white" style="max-width: 480px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+                <div class="text-center mb-5">
+                    <img src="{% static 'images/logo.png' %}" alt="Logo" height="60" class="mb-3">
+                    <h3 class="fw-bold mb-2" style="color: #11998e;">Teacher Portal</h3>
+                    <p class="text-muted mb-0">Access your teaching resources and records.</p>
+                </div>
+
+                {% include "includes/message_modal.html" %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-dark mb-2">
+                            <i class="bi bi-person-badge me-1"></i> Username / Reg No
+                        </label>
+                        <input type="text" 
+                               name="username" 
+                               class="form-control form-control-lg border-2 rounded-3" 
+                               placeholder="Enter your username" 
+                               style="padding: 0.75rem 1rem; border-color: #e0e0e0;"
+                               required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-dark mb-2">
+                            <i class="bi bi-shield-lock me-1"></i> Password
+                        </label>
+                        <input type="password" 
+                               name="password" 
+                               class="form-control form-control-lg border-2 rounded-3" 
+                               placeholder="Enter your password"
+                               style="padding: 0.75rem 1rem; border-color: #e0e0e0;"
+                               required>
+                        <div class="text-end mt-2">
+                            <a href="{% url 'reset_password' %}" 
+                               class="text-decoration-none small"
+                               style="color: #11998e;">
+                                <i class="bi bi-question-circle me-1"></i>Forgot Password?
+                            </a>
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                            class="btn btn-lg w-100 py-3 fw-bold text-white rounded-3 shadow-sm"
+                            style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border: none; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(17, 153, 142, 0.4)';"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="small text-muted mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Secure access to educational resources
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        border-color: #11998e !important;
+        box-shadow: 0 0 0 0.2rem rgba(17, 153, 142, 0.15) !important;
+    }
+    
+    .login-form-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
