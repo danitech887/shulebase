@@ -483,7 +483,8 @@ def competency(request):
         if subject and comment and term and student_id:
             try:
                 student = StudentInfo.objects.get(registration_no=student_id, school=school_instance)
-                LearnerCompetency.objects.create(
+                
+                LearnerCompetency.objects.create_or_update(
                     school=school_instance,
                     student=student,
                     grade=selected_grade,
