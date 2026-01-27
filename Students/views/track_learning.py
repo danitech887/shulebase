@@ -144,10 +144,11 @@ def learning_hub_view(request):
     reg_no = request.session.get('registration_no')
     student = get_object_or_404(StudentInfo, registration_no=reg_no)
     grade = student.grade
+    school_id = request.session.get('school_id')
     
     # Prefetch only the log for the current student to use in the template
     user_logs = LearningLog.objects.filter(student=student)
-    resources = Resource.objects.filter(grade=grade).prefetch_related(
+    resources = Resource.objects.filter(grade=grade,school_id = school_id).prefetch_related(
         Prefetch('learninglog_set', queryset=user_logs, to_attr='user_log')
     ).order_by('-created_at')
 
