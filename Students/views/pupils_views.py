@@ -1253,7 +1253,7 @@ def academic_home(request):
 GOOD_THRESHOLD = 2.5 
  
 
-def dashboard_comparison_view(request,selected_term,selected_year,grade,stream):
+def dashboard_comparison_view(request,school_id,selected_term,selected_year,grade,stream):
     """
     Generates data for a dashboard comparing performance across all Learning Areas (Subjects), 
     filtered by optional term and year provided in the request query parameters.
@@ -1264,7 +1264,8 @@ def dashboard_comparison_view(request,selected_term,selected_year,grade,stream):
     
 
     # 2. Fetch all unique Learning Areas (Strands) based on their subject name.
-    learning_areas = Strand.objects.values('subject').distinct()
+    learning_areas = Strand.objects.filter(school_id = school_id).values('subject').distinct()
+    
     
     dashboard_data = []
 
@@ -1500,7 +1501,7 @@ def academic_dashboard(request):
     
     # 6. Call the comparison view (assuming it accepts the request object and applies filters)
     # The comparison view will now receive the year, term, assessment_type, grade, and stream filters.
-    learning_areas = dashboard_comparison_view(request,term,year,grade,stream)
+    learning_areas = dashboard_comparison_view(request,school_id,term,year,grade,stream)
     print("Learning Areas Dashboard Data: ",learning_areas)
     
     # 7. Return final context
