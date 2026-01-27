@@ -64,261 +64,292 @@
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             {% block extra_css %}
             <style>
-                :root {
-                    --header-height: 70px;
-                    --sidebar-width: 250px;
-                    /* New Color Palette */
-                    --color-primary: #0d6efd; 
-                    --color-accent: #ffc107;
-                    --font-base: 16px;
-                }
-                
-                html { font-size: var(--font-base); }
-                body {
-                    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                    height: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    margin: 0;
-                    overflow-x: hidden;
-                    background-color: #f8f9fa;
-                }
-                
-                /* HEADER */
-                .base_header {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: var(--header-height);
-                    background-color: var(--color-primary); 
-                    color: #fff;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    z-index: 1100;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); 
-                    padding: 0 20px;
-                }
+/* =========================
+   THEME VARIABLES
+   ========================= */
 
-                .base_header .header-left {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                }
+:root {
+    --header-height: 70px;
+    --sidebar-width: 250px;
+    --font-base: 16px;
 
-                .base_header .logo-img {
-                    width: 100px;
-                    height: 70px;
-                    object-fit: contain;
-                    border-radius: 8px;
-                    padding: 2px;
-                }
+    /* BRAND COLORS */
+    --color-primary: #0d6efd;
+    --color-accent: #ffc107;
 
-                .base_header .school-title {
-                    font-size: 2.45rem; 
-                    text-transform: uppercase;
-                    font-weight: 700;
-                    letter-spacing: .5px;
-                    margin: 0;
-                    color: #fff;
-                    text-shadow: none; 
-                    flex-grow: 1;
-                    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-                }
-                
-                .base_header .header-right {
-                    display: flex;
-                    align-items: center;
-                    gap: 1.25rem;
-                }
+    /* LIGHT THEME */
+    --bg-body: #f8f9fa;
+    --bg-surface: #ffffff;
+    --bg-header: var(--color-primary);
+    --bg-sidebar: var(--color-primary);
 
-                .base_header .user-avatar {
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    border: 2px solid #fff;
-                }
+    --text-primary: #212529;
+    --text-inverse: #ffffff;
+    --text-muted: #6c757d;
 
-                .base_header .user-name {
-                    font-weight: 600;
-                    color: #fff;
-                    font-size: 1rem;
-                    letter-spacing: .5px;
-                }
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
 
-                .base_header .menu-btn {
-                    background: transparent;
-                    border: none;
-                    color: #fff;
-                    font-size: 1.5rem;
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: background 0.2s;
-                }
+/* DARK THEME */
+[data-theme="dark"] {
+    --bg-body: #121212;
+    --bg-surface: #1e1e1e;
+    --bg-header: #0b5ed7;
+    --bg-sidebar: #0b5ed7;
 
-                /* SIDEBAR */
-                .sidebar {
-                    width: var(--sidebar-width);
-                    height: calc(100vh - var(--header-height));
-                    position: fixed;
-                    top: var(--header-height);
-                    left: calc(-1 * var(--sidebar-width));
-                    background-color: var(--color-primary);
-                    color: white;
-                    overflow-y: auto;
-                    z-index: 1050;
-                    transition: left 0.25s ease;
-                    display: flex;
-                    flex-direction: column;
-                    padding-top: 12px;
-                }
-                
-                /* <<<--- THE CRUCIAL FIX FOR THE MENU BUTTON --- >>> */
-                .sidebar.show {
-                    left: 0;
-                }
-                
-                /* Backdrop for Mobile Menu */
-                .sidebar-backdrop {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background-color: rgba(0, 0, 0, 0.5);
-                    z-index: 1040;
-                    display: none;
-                }
-                /* Show backdrop only when sidebar has the 'show' class */
-                .sidebar.show + .content + .sidebar-backdrop {
-                    display: block;
-                }
+    --text-primary: #eaeaea;
+    --text-inverse: #ffffff;
+    --text-muted: #9ca3af;
 
-                @media (min-width: 992px) {
-                    .sidebar {
-                        left: 0;
-                    }
-                    
-                    .sidebar.closed {
-                        left: calc(-1 * var(--sidebar-width));
-                    }
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
 
-                    .content {
-                        margin-left: var(--sidebar-width);
-                    }
-                    
-                    .content.full-width {
-                        margin-left: 0;
-                    }
-                }
-                
-                /* Hide sidebar and reset content on smaller screens */
-                @media (max-width: 991.98px) {
-                    .sidebar { left: calc(-1 * var(--sidebar-width)); }
-                    .content { margin-left: 0; }
-                }
+html {
+    font-size: var(--font-base);
+}
 
-                .sidebar .nav {
-                    flex-grow: 1;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-start;
-                }
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    overflow-x: hidden;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+}
 
-                .sidebar .nav-link {
-                    color: white;
-                    padding: .6rem 1rem;
-                    display: flex; 
-                    align-items: center;
-                    gap: 20px;
-                }
+/* =========================
+   HEADER
+   ========================= */
 
-                .sidebar .nav-link:hover {
-                    background: rgba(255, 255, 255, 0.08);
-                    text-decoration: none;
-                }
+.base_header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background-color: var(--bg-header);
+    color: var(--text-inverse);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1100;
+    box-shadow: var(--shadow-soft);
+    padding: 0 20px;
+}
 
-                .sidebar .nav-link.active {
-                    background: rgba(255, 255, 255, 0.25);
-                    color: #fff !important;
-                    font-weight: 600;
-                    border-left: 4px solid var(--color-accent);
-                }
+.base_header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-                .content {
-                    flex: 1;
-                    padding: 15px;
-                    margin-top: var(--header-height);
-                    transition: margin-left 0.25s ease, margin-top 0.2s ease;
-                }
-                
-                /* Mobile Overrides */
-                @media (max-width: 768px) {
-                    :root { --header-height: 54px; --sidebar-width: 220px; } .content { padding: 10px; }
-                    .base_header { padding: 0 10px; }
-                    .base_header .school-title { font-size: 1rem; }
-                    .base_header .logo-img { width: 60px; height: 60px; }
-                    .base_header .user-name { display: none; }
-                    .base_header .header-right { gap: 0.5rem; }
-                    .base_header .user-avatar { width: 36px; height: 36px; }
-                }
-                
-                footer {
-                    margin-top: 0px;
-                }
-                
-                /* Footer Styles */
-                .footer-title {
-                    font-weight: 700;
-                    color: white;
-                    margin-bottom: 15px;
-                    position: relative;
-                }
-                .footer-title::after {
-                    content: '';
-                    position: absolute;
-                    width: 30px;
-                    height: 3px;
-                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                    bottom: -5px;
-                    left: 0;
-                    border-radius: 2px;
-                }
-                .footer-link {
-                    color: rgba(255, 255, 255, 0.7);
-                    text-decoration: none;
-                    transition: color 0.3s ease, transform 0.3s ease;
-                    display: block;
-                    margin-bottom: 8px;
-                }
-                .footer-link:hover {
-                    color: white;
-                    transform: translateX(5px);
-                }
-                .newsletter-input {
-                    background: rgba(255, 255, 255, 0.9);
-                    border: none;
-                    border-radius: 10px 0 0 10px;
-                    padding: 10px 15px;
-                }
-                .newsletter-btn {
-                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                    border: none;
-                    color: white;
-                    font-weight: 600;
-                    border-radius: 0 10px 10px 0;
-                    transition: opacity 0.3s;
-                }
-                .newsletter-btn:hover { opacity: 0.9; }
+.base_header .logo-img {
+    width: 100px;
+    height: 70px;
+    object-fit: contain;
+    border-radius: 8px;
+    padding: 2px;
+}
 
-            </style>
+.base_header .school-title {
+    font-size: 2.45rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin: 0;
+    color: var(--text-inverse);
+    flex-grow: 1;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.base_header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.base_header .user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--text-inverse);
+}
+
+.base_header .user-name {
+    font-weight: 600;
+    color: var(--text-inverse);
+    font-size: 1rem;
+    letter-spacing: .5px;
+}
+
+.base_header .menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-inverse);
+    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.sidebar {
+    width: var(--sidebar-width);
+    height: calc(100vh - var(--header-height));
+    position: fixed;
+    top: var(--header-height);
+    left: calc(-1 * var(--sidebar-width));
+    background-color: var(--bg-sidebar);
+    color: var(--text-inverse);
+    overflow-y: auto;
+    z-index: 1050;
+    transition: left 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    padding-top: 12px;
+}
+
+.sidebar.show {
+    left: 0;
+}
+
+/* Backdrop for Mobile */
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    display: none;
+}
+
+.sidebar.show + .content + .sidebar-backdrop {
+    display: block;
+}
+
+.sidebar .nav {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .nav-link {
+    color: var(--text-inverse);
+    padding: .6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+}
+
+.sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.25);
+    font-weight: 600;
+    border-left: 4px solid var(--color-accent);
+}
+
+/* =========================
+   CONTENT
+   ========================= */
+
+.content {
+    flex: 1;
+    padding: 15px;
+    margin-top: var(--header-height);
+    background: var(--bg-body);
+    transition: margin-left 0.25s ease;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (min-width: 992px) {
+    .sidebar { left: 0; }
+    .sidebar.closed { left: calc(-1 * var(--sidebar-width)); }
+    .content { margin-left: var(--sidebar-width); }
+    .content.full-width { margin-left: 0; }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --header-height: 54px;
+        --sidebar-width: 220px;
+    }
+    .content { padding: 10px; }
+    .base_header { padding: 0 10px; }
+    .base_header .school-title { font-size: 1rem; }
+    .base_header .logo-img { width: 60px; height: 60px; }
+    .base_header .user-name { display: none; }
+    .base_header .header-right { gap: 0.5rem; }
+    .base_header .user-avatar { width: 36px; height: 36px; }
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.footer-title {
+    font-weight: 700;
+    color: var(--text-inverse);
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.footer-title::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 3px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    bottom: -5px;
+    left: 0;
+    border-radius: 2px;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.footer-link:hover {
+    color: white;
+    transform: translateX(5px);
+}
+
+.newsletter-input {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 10px 0 0 10px;
+    padding: 10px 15px;
+}
+
+.newsletter-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 0 10px 10px 0;
+}
+</style>
+
             {% endblock %}
         </head>
         <body>
