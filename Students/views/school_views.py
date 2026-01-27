@@ -52,20 +52,20 @@ def school_registration(request):
                         f"✅ School '{school.school_name}' registered successfully. "
                         f"Admin username: {admin_username}"
                     )
-                    send_mail(
-                        subject="School Registration Received",
-                        message=(
-                            f"Dear {school.school_name},\n\n"
-                            "Thank you for registering your school with ShuleBase. "
-                            "Your registration is currently under review. "
-                            "We will notify you once your account has been approved.\n\n"
-                            "Best regards,\n"
-                            "The ShuleBase Team"
-                        ),
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[admin_email],
-                        fail_silently=True,
-                    )
+                    # send_mail(
+                    #     subject="School Registration Received",
+                    #     message=(
+                    #         f"Dear {school.school_name},\n\n"
+                    #         "Thank you for registering your school with ShuleBase. "
+                    #         "Your registration is currently under review. "
+                    #         "We will notify you once your account has been approved.\n\n"
+                    #         "Best regards,\n"
+                    #         "The ShuleBase Team"
+                    #     ),
+                    #     from_email=settings.DEFAULT_FROM_EMAIL,
+                    #     recipient_list=[admin_email],
+                    #     fail_silently=True,
+                    # )
                     return redirect('waiting_page')
     else:
         form = SchoolRegistrationForm()
