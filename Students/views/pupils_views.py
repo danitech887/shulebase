@@ -1252,7 +1252,9 @@ def academic_home(request):
 
 GOOD_THRESHOLD = 2.5 
  
-
+GOOD_THRESHOLD = 2.5 
+LEVEL_NAMES = {4: 'Exceeding Expectations', 3: 'Meeting Expectation', 2: 'Approaching Expectation',1: 'Below Expectation'}
+ 
 def dashboard_comparison_view(request,school_id,selected_term,selected_year,grade,stream):
     """
     Generates data for a dashboard comparing performance across all Learning Areas (Subjects), 
@@ -1273,7 +1275,7 @@ def dashboard_comparison_view(request,school_id,selected_term,selected_year,grad
         subject_name = area['subject']
         
         # 3. Identify ALL Strands belonging to this specific subject name.
-        subject_strands = Strand.objects.filter(subject=subject_name)
+        subject_strands = Strand.objects.filter(school_id = school_id,subject=subject_name)
         
         # 4. Get all SubStrands linked to these Strands.
         # Assumes SubStrand has a ForeignKey field named 'strand'
@@ -1380,9 +1382,7 @@ def dashboard_comparison_view(request,school_id,selected_term,selected_year,grad
 
 from django.db.models import Sum, Avg, Q
 
-GOOD_THRESHOLD = 2.5 
-LEVEL_NAMES = {4: 'Exceeding Expectations', 3: 'Meeting Expectation', 2: 'Approaching Expectation',1: 'Below Expectation'}
- 
+
 @login_required
 def academic_dashboard(request):
     school_id = request.session.get('school_id')
@@ -1502,7 +1502,7 @@ def academic_dashboard(request):
     # 6. Call the comparison view (assuming it accepts the request object and applies filters)
     # The comparison view will now receive the year, term, assessment_type, grade, and stream filters.
     learning_areas = dashboard_comparison_view(request,school_id,term,year,grade,stream)
-    print("Learning Areas Dashboard Data: ",learning_areas)
+
     
     # 7. Return final context
     return render(request, 'students/pages/academic_dashboard.html', {

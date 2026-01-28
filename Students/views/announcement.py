@@ -37,7 +37,8 @@ def create_announcement(request):
         title = request.POST.get('title')
         content = request.POST.get('content')
         school_id = request.session.get('school_id')
-        target_audience = request.POST.get('target_audience')
+        target_audience_list = request.POST.getlist('target_audience')
+        target_audience = ",".join(target_audience_list)
 
         Announcement.objects.create(
             school_id=school_id,
@@ -57,7 +58,8 @@ def edit_announcement(request, id):
     if request.method == 'POST':
         announcement.title = request.POST.get('title')
         announcement.content = request.POST.get('content')
-        announcement.target_audience = request.POST.get('target_audience')
+        target_audience_list = request.POST.getlist('target_audience')
+        announcement.target_audience = ",".join(target_audience_list)
         announcement.save()
         messages.success(request, 'Announcement updated successfully!')
     return redirect('announcements')

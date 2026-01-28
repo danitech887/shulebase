@@ -302,13 +302,14 @@
                                         </div>
                                         <div class="mb-3">
                                             <label for="edit_target_{{ announcement.id }}" class="form-label">Target Audience</label>
-                                            <select class="form-select" id="edit_target_{{ announcement.id }}" name="target_audience" required>
-                                                <option value="ALL" {% if announcement.target_audience == "ALL" %}selected{% endif %}>All Users</option>
-                                                <option value="TEACHERS" {% if announcement.target_audience == "TEACHERS" %}selected{% endif %}>Teachers Only</option>
-                                                <option value="STUDENTS" {% if announcement.target_audience == "STUDENTS" %}selected{% endif %}>Students Only</option>
-                                                <option value="PARENTS" {% if announcement.target_audience == "PARENTS" %}selected{% endif %}>Parents Only</option>
-                                                <option value="STAFF" {% if announcement.target_audience == "STAFF" %}selected{% endif %}>Staff Only</option>
+                                            <select class="form-select" id="edit_target_{{ announcement.id }}" name="target_audience" required multiple>
+                                                <option value="ALL" {% if "ALL" in announcement.target_audience %}selected{% endif %}>All Users</option>
+                                                <option value="TEACHERS" {% if "TEACHERS" in announcement.target_audience %}selected{% endif %}>Teachers Only</option>
+                                                <option value="STUDENTS" {% if "STUDENTS" in announcement.target_audience %}selected{% endif %}>Students Only</option>
+                                                <option value="PARENTS" {% if "PARENTS" in announcement.target_audience %}selected{% endif %}>Parents Only</option>
+                                                <option value="STAFF" {% if "STAFF" in announcement.target_audience %}selected{% endif %}>Staff Only</option>
                                             </select>
+                                            <div class="form-text text-muted small">Hold Ctrl (Windows) or Command (Mac) to select multiple. On mobile, use the native picker.</div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -376,14 +377,15 @@
                     </div>
                     <div class="mb-3">
                         <label for="id_target_audience" class="form-label">Target Audience</label>
-                        <select class="form-select" id="id_target_audience" name="target_audience" required>
-                            <option value="" disabled selected>Select Audience</option>
+                        <select class="form-select" id="id_target_audience" name="target_audience" required multiple>
+                            <option value="" disabled>Select Audience</option>
                             <option value="ALL">All Users</option>
                             <option value="TEACHERS">Teachers Only</option>
                             <option value="STUDENTS">Students Only</option>
                             <option value="PARENTS">Parents Only</option>
                             <option value="STAFF">Staff Only</option>
                         </select>
+                        <div class="form-text text-muted small">Hold Ctrl (Windows) or Command (Mac) to select multiple. On mobile, use the native picker.</div>
                     </div>
                 </div>
                 <div class="modal-footer">

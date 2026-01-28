@@ -589,7 +589,7 @@ def parents_announcements(request):
     registration_no = request.session.get('registration_no')
 
     announcements = Announcement.objects.filter(
-        Q(target_audience='PARENTS') | 
+        Q(target_audience__icontains='PARENTS') | 
         Q(target_audience__icontains=registration_no)
     , school_id=school_id).order_by('-created_at')
 

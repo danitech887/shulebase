@@ -65,12 +65,17 @@
                         <label class="form-label fw-semibold text-dark mb-2">
                             <i class="bi bi-shield-lock me-1"></i> Password
                         </label>
-                        <input type="password" 
-                               name="password" 
-                               class="form-control form-control-lg border-2 rounded-3" 
-                               placeholder="Enter your password"
-                               style="padding: 0.75rem 1rem; border-color: #e0e0e0;"
-                               required>
+                        <div class="position-relative">
+                            <input type="password" 
+                                   name="password" 
+                                   class="form-control form-control-lg border-2 rounded-3" 
+                                   placeholder="Enter your password"
+                                   style="padding: 0.75rem 2.5rem 0.75rem 1rem; border-color: #e0e0e0;"
+                                   required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         <div class="text-end mt-2">
                             <a href="{% url 'reset_password' %}" 
                                class="text-decoration-none small"
@@ -131,5 +136,28 @@
             transform: translateY(0);
         }
     }
+    
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0;
+        z-index: 10;
+    }
 </style>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.querySelector('input[name="password"]');
+        const icon = document.querySelector('.password-toggle i');
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        icon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+    }
+</script>
 {% endblock %}

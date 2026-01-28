@@ -3,6 +3,7 @@
 {% block content %}
 <style>
     :root {
+        color-scheme: light;
         --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
@@ -138,6 +139,24 @@
         transform: translateY(-3px);
         box-shadow: 0 12px 35px rgba(44, 62, 80, 0.4);
         color: white;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.1rem;
+        transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+        color: #667eea;
     }
 
     .btn-primary {
@@ -695,12 +714,27 @@
                             </h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_username" class="form-label">Username</label>
-                                    <input type="text" id="username" name="username" required>
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" id="username" name="username" class="form-control" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_password" class="form-label">Password</label>
-                                    <input type="password" id="password" name="password" required>
+                                    <label for="password" class="form-label">Password</label>
+                                    <div class="position-relative">
+                                        <input type="password" id="password" name="password" class="form-control" required>
+                                        <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordIcon')">
+                                            <i class="bi bi-eye" id="passwordIcon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                                    <div class="position-relative">
+                                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                                        <button type="button" class="password-toggle" onclick="togglePassword('confirm_password', 'confirmPasswordIcon')">
+                                            <i class="bi bi-eye" id="confirmPasswordIcon"></i>
+                                        </button>
+                                    </div>
+                                    <div id="password-error" class="text-danger small mt-1" style="display: none;">Passwords do not match.</div>
                                 </div>
                             </div>
                         </div>
@@ -813,54 +847,72 @@
 </div>
 
 <script>
-    
-    // Add loading state to form submission
-    document.querySelector('form').addEventListener('submit', function() {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Registering...';
-        submitBtn.disabled = true;
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const passwordIcon = document.getElementById(iconId);
         
-        // Re-enable after 5 seconds as fallback
-        setTimeout(() => {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }, 5000);
-    });
-
-    // Add animation to table rows
-    document.addEventListener('DOMContentLoaded', function() {
-        const tableRows = document.querySelectorAll('.table tbody tr');
-        tableRows.forEach((row, index) => {
-            row.style.animationDelay = `${index * 0.1}s`;
-            row.classList.add('fade-in');
-        });
-    });
-
-    // Form validation enhancement
-    const form = document.querySelector('form');
-    const requiredFields = form.querySelectorAll('[required]');
-    
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', function() {
-            if (!this.value.trim()) {
-                this.classList.add('is-invalid');
-            } else {
-                this.classList.remove('is-invalid');
-            }
-        });
-        
-        field.addEventListener('input', function() {
-            if (this.value.trim()) {
-                this.classList.remove('is-invalid');
-            }
-        });
-    });
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.className = 'bi bi-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            passwordIcon.className = 'bi bi-eye';
+        }
+    }
 
     function triggerDelete(id) {
        
         document.getElementById('delForm').action = `/delete-teacher/${id}/`;
         new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to table rows
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.1}s`;
+            row.classList.add('fade-in');
+        });
+
+        const registrationForm = document.querySelector('#registerTeacherModal form');
+        if (registrationForm) {
+            // Form submission with password validation
+            registrationForm.addEventListener('submit', function(e) {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+                const errorDiv = document.getElementById('password-error');
+                const submitBtn = this.querySelector('button[type="submit"]');
+
+                if (password !== confirmPassword) {
+                    e.preventDefault(); // Stop form submission
+                    errorDiv.style.display = 'block';
+                    document.getElementById('password').classList.add('is-invalid');
+                    document.getElementById('confirm_password').classList.add('is-invalid');
+                    return;
+                }
+                
+                errorDiv.style.display = 'none';
+                document.getElementById('password').classList.remove('is-invalid');
+                document.getElementById('confirm_password').classList.remove('is-invalid');
+
+                // Add loading state
+                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Registering...';
+                submitBtn.disabled = true;
+            });
+
+            // Form validation enhancement
+            const requiredFields = registrationForm.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                field.addEventListener('blur', function() {
+                    if (!this.value.trim()) this.classList.add('is-invalid');
+                    else this.classList.remove('is-invalid');
+                });
+                
+                field.addEventListener('input', function() {
+                    if (this.value.trim()) this.classList.remove('is-invalid');
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}
