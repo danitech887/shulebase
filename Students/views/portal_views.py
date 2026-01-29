@@ -481,21 +481,24 @@ def competency(request):
         if subject and comment and term and student_id:
             try:
                 student = StudentInfo.objects.get(registration_no=student_id, school=school_instance)
-                
-                LearnerCompetency.objects.create_or_update(
-                    school=school_instance,
-                    student=student,
-                    grade=selected_grade,
-                    stream=selected_stream,
-                    subject=subject,
-                    term=term,
-                    year=year,
-                    competency=competency,
-                    level=level,
-                    comment=comment,
-                    recorded_by=request.user,
-                )
-                messages.success(request, "Competency added successfully.")
+                if not LearnerCompetency.objects.filter(student_id = student.registration_no,competency = competency).exists():
+
+                    LearnerCompetency.objects.create(
+                        school=school_instance,
+                        student=student,
+                        grade=selected_grade,
+                        stream=selected_stream,
+                        subject=subject,
+                        term=term,
+                        year=year,
+                        competency=competency,
+                        level=level,
+                        comment=comment,
+                        recorded_by=request.user,
+                    )
+                    messages.success(request, "Competency added successfully.")
+                else:
+                    messages.info(request,f'This competency {competency} is already saved for this student. please update')
             except StudentInfo.DoesNotExist:
                 messages.error(request, "Selected student does not exist.")
         else:
