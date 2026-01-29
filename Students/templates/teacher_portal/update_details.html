@@ -222,7 +222,6 @@
         border: none;
         padding: 1rem 2rem 1.5rem;
         background: white;
-        justify-content: center;
         justify-content: flex-end;
         gap: 1rem;
     }
@@ -691,23 +690,21 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
                      
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-check-circle me-2"></i>Update
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            .Cancel
-                            Cancel
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-
 </div>
 {% include "includes/message_modal.html" %}
 <script>

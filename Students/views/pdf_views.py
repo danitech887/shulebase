@@ -30,8 +30,6 @@ import pymysql
 
 
 
-
-
 from fpdf import FPDF
 import os
 from django.conf import settings 
@@ -1460,6 +1458,8 @@ def print_fee_reciept(request, fee_id):
     response["Content-Disposition"] = f'inline; filename="{personal_data.registration_no}_fee_receipt.pdf"'
     return response
 
+from django.db.models import Q
+
 @login_required
 def print_attendance_sheet(request):
     from datetime import datetime, timedelta
@@ -1480,17 +1480,20 @@ def print_attendance_sheet(request):
         students_qs = students_qs.filter(grade=grade)
     if stream:
         students_qs = students_qs.filter(stream=stream)
+   
 
     students = list(students_qs.order_by('registration_no'))
 
     # ✅ Attendance lookup (only for selected filters)
-    attendance_qs = StudentAttendance.objects.filter(school_id=school_id)
+    attendance_qs = StudentAttendance.objects.filter(Q(status='Present') | Q(status='Absent'),school_id=school_id)
+
     if grade:
         attendance_qs = attendance_qs.filter(registration_no__in = students)
     if stream:
         attendance_qs = attendance_qs.filter(registration_no__in =students) 
     if term:
         attendance_qs = attendance_qs.filter(term=term)
+   
 
     today = datetime.now().date()
     if date_filter == 'today':
@@ -1545,6 +1548,8 @@ def print_attendance_sheet(request):
     # ✅ Table body
     pdf.set_font('Arial', size=9)
     
+    
+        
     for student in students:
         name = " ".join(
             part for part in [student.first_name, student.second_name, student.surname] if part
@@ -1561,15 +1566,7 @@ def print_attendance_sheet(request):
                 pdf.cell(25, 8, str(r.status), border=1, align='C')
                 pdf.cell(25, 8, str(r.term), border=1, align='C')
                 pdf.ln()
-        else:
-            pdf.cell(25, 8, str(student.registration_no), border=1)
-            pdf.cell(50, 8, name or "Unknown", border=1)
-            pdf.cell(20, 8, str(student.grade), border=1, align='C')
-            pdf.cell(20, 8, str(student.stream), border=1, align='C')
-            pdf.cell(25, 8, "-", border=1, align='C')
-            pdf.cell(25, 8, "-", border=1, align='C')
-            pdf.cell(25, 8, str(term or "-"), border=1, align='C')
-            pdf.ln()
+    
 
     # ✅ File response
     safe_grade = grade.replace(" ", "_") if grade else "all"

@@ -123,8 +123,8 @@ urlpatterns = [
 
 
 
-    path('teaching-progress',teaching_progress,name = 'teaching_progress'),
-    path("account",teacher_account,name = "teacher_account"),
+    path('teaching-progress/',teaching_progress,name = 'teaching_progress'),
+    path("account/",teacher_account,name = "teacher_account"),
     path('teachers/announcements/',teacher_announcements, name='teacher_announcements'),
 
 

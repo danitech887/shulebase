@@ -119,9 +119,9 @@ def teacher_account(request):
     registration_no = request.session.get('registration_no')
     school_id = request.session.get('school_id')
 
-    if not registration_no or not school_id:
-        messages.error(request, "Session expired. Please log in again.")
-        return redirect('login')
+    # if not registration_no or not school_id:
+    #     messages.error(request, "Session expired. Please log in again.")
+    #     return redirect('login')
 
     try:
         teacher = TeacherInfo.objects.get(registration_no=registration_no, school_id=school_id)

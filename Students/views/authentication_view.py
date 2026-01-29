@@ -342,7 +342,15 @@ def change_user_password(request):
         user.set_password(new_password)
         user.save()
         messages.success(request, "Password updated successfully.")
-        return redirect("account")
+        
+        # Redirect to the correct account page based on user role
+        role = request.user.role.lower()
+        if role == 'teacher':
+            return redirect('teacher_account')
+        elif role in ['admin', 'systemowner']:
+            return redirect('account')
+        
+        return redirect('login') # Fallback
 
     return render(request, "user/change_password.html")
 
@@ -367,7 +375,15 @@ def change_username(request):
         user.username = new_username
         user.save()
         messages.success(request, "✅ Username updated successfully.")
-        
+
+        # Redirect to the correct account page based on user role
+        role = request.user.role.lower()
+        if role == 'teacher':
+            return redirect('teacher_account')
+        elif role in ['admin', 'systemowner']:
+            return redirect('account')
+
+    # On GET or if POST fails validation checks above, redirect back to the form page
     return redirect("change_password")
 
 from django.contrib.auth import logout
