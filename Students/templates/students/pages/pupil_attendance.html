@@ -96,33 +96,33 @@
     <!-- Enhanced Filter Bar -->
     <form method="GET" class="search-filter-bar fade-in">
         <div>
-            <label for="search" class="form-label">
+            <label for="filter-search" class="form-label">
                 <i class="bi bi-search me-1"></i>Search by Registration No.
             </label>
-            <input type="text" class="form-control" name="search" id="search"
-                   placeholder="e.g. REG123" value="{{ request.GET.search }}">
+            <input type="text" class="form-control" name="registration_no" id="filter-search"
+                   placeholder="e.g. REG123" value="{{ selected_registration_no }}">
         </div>
         <div>
-            <label for="-select" class="form-label">
+            <label for="filter-grade" class="form-label">
                 <i class="bi bi-mortarboard me-1"></i>Grade Level
             </label>
-            <select class="form-select" id="filter-grade" name="-select"></select>
+            <select class="form-select" id="filter-grade" name="grade"></select>
         </div>
         <div>
-            <label for="stream" class="form-label">
+            <label for="filter-stream" class="form-label">
                 <i class="bi bi-diagram-3 me-1"></i>Stream
             </label>
             <select class="form-select" id="filter-stream" name="stream"></select>
         </div>
         <div>
-            <label for="term" class="form-label">
+            <label for="filter-term" class="form-label">
                 <i class="bi bi-calendar3 me-1"></i>Term
             </label>
-            <select class="form-select" id="term" name="term">
+            <select class="form-select" id="filter-term" name="term">
                 <option value="">All Terms</option>
-                <option value="Term 1" {% if request.GET.term == "Term 1" %}selected{% endif %}>Term 1</option>
-                <option value="Term 2" {% if request.GET.term == "Term 2" %}selected{% endif %}>Term 2</option>
-                <option value="Term 3" {% if request.GET.term == "Term 3" %}selected{% endif %}>Term 3</option>
+                <option value="Term 1" {% if selected_term == "Term 1" %}selected{% endif %}>Term 1</option>
+                <option value="Term 2" {% if selected_term == "Term 2" %}selected{% endif %}>Term 2</option>
+                <option value="Term 3" {% if selected_term == "Term 3" %}selected{% endif %}>Term 3</option>
             </select>
         </div>
         <div class="align-self-end">

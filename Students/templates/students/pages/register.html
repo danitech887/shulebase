@@ -1125,24 +1125,24 @@ function addRow() {
 }
 
 // Automatic filtering script
-document.addEventListener('DOMContentLoaded', function() {
-    const filterForm = document.querySelector('.search-filter-bar');
-    if (filterForm) {
-        const selects = filterForm.querySelectorAll('select');
-        selects.forEach(select => {
-            select.addEventListener('change', () => filterForm.submit());
-        });
+// document.addEventListener('DOMContentLoaded', function() {
+//     const filterForm = document.querySelector('.search-filter-bar');
+//     if (filterForm) {
+//         const selects = filterForm.querySelectorAll('select');
+//         selects.forEach(select => {
+//             select.addEventListener('change', () => filterForm.submit());
+//         });
 
-        const searchInput = filterForm.querySelector('input[name="search"]');
-        if (searchInput) {
-            let debounceTimer;
-            searchInput.addEventListener('input', () => {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => filterForm.submit(), 600);
-            });
-        }
-    }
-});
+//         const searchInput = filterForm.querySelector('input[name="search"]');
+//         if (searchInput) {
+//             let debounceTimer;
+//             searchInput.addEventListener('input', () => {
+//                 clearTimeout(debounceTimer);
+//                 debounceTimer = setTimeout(() => filterForm.submit(), 600);
+//             });
+//         }
+//     }
+// });
 
 </script>
 {% endblock %}

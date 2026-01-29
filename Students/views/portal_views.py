@@ -169,14 +169,12 @@ def attendance(request):
     stream = request.GET.get("stream", "")
 
     email = request.session.get("email")
-    print(f"Session email: {email}")
 
-    alias = get_school_db_alias_from_session(request)
     try:
         teacher = TeacherInfo.objects.get(school = school_instance,registration_no = request.session.get('registration_no'))
     except TeacherInfo.DoesNotExist:
         teacher = None
-    logger.debug(f"Teacher taking attendance: {teacher}")
+    
 
     grades = TeachersRole.objects.filter(
         school_id = school_id,

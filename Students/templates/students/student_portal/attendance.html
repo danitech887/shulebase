@@ -465,7 +465,7 @@
                                     <th scope="col">Day of Week</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Recorded By</th>
-                                    <th scope="col">Notes/Reason</th>
+        
                                 </tr>
                             </thead>
                             <tbody>
@@ -483,8 +483,8 @@
                                             <span class="badge bg-warning text-dark"><i class="bi bi-question-circle"></i> {{ record.status }}</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ record.recorded_by|default:"System" }}</td>
-                                    <td>{{ record.notes|default:"-" }}</td>
+                                    <td>{{ class_teacher }}</td>
+                                
                                 </tr>
                                 {% endfor %}
                             </tbody>

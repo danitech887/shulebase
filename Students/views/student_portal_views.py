@@ -120,6 +120,19 @@ def student_portal_attendance(request):
     absent_days = attendance_records.filter(status='Absent').count()
     total_days = attendance_records.count()
     attendance_percentage = (present_days / total_days * 100) if total_days > 0 else 0
+    student_obj = get_object_or_404(StudentInfo, school_id=school_id, registration_no=registration_no)
+    grade = student_obj.grade
+    stream = student_obj.stream
+
+    teacher_role = TeachersRole.objects.filter(
+        school_id=school_id, 
+        grade=grade, 
+        stream=stream, 
+        type_of_teacher='Class Teacher'
+    ).select_related('registration_no').first()
+    
+    class_teachername = teacher_role.registration_no.first_name if teacher_role else "N/A"
+    
 
     context = {
         "attendance_records": attendance_records,
@@ -128,6 +141,7 @@ def student_portal_attendance(request):
         "total_days": total_days,
         "attendance_percentage": attendance_percentage,
         "term_choices": ['Term 1', 'Term 2', 'Term 3'],
+        'class_teacher': class_teachername
     }
 
     return render(

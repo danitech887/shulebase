@@ -1492,23 +1492,23 @@ function updateRowCalculation(rawInput, maxScore) {
 }
 
 // Automatic filtering for GET forms
-document.addEventListener('DOMContentLoaded', function() {
-    const getForms = document.querySelectorAll('form[method="get"]');
-    getForms.forEach(form => {
-        const selects = form.querySelectorAll('select');
-        selects.forEach(select => {
-            select.addEventListener('change', () => form.submit());
-        });
-        const inputs = form.querySelectorAll('input[type="text"], input[type="search"]');
-        inputs.forEach(input => {
-            let debounce;
-            input.addEventListener('input', () => {
-                clearTimeout(debounce);
-                debounce = setTimeout(() => form.submit(), 600);
-            });
-        });
-    });
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     const getForms = document.querySelectorAll('form[method="get"]');
+//     getForms.forEach(form => {
+//         const selects = form.querySelectorAll('select');
+//         selects.forEach(select => {
+//             select.addEventListener('change', () => form.submit());
+//         });
+//         const inputs = form.querySelectorAll('input[type="text"], input[type="search"]');
+//         inputs.forEach(input => {
+//             let debounce;
+//             input.addEventListener('input', () => {
+//                 clearTimeout(debounce);
+//                 debounce = setTimeout(() => form.submit(), 600);
+//             });
+//         });
+//     });
+// });
 </script>
 
 {% endblock %}

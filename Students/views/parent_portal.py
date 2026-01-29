@@ -221,6 +221,8 @@ def parent_portal_student_attendance(request):
     total_days = attendance_records.count()
     attendance_percentage = (present_days / total_days * 100) if total_days > 0 else 0
 
+    
+
     context = {
         "students": students,  # All children for the switcher
         "student": student,    # The currently selected child

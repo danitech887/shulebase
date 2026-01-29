@@ -987,9 +987,9 @@
         
         // Populate data from historical records
         {% for record in attendance_records %}
-            if ("{{ record.status }}" === "Present") {
+            if ("{{ record.status }}" === "Present" && "{{ record.date_of_attendance }}" === "{{ today }}") {
                 present++;
-            } else {
+            } else if ("{{ record.status }}" === "Absent" && "{{ record.date_of_attendance }}" === "{{ today }}") {
                 absent++;
             }
         {% endfor %}

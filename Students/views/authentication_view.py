@@ -8,7 +8,7 @@ import random, time
 import smtplib
 import ssl
  
-from ..models import Users, MasterSchool, StudentInfo,Announcement
+from ..models import Users, MasterSchool, StudentInfo, Announcement, TeachersRole
 from django.shortcuts import get_object_or_404
 
 from .announcements_api import get_announcements
@@ -151,6 +151,14 @@ def _perform_login(request, user):
         # Role specific session data
         if user.role.lower() == "teacher":
             request.session["registration_no"] = user.registration_no
+            
+            # Check if class teacher and store in session
+            is_class_teacher = TeachersRole.objects.filter(
+                registration_no=user.registration_no,
+                school_id=user.school.id,
+                type_of_teacher='Class Teacher'
+            ).exists()
+            request.session["is_class_teacher"] = is_class_teacher
         elif user.role.lower() == "student":
             request.session["registration_no"] = user.registration_no
             student = get_object_or_404(StudentInfo, school_id=user.school.id, registration_no=user.registration_no)

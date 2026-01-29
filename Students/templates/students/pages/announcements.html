@@ -228,6 +228,20 @@
         </div>
     </div>
 
+    <!-- Search Filter -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-10">
+                    <input type="text" name="q" class="form-control" placeholder="Search announcements by title or content..." value="{{ query|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-2"></i>Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Announcements List -->
     {% if announcements %}
         <div class="announcements-container">

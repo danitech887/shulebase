@@ -475,7 +475,7 @@ body {
                     </li>
                     
 
-                    {% if is_class_teacher %}
+                    {% if request.session.is_class_teacher %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'attendance' %}active{% endif %}"
                             href="{% url 'attendance' %}">

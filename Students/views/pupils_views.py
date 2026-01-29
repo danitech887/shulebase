@@ -129,6 +129,11 @@ def manage_details(request):
     school_id = request.session.get('school_id')
     print('School id',school_id)
     school_instance = MasterSchool.objects.get(id = school_id)
+    
+    if not school_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('login')
+    school_instance = get_object_or_404(MasterSchool, id=school_id)
 
     # Registration handling
     if request.method == "POST":

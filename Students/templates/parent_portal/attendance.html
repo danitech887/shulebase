@@ -539,8 +539,7 @@
                                     <th scope="col">Date</th>
                                     <th scope="col">Day of Week</th>
                                     <th scope="col">Status</th>
-                                    <th scope="col">Recorded By</th>
-                                    <th scope="col">Notes/Reason</th>
+                                   
                                 </tr>
                             </thead>
                             <tbody>
@@ -567,11 +566,7 @@
                                             </span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <i class="bi bi-person me-2 text-muted"></i>
-                                        {{ record.recorded_by|default:"System" }}
-                                    </td>
-                                    <td class="text-muted">{{ record.notes|default:"-" }}</td>
+                                    
                                 </tr>
                                 {% endfor %}
                             </tbody>
