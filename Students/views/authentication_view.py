@@ -233,7 +233,7 @@ def admin_login(request):
         password = request.POST.get("password", "").strip()
         user = authenticate(request, username=username, password=password)
         if user:
-            if user.role.lower() not in ['admin', 'systemowner']: # Assuming Admin/SystemOwner
+            if user.role.lower() not in ['admin','Admin', 'systemowner']: # Assuming Admin/SystemOwner
                 messages.error(request, "❌ This login is for Administrators only.")
             elif _perform_login(request, user):
                 return redirect('dashboard')

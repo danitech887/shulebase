@@ -19,6 +19,8 @@ from django.db import transaction
 
 def school_registration(request):
     if request.method == 'POST':
+        username = request.POST.get('username')
+        admin_password = request.POST.get('password')
         form = SchoolRegistrationForm(request.POST, request.FILES)
 
         # Clear old messages
@@ -27,7 +29,7 @@ def school_registration(request):
 
         if form.is_valid():
             email = form.cleaned_data.get('email_address')
-            username = form.cleaned_data.get('username')
+            
 
             if MasterSchool.objects.filter(email_address=email).exists():
                 messages.error(request, "❌ Email is already registered to another school.")
@@ -40,7 +42,8 @@ def school_registration(request):
                     with transaction.atomic():
                         admin_username = username
                         admin_email = email
-                        admin_password = form.cleaned_data.get("confirm_password")
+                        
+                        
 
                         # Save school FIRST
                         school = form.save()
@@ -67,6 +70,7 @@ def school_registration(request):
                         request,
                         "❌ Registration failed. Please try again."
                     )
+                    print(f"Error during registration: {e}")
 
     else:
         form = SchoolRegistrationForm()
