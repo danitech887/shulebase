@@ -173,7 +173,7 @@ class LeaveManagement(models.Model):
     term = models.CharField(max_length=10)
     status = models.CharField(max_length=10, blank=True, null=True)
     phone = models.BigIntegerField()
-    date_of_leave = models.DateField(blank=True, null=True)
+    date_of_leave = models.DateField(blank=True, null=True,default = timezone.now())
     return_date = models.DateField(blank=True, null=True)
     year = models.IntegerField(blank=True, null=True, default=timezone.now().year)
     time = models.TimeField(blank=True, null=True, default=timezone.now)
