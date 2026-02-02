@@ -152,7 +152,7 @@ class Fee(models.Model):
     mode_of_payment = models.CharField(max_length=10, blank=True, null=True)
     transaction_code = models.CharField(max_length=30, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    date_of_payment = models.DateField(blank=True, null=True)
+    date_of_payment = models.DateField(blank=True, null=True,default = timezone.now())
     time = models.TimeField(blank=True, null=True, auto_now_add=True)
     term = models.CharField(max_length=6, blank=True, null=True)    
     year = models.IntegerField(blank=True, null=True, default=timezone.now().year)
