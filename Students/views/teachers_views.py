@@ -106,7 +106,7 @@ def register_teacher(request):
     # Generate the next available registration number (auto-fill)
     def get_next_registration_number(existing_regnos):
         reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
-        formt = reg_format.reg_format.upper()
+        formt = reg_format.reg_format.upper() if reg_format != None else ''
         for i in range (1,500):
             reg_no = f'{formt}{i:02d}'
 
