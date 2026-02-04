@@ -75,7 +75,7 @@ from ..utils.per_school_db_utils import get_school_db_alias_from_session
 
 def teacher_reg_config(request):
 
-    school_id = request.session.get('school_ic')
+    school_id = request.session.get('school_id')
     school_instance = MasterSchool.objects.get(id = school_id)
     if request.method == 'POST':
         reg_format = request.POST.get('reg_format')
