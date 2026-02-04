@@ -216,7 +216,9 @@ def manage_details(request):
     gradestream = GradeStream.objects.filter(school_id = school_id)
     # Suggested registration number
     existing_regnos = set(pupils.values_list('registration_no', flat=True))
-    suggested_regno = get_next_registration_number(school_id,existing_regnos)
+    suggested_regno = get_next_registration_number(existing_regnos)
+    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student')
+    formt = reg_format.reg_format.upper() if reg_format != None else ''
 
     return render(request, "students/pages/register.html", {
         "form": form,
@@ -226,7 +228,8 @@ def manage_details(request):
         "selected_grade": grade,
         "selected_stream": stream,
         "suggested_regno": suggested_regno,
-        'gradestream': gradestream
+        'gradestream': gradestream,
+        'reg_format': formt
     })
 
 @login_required
