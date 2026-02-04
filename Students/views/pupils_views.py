@@ -27,14 +27,41 @@ from ..models import *
 
 
 # --- Utility function for next registration number ---
+
+
+
+def reg_config(request):
+    school_id = request.session.get('school_id')
+    school_instance = MasterSchool.objects.get(id = school_id)
+
+    if request.method == 'POST':
+        reg_format = request.POST.get('reg_format')
+        if '/' in reg_format:
+            messages.error(request,f'Invalid format {reg_format} use (-) instead of /')
+            return redirect('manage_details')
+        else:
+
+            RegConfig.objects.update_or_create(
+                school = school_instance,
+                reg_format = reg_format,
+                target_type = 'student'
+
+            )
+            
+            messages.success(request,f'student registration format: {reg_format} updated')
+            return redirect('manage_details')
+
 def get_next_registration_number(school_id,existing_regnos):
+    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student').first()
+    formt = reg_format.reg_format.upper() if reg_format != None else ''
+    
+
 
     for i in range(1, 20000):  # allow up to 19999 pupils
-        reg_no = f"SCH{school_id}ST{i:02d}"
+        reg_no = f"{formt}{i:02d}"
         if reg_no not in existing_regnos:
             return reg_no
     return None
-
 
 # --- Streams API ---
 @login_required
@@ -157,6 +184,15 @@ def manage_details(request):
                 try:
                     obj = form.save(commit=False)
                     obj.school = school_instance
+                    
+                    # Enforce phone number format
+                    s_phone = str(obj.phone)
+                    if s_phone.startswith('0'):
+                        s_phone = '254' + s_phone[1:]
+                    elif not s_phone.startswith('254'):
+                        s_phone = '254' + s_phone
+                    obj.phone = int(s_phone[:12])
+                    
                     obj.save()
 
                     Users.objects.create(
@@ -185,6 +221,7 @@ def manage_details(request):
     grade = request.GET.get("grade", "").strip()
     stream = request.GET.get("stream", "").strip()
 
+    
     pupils = StudentInfo.objects.filter(school_id=school_id)
     if query:
         pupils = pupils.filter(Q(registration_no__icontains=query) |
@@ -202,6 +239,10 @@ def manage_details(request):
     existing_regnos = set(pupils.values_list('registration_no', flat=True))
     suggested_regno = get_next_registration_number(school_id,existing_regnos)
 
+    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student').first()
+    formt = reg_format.reg_format.upper() if reg_format != None else ''
+    print(pupil.registration_no for pupil in pupils)
+
     return render(request, "students/pages/register.html", {
         "form": form,
         "query": query,
@@ -210,7 +251,8 @@ def manage_details(request):
         "selected_grade": grade,
         "selected_stream": stream,
         "suggested_regno": suggested_regno,
-        'gradestream': gradestream
+        'gradestream': gradestream,
+        'reg_format': formt
     })
 
 @login_required

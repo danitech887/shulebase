@@ -233,6 +233,27 @@
         border-radius: 4px;
     }
 
+    .overlay3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(12px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.overlay.show, .overlay2.show, .overlay3.show {
+    display: flex;
+    opacity: 1;
+}
+
     .modal-footer {
         border: none;
         padding: 1rem 2rem 1.5rem;
@@ -628,6 +649,10 @@
             <i class="bi bi-speedometer2"></i>
             Go to Dashboard
         </a>
+        <button class="btn btn-primary mb-3" onclick="showDialog3()">
+            <i class="bi bi-speedometer2"></i>
+            <span>Registration Configuration</span>
+        </button>
     </div>
 
 
@@ -751,6 +776,23 @@
             </div>
         </div>
     </div>
+
+    <div class="overlay3" id="overlay3"  style="min-height: 600px; overflow-y:auto; row-gap: 20px;">
+    <div class="card2 p-4 shadow-lg">
+        <button class="close-btn" onclick="closeDialog3();" title="Close">&times;</button>
+        <h2 style="color: var(--dark); font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
+            <i class="bi bi-gear-fill me-2" style="color: var(--primary);"></i>
+            Registration Configuration
+        </h2>
+        <form method="post" action="{% url 'teacher_reg_config' %}">
+            <div class="container" style="display: flex; flex-direction: column; gap: 30px;">
+                {% csrf_token %}
+                <input type="text" value="{{ reg_format }}" class="form-control" name="reg_format" required placeholder="E.g REG">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i>Save</button>
+            </div>
+        </form>
+    </div>
+    </div>
     {% include "includes/message_modal.html" %}
 
     <!-- Enhanced Teachers Table -->
@@ -847,6 +889,17 @@
 </div>
 
 <script>
+
+    function showDialog3() {
+        document.getElementById("overlay3").classList.add("show");
+    }
+
+
+    function closeDialog3() {
+        document.getElementById("overlay3").classList.remove("show");
+    }
+
+
     function togglePassword(inputId, iconId) {
         const passwordInput = document.getElementById(inputId);
         const passwordIcon = document.getElementById(iconId);
@@ -912,6 +965,27 @@
                     if (this.value.trim()) this.classList.remove('is-invalid');
                 });
             });
+
+            // Phone number validation
+            const phoneInput = document.getElementById('id_phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.startsWith('0')) {
+                        value = '254' + value.substring(1);
+                    }
+                    if (value.length > 12) value = value.substring(0, 12);
+                    this.value = value;
+                });
+                phoneInput.addEventListener('blur', function(e) {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 0 && !value.startsWith('254')) {
+                        value = '254' + value;
+                    }
+                    if (value.length > 12) value = value.substring(0, 12);
+                    this.value = value;
+                });
+            }
         }
     });
 </script>

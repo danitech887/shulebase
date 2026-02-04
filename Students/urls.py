@@ -37,6 +37,7 @@ urlpatterns = [
 
     path('grade-stream-delete/<int:id>/',delete_grade_stream,name = 'delete_grade_stream'),
     path('grade-stream-edit/<int:id>/',edit_grade_stream,name = 'edit_grade_stream'),
+    path('reg-config/',reg_config,name = 'reg_config'),
  
     path('update/<str:reg_no>/',update_pupil,name = 'update_pupil'),
     path('delete/<str:reg_no>/',delete_pupil,name = 'delete_pupil'),
@@ -64,7 +65,7 @@ urlpatterns = [
     path('academic/', academic_home, name='academic_home'), 
     path('academics-leaning-area-config',manage_learning_areas,name = 'manage_learning_areas'),
     path('academic-dashboard/', academic_dashboard, name='academic_dashboard'),
-    path('other_exams/<str:reg_no>/', other_exams, name='other_exams'),
+    path('other_exams/<path:reg_no>/', other_exams, name='other_exams'),
     path('report_forms/', print_report_forms_cbc, name='report_forms'),
     path('report_forms_cbc/', print_report_forms_cbc, name='report_forms_cbc'),
     path('generate_result_papers/', generate_result_papers_cbc, name='generate_result_papers'),
@@ -77,7 +78,8 @@ urlpatterns = [
     path('teacher-attendance/', teacher_attendance, name='teacher_attendance'),
     path('role-management/', role_management, name='role_management'),
     path('approve-role/', approve_role, name='approve_role'),
-    path('delete-teacher/<str:reg_no>/', delete_teacher, name='delete_teacher'),
+    path('delete-teacher/<path:reg_no>/', delete_teacher, name='delete_teacher'),
+    path('teacher-reg-config/',teacher_reg_config,name = 'teacher_reg_config'),
     
     path('remove-role/', remove_role, name='remove_role'),
 
@@ -119,7 +121,7 @@ urlpatterns = [
     # CBC endpoints
     path('cbc_record_substrand/<int:sub_strand_id>/<str:grade>/<str:stream>/', cbc_record_substrand, name='cbc_record_substrand'),
     path('cbc_events/', cbc_events, name='cbc_events'),
-    path('cbc_report_student/<str:reg_no>/', cbc_report_student, name='cbc_report_student'),
+    path('cbc_report_student/<path:reg_no>/', cbc_report_student, name='cbc_report_student'),
 
 
 
@@ -156,7 +158,7 @@ urlpatterns = [
     path('parent-portal/leave-statement/', parent_student_portal_leave_statement, name='parent_student_portal_leave_statement'),
     path('parent-portal/leave-application/', parent_student_portal_leave_application, name='parent_student_portal_leave_application'),
     path('parent-portal/academic/', parent_student_portal_academics, name='parent_student_portal_academics'),
-    path('parent-portal/learning-area-breakdown/<str:reg_no>/', parent_student_view_learning_area_breakdown, name='parent_student_view_learning_area_breakdown'),
+    path('parent-portal/learning-area-breakdown/<path:reg_no>/', parent_student_view_learning_area_breakdown, name='parent_student_view_learning_area_breakdown'),
     path('parent-portal/announcements/', parents_announcements, name='parents_announcements'),
     
 

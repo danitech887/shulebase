@@ -68,9 +68,31 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 
 from ..forms import RegisterTeacherForm
-from ..models import TeacherInfo, Users,MasterSchool
+from ..models import*
 from ..utils.per_school_db_utils import get_school_db_alias_from_session
 
+
+def teacher_reg_config(request):
+    school_id = request.session.get('school_id')
+    school_instance = MasterSchool.objects.get(id = school_id)
+
+    if request.method == 'POST':
+        reg_format = request.POST.get('reg_format')
+        if '/' in reg_format:
+            messages.error(request,f'Invalid format {reg_format} use (-) instead of /')
+            return redirect('register_teacher')
+             
+        else:
+            RegConfig.objects.update_or_create(
+                school = school_instance,
+                reg_format = reg_format,
+                target_type = 'teacher'
+
+            )
+        
+            messages.success(request,f'teacher registration format: {reg_format} updated')
+            return redirect('register_teacher')
+ 
 
 def register_teacher(request):
     for _ in messages.get_messages(request):
@@ -83,14 +105,18 @@ def register_teacher(request):
     existing_regnos = set(registered_teachers.values_list('registration_no', flat=True))
 
     # Generate the next available registration number (auto-fill)
-    def get_next_registration_no():
-        for i in range(1, 5000):  # allow up to 4999 teachers
-            reg_no = f"SCH{school_id}TCH{i:02d}"
+    def get_next_registration_number(existing_regnos):
+        reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
+        formt = reg_format.reg_format.upper() if reg_format != None else ''
+
+
+        for i in range(1, 500):  # allow up to 19999 pupils
+            reg_no = f"{formt}{i:02d}"
             if reg_no not in existing_regnos:
                 return reg_no
         return None
 
-    suggested_regno = get_next_registration_no()
+    suggested_regno = get_next_registration_number(existing_regnos)
     today = timezone.now().date()
 
     if request.method == 'POST':
@@ -115,6 +141,15 @@ def register_teacher(request):
                         # Save teacher info
                         teacher = form.save(commit=False)
                         teacher.school = school_instance
+                        
+                        # Enforce phone number format
+                        s_phone = str(teacher.phone)
+                        if s_phone.startswith('0'):
+                            s_phone = '254' + s_phone[1:]
+                        elif not s_phone.startswith('254'):
+                            s_phone = '254' + s_phone
+                        teacher.phone = s_phone[:12]
+                        
                         teacher.registration_no = regno
                         teacher.date_of_registration = today
                         teacher.save()
@@ -144,6 +179,8 @@ def register_teacher(request):
         form = RegisterTeacherForm(initial={'registration_no': suggested_regno})
 
     teachers = TeacherInfo.objects.filter(school_id=school_id)
+    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
+    formt = reg_format.reg_format.upper() if reg_format != None else ''
     return render(
         request,
         "teacher/register_teacher.html",
@@ -151,6 +188,7 @@ def register_teacher(request):
             'form': form,
             'teachers': teachers,
             'suggested_regno': suggested_regno,
+            'reg_format': formt
         },
     )
 

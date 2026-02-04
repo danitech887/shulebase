@@ -463,7 +463,7 @@ def generate_result_papers_cbc(request):
     student_map = {s.registration_no: s for s in students}
     
     # Get list of unique subjects (Learning Areas) for the PDF header
-    subject_query = Strand.objects.all()
+    subject_query = Strand.objects.filter(school_id = school_id).all()
     # MODIFIED: Only filter subject list by grade if a grade filter is provided.
     if grade_filter:
         subject_query = subject_query.filter(grade=grade_filter)
@@ -814,7 +814,7 @@ def print_report_forms_cbc(request):
     # 5. --- Subject List based on Grade Group ---
     # Fetch all unique Learning Area names for this grade to ensure the report prints all rows
     # NOTE: Using 'subject' field on Strand model.
-    subjects_in_grade = Strand.objects.filter(grade=grade).values_list('subject', flat=True).distinct()
+    subjects_in_grade = Strand.objects.filter(grade=grade,school_id = school_id).values_list('subject', flat=True).distinct()
     
     # 6. --- PDF generation ---
     pdf = PdfReportForm()
@@ -1054,7 +1054,7 @@ def print_individual_report_form(request):
 
     # --- 4. Get all subjects in this grade ---
     subjects_in_grade = (
-        Strand.objects.filter(grade=grade)
+        Strand.objects.filter(school_id = school_id,grade=grade)
         .values_list('subject', flat=True)
         .distinct()
     )

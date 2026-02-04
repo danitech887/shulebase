@@ -33,6 +33,11 @@ class MasterSchool(models.Model):
     def __str__(self):
         return self.school_name
 
+class RegConfig(models.Model):
+    school = models.ForeignKey(MasterSchool,on_delete=models.CASCADE)
+    reg_format = models.CharField(max_length = 10,default='')
+    target_type = models.CharField(max_length=10,default='')
+
 
 # ---------------- Core Models ----------------
 
@@ -152,7 +157,7 @@ class Fee(models.Model):
     mode_of_payment = models.CharField(max_length=10, blank=True, null=True)
     transaction_code = models.CharField(max_length=30, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    date_of_payment = models.DateField(blank=True, null=True)
+    date_of_payment = models.DateField(blank=True, null=True,default = timezone.now())
     time = models.TimeField(blank=True, null=True, auto_now_add=True)
     term = models.CharField(max_length=6, blank=True, null=True)    
     year = models.IntegerField(blank=True, null=True, default=timezone.now().year)
@@ -171,15 +176,15 @@ class LeaveManagement(models.Model):
     reason = models.CharField(max_length=50, blank=True, null=True)
     other_reason = models.CharField(max_length=50, blank=True, null=True)
     term = models.CharField(max_length=10)
-    status = models.CharField(max_length=10, blank=True, null=True)
+    status = models.CharField(max_length=10, blank=True, null=True) 
     phone = models.BigIntegerField()
-    date_of_leave = models.DateField(blank=True, null=True)
+    date_of_leave = models.DateField(blank=True, null=True,default=timezone.now())
     return_date = models.DateField(blank=True, null=True)
     year = models.IntegerField(blank=True, null=True, default=timezone.now().year)
     time = models.TimeField(blank=True, null=True, default=timezone.now)
 
     objects = SchoolManager()
-
+ 
     class Meta:
         # Let Django manage the table name 'students_leavemanagement'
         pass

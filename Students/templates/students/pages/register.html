@@ -534,6 +534,23 @@ body {
     </div>
 </div>
 
+<div class="overlay3" id="overlay3"  style="min-height: 600px; overflow-y:auto;">
+    <div class="card2 p-4 shadow-lg">
+        <button class="close-btn" onclick="closeDialog3();" title="Close">&times;</button>
+        <h2 style="color: var(--dark); font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
+            <i class="bi bi-gear-fill me-2" style="color: var(--primary);"></i>
+            Registration Configuration
+        </h2>
+        <form method="post" action="{% url 'reg_config' %}">
+            <div class="container" style="display: flex; flex-direction: column; gap: 30px;">
+                {% csrf_token %}
+                <input type="text" class="form-control" name="reg_format" required placeholder="E.g REG">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i>Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Registration Form Overlay -->
 <div class="overlay" id="overlay">
     <div class="card p-4 shadow-lg">
@@ -658,6 +675,11 @@ body {
             <i class="bi bi-gear-fill"></i>
             <span>Grade Configuration</span>
         </button>
+        <button class="btn btn-primary mb-3" onclick="showDialog3()">
+            <i class="bi bi-gear-fill"></i>
+            <span>Registration Configuration</span>
+        </button>
+
     </div>
 
     <h2 style="color: var(--dark); font-weight: 700; margin-bottom: 1.5rem;">
@@ -1109,8 +1131,18 @@ function showDialog2() {
     document.getElementById("overlay2").classList.add("show");
 }
 
+
 function closeDialog2() {
     document.getElementById("overlay2").classList.remove("show");
+}
+
+function showDialog3() {
+    document.getElementById("overlay3").classList.add("show");
+}
+
+
+function closeDialog3() {
+    document.getElementById("overlay3").classList.remove("show");
 }
 
 // Add row function for grade stream configuration
