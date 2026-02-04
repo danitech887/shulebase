@@ -78,14 +78,7 @@ def get_next_registration_number(school_id,existing_regnos):
         if reg_no not in existing_regnos:
             return reg_no
     return None
-def get_next_registration_number(school_id,existing_regnos):
-        reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
-        formt = reg_format.reg_format.upper()
-        for i in range (1,500):
-            reg_no = f'{formt}{i:02d}'
-            if reg_no not in existing_regnos:
-                return reg_no
-            return None
+
             
 
 # --- Streams API ---
