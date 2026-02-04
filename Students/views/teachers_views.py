@@ -116,7 +116,7 @@ def register_teacher(request):
             
 
 
-    suggested_regno = get_next_registration_no(existing_regnos)
+    suggested_regno = get_next_registration_number(existing_regnos)
 
     today = timezone.now().date()
 
