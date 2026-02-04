@@ -33,6 +33,11 @@ class MasterSchool(models.Model):
     def __str__(self):
         return self.school_name
 
+class RegConfig(models.Model):
+    school=models.ForeignKey(MasterSchool,ondelete = models.CASCADE)
+    reg_format = models.CharField(max_length = 10,default = '')
+    target_type = models.CharField(max_length= 10,default = '')
+
 
 # ---------------- Core Models ----------------
 
