@@ -88,7 +88,6 @@ def get_next_registration_number(existing_regnos):
                 return reg_no
             return None
             
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
 
 # --- Streams API ---
 @login_required
