@@ -88,7 +88,7 @@ def teacher_reg_config(request):
                 reg_format = reg_format,
                 target_type = 'teacher'
             )
-            messaages.success(request,f'teacher registration format: {reg_format} updated')
+            messages.success(request,f'teacher registration format: {reg_format} updated')
             return redirect('register_teacher')
 
 
