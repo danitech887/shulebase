@@ -35,21 +35,22 @@ def reg_config(request):
             RegConfig.objects.update_or_create(
                 school = school_instance,
                 reg_format = reg_format,
-                target_type = 'teacher'
+                target_type = 'student'
             )
             messaages.success(request,f'student registration format: {reg_format} updated')
             return redirect('manage_details')
 
 
 # --- Utility function for next registration number ---
-def get_next_registration_number(school_id,existing_regnos):
-
-    for i in range(1, 20000):  # allow up to 19999 pupils
-        reg_no = f"SCH{school_id}ST{i:02d}"
-        if reg_no not in existing_regnos:
-            return reg_no
-    return None
-
+def get_next_registration_number(existing_regnos):
+        reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
+        formt = reg_format.reg_format.upper()
+        for i in range (1,500):
+            reg_no = f'{formt}{i:02d}'
+            if reg_no not in existing_regnos:
+                return reg_no
+            return None
+            
 
 # --- Streams API ---
 @login_required
