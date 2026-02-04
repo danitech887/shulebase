@@ -256,7 +256,7 @@ def manage_details(request):
     # Suggested registration number
     existing_regnos = set(pupils.values_list('registration_no', flat=True))
     suggested_regno = get_next_registration_number(school_id,existing_regnos)
-    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student')
+    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student').first()
     formt = reg_format.reg_format.upper() if reg_format != None else ''
 
     
