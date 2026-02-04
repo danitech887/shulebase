@@ -72,47 +72,28 @@ from ..forms import RegisterTeacherForm
 from ..models import*
 =======
 from ..models import *
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
 from ..utils.per_school_db_utils import get_school_db_alias_from_session
 
 
 def teacher_reg_config(request):
-<<<<<<< HEAD
-    school_id = request.session.get('school_id')
-    school_instance = MasterSchool.objects.get(id = school_id)
 
-    if request.method == 'POST':
-        reg_format = request.POST.get('reg_format')
-        if '/' in reg_format:
-            messages.error(request,f'Invalid format {reg_format} use (-) instead of /')
-            return redirect('register_teacher')
-             
-=======
     school_id = request.session.get('school_ic')
     school_instance = MasterSchool.objects.get(id = school_id)
     if request.method == 'POST':
         reg_format = request.POST.get('reg_format')
         if '/' in reg_format:
             messages.error(request,f'Invalid registration format use (-) instead')
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
+
         else:
             RegConfig.objects.update_or_create(
                 school = school_instance,
                 reg_format = reg_format,
                 target_type = 'teacher'
-<<<<<<< HEAD
-
-            )
-        
-            messages.success(request,f'teacher registration format: {reg_format} updated')
-            return redirect('register_teacher')
- 
-=======
             )
             messaages.success(request,f'teacher registration format: {reg_format} updated')
             return redirect('register_teacher')
 
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
+
 
 def register_teacher(request):
     for _ in messages.get_messages(request):
@@ -127,27 +108,18 @@ def register_teacher(request):
     # Generate the next available registration number (auto-fill)
     def get_next_registration_number(existing_regnos):
         reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
-<<<<<<< HEAD
-        formt = reg_format.reg_format.upper() if reg_format != None else ''
-
-
-        for i in range(1, 500):  # allow up to 19999 pupils
-            reg_no = f"{formt}{i:02d}"
-=======
         formt = reg_format.reg_format.upper()
         for i in range (1,500):
             reg_no = f'{formt}{i:02d}'
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
+
             if reg_no not in existing_regnos:
                 return reg_no
             return None
             
 
-<<<<<<< HEAD
-    suggested_regno = get_next_registration_number(existing_regnos)
-=======
+
     suggested_regno = get_next_registration_no(existing_regnos)
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
+
     today = timezone.now().date()
 
     if request.method == 'POST':
