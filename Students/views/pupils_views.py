@@ -24,9 +24,25 @@ import pymysql
 from ..forms import *
 from ..models import *
 
+def reg_config(request):
+    school_id = request.session.get('school_ic')
+    school_instance = MasterSchool.objects.get(id = school_id)
+    if request.method == 'POST':
+        reg_format = request.POST.get('reg_format')
+        if '/' in reg_format:
+            messages.error(request,f'Invalid registration format use (-) instead')
+        else:
+            RegConfig.objects.update_or_create(
+                school = school_instance,
+                reg_format = reg_format,
+                target_type = 'student'
+            )
+            messaages.success(request,f'student registration format: {reg_format} updated')
+            return redirect('manage_details')
 
 
 # --- Utility function for next registration number ---
+<<<<<<< HEAD
 
 
 
@@ -62,6 +78,17 @@ def get_next_registration_number(school_id,existing_regnos):
         if reg_no not in existing_regnos:
             return reg_no
     return None
+=======
+def get_next_registration_number(existing_regnos):
+        reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
+        formt = reg_format.reg_format.upper()
+        for i in range (1,500):
+            reg_no = f'{formt}{i:02d}'
+            if reg_no not in existing_regnos:
+                return reg_no
+            return None
+            
+>>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
 
 # --- Streams API ---
 @login_required
@@ -237,7 +264,9 @@ def manage_details(request):
     gradestream = GradeStream.objects.filter(school_id = school_id)
     # Suggested registration number
     existing_regnos = set(pupils.values_list('registration_no', flat=True))
-    suggested_regno = get_next_registration_number(school_id,existing_regnos)
+    suggested_regno = get_next_registration_number(existing_regnos)
+    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student')
+    formt = reg_format.reg_format.upper() if reg_format != None else ''
 
     reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student').first()
     formt = reg_format.reg_format.upper() if reg_format != None else ''

@@ -43,7 +43,10 @@ def school_registration(request):
                         admin_username = username
                         admin_email = email
                         
+<<<<<<< HEAD
                         
+=======
+>>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
 
                         # Save school FIRST
                         school = form.save()

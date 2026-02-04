@@ -34,9 +34,15 @@ class MasterSchool(models.Model):
         return self.school_name
 
 class RegConfig(models.Model):
+<<<<<<< HEAD
     school = models.ForeignKey(MasterSchool,on_delete=models.CASCADE)
     reg_format = models.CharField(max_length = 10,default='')
     target_type = models.CharField(max_length=10,default='')
+=======
+    school=models.ForeignKey(MasterSchool,ondelete = models.CASCADE)
+    reg_format = models.CharField(max_length = 10,default = '')
+    target_type = models.CharField(max_length= 10,default = '')
+>>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
 
 
 # ---------------- Core Models ----------------
@@ -178,7 +184,11 @@ class LeaveManagement(models.Model):
     term = models.CharField(max_length=10)
     status = models.CharField(max_length=10, blank=True, null=True) 
     phone = models.BigIntegerField()
+<<<<<<< HEAD
     date_of_leave = models.DateField(blank=True, null=True,default=timezone.now())
+=======
+    date_of_leave = models.DateField(blank=True, null=True,default = timezone.now())
+>>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
     return_date = models.DateField(blank=True, null=True)
     year = models.IntegerField(blank=True, null=True, default=timezone.now().year)
     time = models.TimeField(blank=True, null=True, default=timezone.now)
