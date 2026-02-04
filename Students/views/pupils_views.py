@@ -24,6 +24,21 @@ import pymysql
 from ..forms import *
 from ..models import *
 
+def reg_config(request):
+    school_id = request.session.get('school_ic')
+    school_instance = MasterSchool.objects.get(id = school_id)
+    if request.method == 'POST':
+        reg_format = request.POST.get('reg_format')
+        if '/' in reg_format:
+            messages.error(request,f'Invalid registration format use (-) instead')
+        else:
+            RegConfig.objects.update_or_create(
+                school = school_instance,
+                reg_format = reg_format,
+                target_type = 'teacher'
+            )
+            messaages.success(request,f'student registration format: {reg_format} updated')
+            return redirect('manage_details')
 
 
 # --- Utility function for next registration number ---
