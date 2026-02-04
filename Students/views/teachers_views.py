@@ -68,7 +68,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 
 from ..forms import RegisterTeacherForm
-from ..models import TeacherInfo, Users,MasterSchool
+from ..models import *
 from ..utils.per_school_db_utils import get_school_db_alias_from_session
 
 
