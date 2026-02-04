@@ -42,7 +42,7 @@ def reg_config(request):
 
 
 # --- Utility function for next registration number ---
-<<<<<<< HEAD
+
 
 
 
@@ -78,7 +78,6 @@ def get_next_registration_number(school_id,existing_regnos):
         if reg_no not in existing_regnos:
             return reg_no
     return None
-=======
 def get_next_registration_number(existing_regnos):
         reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
         formt = reg_format.reg_format.upper()
@@ -267,9 +266,8 @@ def manage_details(request):
     reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student')
     formt = reg_format.reg_format.upper() if reg_format != None else ''
 
-    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'student').first()
-    formt = reg_format.reg_format.upper() if reg_format != None else ''
-    print(pupil.registration_no for pupil in pupils)
+    
+
 
     return render(request, "students/pages/register.html", {
         "form": form,
