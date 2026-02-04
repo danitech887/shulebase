@@ -34,15 +34,11 @@ class MasterSchool(models.Model):
         return self.school_name
 
 class RegConfig(models.Model):
-<<<<<<< HEAD
     school = models.ForeignKey(MasterSchool,on_delete=models.CASCADE)
     reg_format = models.CharField(max_length = 10,default='')
     target_type = models.CharField(max_length=10,default='')
-=======
-    school=models.ForeignKey(MasterSchool,ondelete = models.CASCADE)
-    reg_format = models.CharField(max_length = 10,default = '')
-    target_type = models.CharField(max_length= 10,default = '')
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
+
+
 
 
 # ---------------- Core Models ----------------

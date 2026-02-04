@@ -210,11 +210,10 @@ def register_teacher(request):
         form = RegisterTeacherForm(initial={'registration_no': suggested_regno})
 
     teachers = TeacherInfo.objects.filter(school_id=school_id)
-<<<<<<< HEAD
+
     reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher').first()
-=======
-    reg_format = RegConfig.objects.filter(school_id = school_id,target_type = 'teacher')
->>>>>>> c45af83e395314eb232d5be504ea138a4b75f0c3
+
+    
     formt = reg_format.reg_format.upper() if reg_format != None else ''
     return render(
         request,
