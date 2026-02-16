@@ -15,7 +15,7 @@ requests
 django-unfold          
 django-widget-tweaks
 
--U django-jazzmin
+django-jazzmin
 
 
 
