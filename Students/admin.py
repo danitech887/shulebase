@@ -146,3 +146,89 @@ class LearningLogAdmin(admin.ModelAdmin):
     
     # Makes the log read-only so admins don't accidentally "fake" student progress
     readonly_fields = ('watched_at',)
+
+@admin.register(RegConfig)
+class RegConfigAdmin(admin.ModelAdmin):
+    list_display = ('school', 'reg_format', 'target_type')
+
+@admin.register(Marks)
+class MarksAdmin(admin.ModelAdmin):
+    list_display = ('registration_no', 'term', 'year', 'total_marks', 'mean_marks', 'school')
+    list_filter = ('term', 'year', 'school')
+    search_fields = ('registration_no__registration_no',)
+
+@admin.register(LearningArea)
+class LearningAreaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'grade_level', 'school')
+    list_filter = ('grade_level', 'school')
+    search_fields = ('name',)
+
+@admin.register(SubStrand)
+class SubStrandAdmin(admin.ModelAdmin):
+    list_display = ('name', 'strand', 'created_by')
+    list_filter = ('strand__subject', 'strand__grade')
+    search_fields = ('name', 'strand__name')
+
+@admin.register(SubStrandMark)
+class SubStrandMarkAdmin(admin.ModelAdmin):
+    list_display = ('student', 'sub_strand', 'score', 'level', 'term', 'year')
+    list_filter = ('term', 'year', 'level')
+    search_fields = ('student__registration_no', 'sub_strand__name')
+
+@admin.register(AssessmentEvent)
+class AssessmentEventAdmin(admin.ModelAdmin):
+    list_display = ('activity', 'subject', 'grade', 'term', 'year', 'date', 'school')
+    list_filter = ('term', 'year', 'grade', 'school')
+    search_fields = ('activity', 'subject')
+
+@admin.register(OutcomeDescriptor)
+class OutcomeDescriptorAdmin(admin.ModelAdmin):
+    list_display = ('sub_strand', 'level', 'descriptor')
+    list_filter = ('level',)
+    search_fields = ('sub_strand__name', 'descriptor')
+
+@admin.register(Observation)
+class ObservationAdmin(admin.ModelAdmin):
+    list_display = ('student', 'sub_strand', 'level', 'term', 'year', 'school')
+    list_filter = ('term', 'year', 'level', 'school')
+    search_fields = ('student__registration_no', 'sub_strand__name')
+
+@admin.register(LearnerCompetency)
+class LearnerCompetencyAdmin(admin.ModelAdmin):
+    list_display = ('student', 'competency', 'level', 'term', 'year', 'school')
+    list_filter = ('term', 'year', 'level', 'school')
+    search_fields = ('student__registration_no', 'competency')
+
+@admin.register(TeachingProgress)
+class TeachingProgressAdmin(admin.ModelAdmin):
+    list_display = ('registration_no', 'subject', 'topic', 'status', 'date_of_teaching', 'school')
+    list_filter = ('status', 'school', 'grade')
+    search_fields = ('topic', 'sub_topic')
+
+@admin.register(LoginDetails)
+class LoginDetailsAdmin(admin.ModelAdmin):
+    list_display = ('username', 'type_of_user', 'teacher_no', 'email')
+    search_fields = ('username', 'email')
+
+@admin.register(GradeStream)
+class GradeStreamAdmin(admin.ModelAdmin):
+    list_display = ('grade', 'stream', 'school')
+    list_filter = ('grade', 'school')
+    search_fields = ('grade', 'stream')
+
+@admin.register(Grade)
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'expected_fee', 'term', 'school')
+    list_filter = ('term', 'school')
+    search_fields = ('name',)
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    readonly_fields = ('created_at',)
+
+@admin.register(StudentNote)
+class StudentNoteAdmin(admin.ModelAdmin):
+    list_display = ('student', 'resource', 'updated_at')
+    search_fields = ('student__registration_no', 'resource__title')
