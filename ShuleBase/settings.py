@@ -21,6 +21,7 @@ AUTH_USER_MODEL = 'Students.Users'
 # Installed Apps
 # =========================
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
