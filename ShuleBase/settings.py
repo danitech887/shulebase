@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 # Middleware
 # =========================
 MIDDLEWARE = [
+    'nexis_telemetry.NexisDjangoMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
