@@ -351,7 +351,7 @@
         .col-md-6:nth-child(3) .portal-card { animation-delay: 0.3s; }
         .col-md-6:nth-child(4) .portal-card { animation-delay: 0.4s; }
     </style>
-    <script src="https://thirty-peaches-prove.loca.lt/api/v1/telemetry/tracker.js?id=shulebase-render-version&key=nx_live_29a1beadb37c7e33ec573ebfef7c2750aad5378c" async></script>
+    
 </head>
 
 <body>
@@ -466,7 +466,90 @@
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://thirty-peaches-prove.loca.lt/api/v1/telemetry/tracker.js?id=shulebase-render-version&key=nx_live_29a1beadb37c7e33ec573ebfef7c2750aad5378c" async></script>
+    
+    <!-- Nexis Autonomous Fleet Telemetry Tracker -->
+    <script>
+    (function() {
+      if (window.__NEXIS_TRACKER_INITIALIZED__) return;
+      window.__NEXIS_TRACKER_INITIALIZED__ = true;
+      var endpoint = "https://thirty-peaches-prove.loca.lt/api/v1/telemetry/events";
+      var softwareId = "shulebase-render-version";
+      var apiKey = "nx_live_29a1beadb37c7e33ec573ebfef7c2750aad5378c";
+      var breadcrumbs = [];
+      function recordBreadcrumb(type, text) {
+        try {
+          breadcrumbs.push({ type: type, text: String(text).slice(0, 120), url: window.location.pathname, time: new Date().toISOString() });
+          if (breadcrumbs.length > 20) breadcrumbs.shift();
+        } catch (e) {}
+      }
+      function dispatchTelemetry(level, tag, message, metadata, stackTrace) {
+        try {
+          var payload = {
+            software_id: softwareId,
+            system_id: softwareId + "-frontend",
+            message: message,
+            level: level || "INFO",
+            tag: tag || "User.Action",
+            stack_trace: stackTrace || null,
+            metadata: Object.assign({
+              url: window.location.href,
+              pathname: window.location.pathname,
+              search: window.location.search,
+              title: document.title,
+              referrer: document.referrer || null,
+              viewport: window.innerWidth + "x" + window.innerHeight,
+              breadcrumbs: breadcrumbs.slice(-6)
+            }, metadata || {}),
+            timestamp: new Date().toISOString()
+          };
+          var body = JSON.stringify(payload);
+          var urlWithAuth = endpoint + (apiKey ? (endpoint.indexOf("?") === -1 ? "?key=" : "&key=") + encodeURIComponent(apiKey) : "");
+          if (window.fetch) {
+            fetch(urlWithAuth, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "X-API-Key": apiKey, "Bypass-Tunnel-Reminder": "true" },
+              body: body,
+              keepalive: true,
+              mode: "cors"
+            }).catch(function() {});
+          } else if (navigator.sendBeacon) {
+            var blob = new Blob([body], { type: "application/json" });
+            navigator.sendBeacon(urlWithAuth, blob);
+          }
+        } catch (e) {}
+      }
+      recordBreadcrumb("nav", window.location.pathname);
+      dispatchTelemetry("INFO", "User.Navigation", "User visited " + window.location.pathname, { action: "page_load" });
+      window.addEventListener("click", function(e) {
+        try {
+          var target = e.target;
+          var clickable = target.closest("button, a, input[type=submit], [role=button], .btn");
+          if (clickable) {
+            var label = (clickable.innerText || clickable.value || clickable.getAttribute("aria-label") || clickable.title || clickable.id || clickable.className || clickable.tagName).trim();
+            if (label.length > 60) label = label.slice(0, 57) + "...";
+            recordBreadcrumb("click", clickable.tagName + ": " + label);
+            dispatchTelemetry("INFO", "User.Click", "User clicked " + clickable.tagName.toLowerCase() + " ["" + label + ""]", {
+              tagName: clickable.tagName, id: clickable.id || null, href: clickable.href || null
+            });
+          }
+        } catch (err) {}
+      }, true);
+      window.addEventListener("error", function(e) {
+        try {
+          recordBreadcrumb("error", e.message);
+          dispatchTelemetry("ERROR", "User.Crash", "Unhandled UI Error: " + e.message, { filename: e.filename, lineno: e.lineno, colno: e.colno }, e.error ? e.error.stack : null);
+        } catch (err) {}
+      });
+      window.addEventListener("unhandledrejection", function(e) {
+        try {
+          var reason = e.reason;
+          var msg = (reason && (reason.message || reason)) || "Unknown rejection";
+          recordBreadcrumb("reject", String(msg));
+          dispatchTelemetry("ERROR", "User.PromiseReject", "Unhandled Promise Rejection: " + msg, {}, reason && reason.stack ? reason.stack : null);
+        } catch (err) {}
+      });
+    })();
+    </script>
 </body>
 
 </html>

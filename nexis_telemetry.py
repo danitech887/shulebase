@@ -35,6 +35,7 @@ def _post_telemetry_async(payload: dict, sync: bool = False):
                     "Content-Type": "application/json",
                     "X-API-Key": NEXIS_API_KEY,
                     "User-Agent": "Nexis-Client-Telemetry/1.0",
+                    "Bypass-Tunnel-Reminder": "true",
                 },
                 method="POST"
             )
