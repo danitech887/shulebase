@@ -18,9 +18,9 @@ import traceback
 from datetime import datetime
 
 # Nexis Configuration
-NEXIS_ENDPOINT = os.environ.get("NEXIS_ENDPOINT", "https://llp-chrome-inputs-fresh.trycloudflare.com/api/v1/telemetry/events")
+NEXIS_ENDPOINT = os.environ.get("NEXIS_ENDPOINT", "https://bar-institution-baking-beverly.trycloudflare.com/api/v1/telemetry/events")
 NEXIS_SOFTWARE_ID = os.environ.get("NEXIS_SOFTWARE_ID", "shulebase-render-version")
-NEXIS_API_KEY = os.environ.get("NEXIS_API_KEY", "nx_live_8c39f50e1bbfc6196843299bb138ec7b4b71e599")
+NEXIS_API_KEY = os.environ.get("NEXIS_API_KEY", "nx_live_0e3f01e68d6d5f78f444de180959ef67b3f16c17")
 
 
 def _post_telemetry_async(payload: dict, sync: bool = False):
